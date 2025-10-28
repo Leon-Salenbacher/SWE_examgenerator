@@ -3,8 +3,6 @@
 
 <?import javafx.scene.control.Label?>
 <VBox xmlns:fx="http://javafx.com/fxml"
-      fx:controller="controller.SidebarController"
-      fx:id="root">
-    <Label fx:id="nameLabel" text="Name"/>
-    <Label fx:id="emailLabel" text="Email"/>
+      fx:controller="controller.SidebarController">
+    <fx:include source="../components/Sidebar_Chapter.fxml" />
 </VBox>
