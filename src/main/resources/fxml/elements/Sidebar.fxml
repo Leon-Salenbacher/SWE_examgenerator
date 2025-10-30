@@ -3,6 +3,6 @@
 
 <?import javafx.scene.control.Label?>
 <VBox xmlns:fx="http://javafx.com/fxml"
-      fx:controller="controller.SidebarController">
-    <fx:include source="../components/Sidebar_Chapter.fxml" />
+      fx:controller="controller.SidebarController" styleClass="sidebar-container">
+    <VBox fx:id="chapterBox" spacing="6" />
 </VBox>

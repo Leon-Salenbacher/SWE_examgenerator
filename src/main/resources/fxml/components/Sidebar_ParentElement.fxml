@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.image.ImageView?>
+<VBox fx:controller="controller.sidebar.SidebarParentElementController" xmlns:fx="http://javafx.com/fxml" styleClass="sidebar-chapter">
+    <HBox onMouseClicked="#toggleOpen">
+        <ImageView fx:id="chevronImg"
+                   fitWidth="14" fitHeight="14"
+                   pickOnBounds="true" preserveRatio="true"/>
+        <Label fx:id="title"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+    </HBox>
+    <VBox styleClass="subtasks-container" fx:id="childContainer" visible="false" managed="false">
+
+    </VBox>
+</VBox>
