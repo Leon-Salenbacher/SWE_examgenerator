@@ -1,5 +1,6 @@
 package controller;
 
+import controller.sidebar.SidebarParentElementController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -25,8 +26,8 @@ public class SidebarController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/Sidebar_ParentElement.fxml"));
             Node node = loader.load();
 
-            Sidebar_ChapterController itemCtrl = loader.getController();
-            itemCtrl.setTitle();
+            SidebarParentElementController chapterController = loader.getController();
+            chapterController.setTitle();
 
             chapterBox.getChildren().add(node);
 

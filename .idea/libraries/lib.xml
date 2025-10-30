@@ -3,9 +3,11 @@
     <CLASSES>
       <root url="file://$PROJECT_DIR$/../../Program Files/javafx/javafx-sdk-21.0.9/lib" />
       <root url="file://$PROJECT_DIR$/../../Program Files/fxml/javafx-sdk-21.0.9/lib" />
+      <root url="file://C:/Program Files/javafx/javafx-sdk-21.0.9/lib" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
+    <jarDirectory url="file://C:/Program Files/javafx/javafx-sdk-21.0.9/lib" recursive="false" />
     <jarDirectory url="file://$PROJECT_DIR$/../../Program Files/fxml/javafx-sdk-21.0.9/lib" recursive="false" />
     <jarDirectory url="file://$PROJECT_DIR$/../../Program Files/javafx/javafx-sdk-21.0.9/lib" recursive="false" />
   </library>

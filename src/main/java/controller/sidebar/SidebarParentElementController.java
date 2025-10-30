@@ -59,6 +59,6 @@ public class SidebarParentElementController extends SidebarChildElementControlle
     }
 
     protected void onOpen(){
-
+        setOpen(true, true);
     }
 }
