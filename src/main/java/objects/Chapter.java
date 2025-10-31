@@ -2,7 +2,7 @@ package objects;
 
 import java.util.List;
 
-public class Chapter implements DataObject{
+public class Chapter implements ParentObject<Subtask>{
     private int id;
     private String title;
     private List<Subtask> subtasks;
@@ -42,5 +42,10 @@ public class Chapter implements DataObject{
 
     public void setSubtasks(List<Subtask> subtasks) {
         this.subtasks = subtasks;
+    }
+
+    @Override
+    public List<Subtask> getChildElements() {
+        return this.getSubtasks();
     }
 }

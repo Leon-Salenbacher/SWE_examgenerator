@@ -1,13 +1,19 @@
 package controller;
 
+import controller.sidebar.SidebarElementController;
 import controller.sidebar.SidebarParentElementController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import objects.Chapter;
+import objects.Subtask;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class SidebarController {
     @FXML
@@ -20,20 +26,14 @@ public class SidebarController {
     }
 
     private void loadChapters() {
-        try {
+        List<Chapter> chapters = new ArrayList<Chapter>();
+        chapters.add(new Chapter(1, "Chapter 1", Arrays.asList(new Subtask(1, "subtask 1", 1), new Subtask(2, "subtask 2", 1))));
+        chapters.add(new Chapter(2, "Chapter 2"));
 
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/Sidebar_ParentElement.fxml"));
-            Node node = loader.load();
-
-            SidebarParentElementController chapterController = loader.getController();
-            chapterController.setTitle();
-
+        for(int i = 0; i < chapters.size(); i++){
+            Node node = SidebarElementController.createElement(chapters.get(i));
             chapterBox.getChildren().add(node);
-
-        }catch(IOException e){
-            e.printStackTrace();
-        }
+    }
     }
     public void setChapters(){
         loadChapters();

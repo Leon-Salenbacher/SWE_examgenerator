@@ -2,7 +2,7 @@ package objects;
 
 import javax.xml.crypto.Data;
 
-public class Variant implements DataObject {
+public class Variant implements ChildObject {
     private int id;
     private String question;
     private String solution;
@@ -38,4 +38,10 @@ public class Variant implements DataObject {
     public void setSolution(String solution) {
         this.solution = solution;
     }
+
+    @Override
+    public String getTitle() {
+        return String.valueOf(this.getId());
+    }
+
 }

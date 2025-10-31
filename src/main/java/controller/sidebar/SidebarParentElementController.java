@@ -3,14 +3,24 @@ package controller.sidebar;
 
 import javafx.animation.RotateTransition;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import objects.Chapter;
+import objects.ChildObject;
+import objects.DataObject;
+import objects.ParentObject;
 
-public class SidebarParentElementController extends SidebarChildElementController {
+import java.io.IOException;
+import java.util.List;
+
+public class SidebarParentElementController extends SidebarChildElementController implements  SidebarElementController{
     @FXML
     protected VBox childContainer;
+
     @FXML
     protected ImageView chevronImg;
 
@@ -35,8 +45,8 @@ public class SidebarParentElementController extends SidebarChildElementControlle
     }
 
     @Override
-    public void setTitle(){
-        title.setText("Test");
+    public void setTitle(String titleText){
+        title.setText(titleText);
         this.open = false;
     }
 
@@ -56,6 +66,20 @@ public class SidebarParentElementController extends SidebarChildElementControlle
         }else{
             chevronImg.setRotate(toAngle);
         }
+    }
+
+
+
+
+    public void loadChildElements(List<ChildObject> childELements){
+        //load child elements
+
+        // if child object is also parent object, load as parent object
+        for(int i = 0; i < childELements.size(); i++){
+
+        }
+
+        //when given elements are also parentElements,
     }
 
     protected void onOpen(){

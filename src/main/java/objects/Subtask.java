@@ -2,7 +2,7 @@ package objects;
 
 import java.util.List;
 
-public class Subtask implements DataObject {
+public class Subtask implements ParentObject<Variant> {
     private int id;
     private String title;
     private int chapterId;
@@ -55,4 +55,10 @@ public class Subtask implements DataObject {
     public void setVariants(List<Variant> variants) {
         this.variants = variants;
     }
+
+    @Override
+    public List<Variant> getChildElements() {
+        return this.getVariants();
+    }
+
 }
