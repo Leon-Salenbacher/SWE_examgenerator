@@ -2,7 +2,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.control.Label?>
-<VBox styleClass="sidebar-chapter">
-    <Label>Variant 1</Label>
+<VBox styleClass="sidebar-chapter" xmlns:fx="http://javafx.com/fxml" fx:controller="controller.sidebar.SidebarChildElementController">
+    <Label fx:id="title">Variant 1</Label>
 
 </VBox>

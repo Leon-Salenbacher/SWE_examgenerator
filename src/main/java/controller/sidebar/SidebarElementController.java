@@ -17,11 +17,29 @@ public interface SidebarElementController {
 
             SidebarParentElementController controller = loader.getController();
             controller.setTitle(element.getTitle());
-            // ggf. controller.loadChildElements(chapter.getSubtasks());
+            controller.loadChildElements(element.getChildElements());
             return node;
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw new IllegalStateException("Unable to load sidebar parent element", e);
+
         }
-    };
+    }
+
+    public static  Node createElement(ChildObject element) {
+        if(element instanceof ParentObject<?>){
+            ParentObject<? extends ChildObject> parent = (ParentObject<? extends  ChildObject>) element;
+            return createElement(parent);
+        }
+
+        try{
+            FXMLLoader loader = new FXMLLoader(SidebarChildElementController.class.getResource("/fxml/components/Sidebar_ChildElement.fxml"));
+            Node node = loader.load();
+
+            SidebarChildElementController controller = loader.getController();
+            controller.setTitle(element.getTitle());
+            return node;
+        }catch(IOException e){
+            throw new IllegalStateException("Unable to load sidebar child element", e);
+        }
+    }
 }

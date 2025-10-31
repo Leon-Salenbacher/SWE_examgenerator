@@ -25,6 +25,7 @@ public class SidebarParentElementController extends SidebarChildElementControlle
     protected ImageView chevronImg;
 
     private boolean open = false;
+    private boolean hasChild = false;
 
     @FXML
     protected void initialize(){
@@ -71,12 +72,16 @@ public class SidebarParentElementController extends SidebarChildElementControlle
 
 
 
-    public void loadChildElements(List<ChildObject> childELements){
+    public void loadChildElements(List<? extends ChildObject> childElements){
         //load child elements
-
+        if(childElements == null || childElements.isEmpty()){
+            return;
+        }
+        this.hasChild = true;
         // if child object is also parent object, load as parent object
-        for(int i = 0; i < childELements.size(); i++){
-
+        for(ChildObject child : childElements){
+            Node childNode = SidebarElementController.createElement(child);
+            childContainer.getChildren().add(childNode);
         }
 
         //when given elements are also parentElements,
