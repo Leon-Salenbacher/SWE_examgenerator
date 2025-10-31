@@ -3,16 +3,17 @@ package controller.sidebar;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import objects.ChildObject;
-import objects.DataObject;
 import objects.ParentObject;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 
 public interface SidebarElementController {
+    public static String PARENT_ELEMENT_FXML_PATH = "/fxml/components/Sidebar_ParentElement.fxml";
+    public static String CHILD_ELEMENT_FXML_PATH = "/fxml/components/Sidebar_ChildElement.fxml";
+
     public static <T extends ChildObject> Node createElement(ParentObject<T> element){
         try {
-            FXMLLoader loader = new FXMLLoader(SidebarParentElementController.class.getResource("/fxml/components/Sidebar_ParentElement.fxml"));
+            FXMLLoader loader = new FXMLLoader(SidebarParentElementController.class.getResource(PARENT_ELEMENT_FXML_PATH));
             Node node = loader.load();
 
             SidebarParentElementController controller = loader.getController();
@@ -32,7 +33,7 @@ public interface SidebarElementController {
         }
 
         try{
-            FXMLLoader loader = new FXMLLoader(SidebarChildElementController.class.getResource("/fxml/components/Sidebar_ChildElement.fxml"));
+            FXMLLoader loader = new FXMLLoader(SidebarChildElementController.class.getResource(CHILD_ELEMENT_FXML_PATH));
             Node node = loader.load();
 
             SidebarChildElementController controller = loader.getController();
