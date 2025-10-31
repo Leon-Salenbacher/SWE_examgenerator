@@ -8,8 +8,8 @@ import objects.ParentObject;
 import java.io.IOException;
 
 public interface SidebarElementController {
-    public static String PARENT_ELEMENT_FXML_PATH = "/fxml/components/Sidebar_ParentElement.fxml";
-    public static String CHILD_ELEMENT_FXML_PATH = "/fxml/components/Sidebar_ChildElement.fxml";
+    public static final String PARENT_ELEMENT_FXML_PATH = "/fxml/components/Sidebar_ParentElement.fxml";
+    public static final String CHILD_ELEMENT_FXML_PATH = "/fxml/components/Sidebar_ChildElement.fxml";
 
     public static <T extends ChildObject> Node createElement(ParentObject<T> element){
         try {
