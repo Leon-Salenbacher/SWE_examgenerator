@@ -7,5 +7,5 @@
     <padding>
         <Insets top="6" right="12" bottom="6" left="32" />
     </padding>
-    <Label fx:id="title" styleClass="text"/>
+    <Label fx:id="title" styleClass="sidebar-item-label"/>
 </VBox>

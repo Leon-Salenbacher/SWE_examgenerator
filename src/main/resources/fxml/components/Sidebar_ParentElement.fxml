@@ -14,7 +14,7 @@
         <ImageView fx:id="chevronImg"
                    fitWidth="14" fitHeight="14"
                    pickOnBounds="true" preserveRatio="true"/>
-        <Label fx:id="title" styleClass="text"/>
+        <Label fx:id="title" styleClass="sidebar-item-label"/>
         <Pane HBox.hgrow="ALWAYS"/>
     </HBox>
     <VBox spacing="4" styleClass="subtasks-container" fx:id="childContainer" visible="false" managed="false">

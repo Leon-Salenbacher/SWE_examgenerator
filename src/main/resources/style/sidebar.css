@@ -7,8 +7,8 @@
     -fx-spacing: 10;
 }
 
-.sidebar-item .text{
-    -fx-color:white;
+.sidebar-item-label{
+    -fx-text-fill: #FFFFFF;
 }
 
 .sidebar-item:hover {
