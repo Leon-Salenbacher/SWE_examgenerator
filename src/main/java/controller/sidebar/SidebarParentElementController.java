@@ -80,7 +80,7 @@ public class SidebarParentElementController extends SidebarChildElementControlle
         this.hasChild = true;
         // if child object is also parent object, load as parent object
         for(ChildObject child : childElements){
-            Node childNode = SidebarElementController.createElement(child);
+            Node childNode = SidebarElementController.createElement(child, selectionCoordinator);
             childContainer.getChildren().add(childNode);
         }
 
@@ -90,4 +90,6 @@ public class SidebarParentElementController extends SidebarChildElementControlle
     protected void onOpen(){
         setOpen(true, true);
     }
+
+
 }

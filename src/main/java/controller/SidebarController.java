@@ -2,6 +2,7 @@ package controller;
 
 import controller.sidebar.SidebarElementController;
 import controller.sidebar.SidebarParentElementController;
+import controller.sidebar.SidebarSelectionCoordinator;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -16,10 +17,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SidebarController {
+public class SidebarController implements SidebarSelectionCoordinator {
     @FXML
     private Label label;
     @FXML private VBox chapterBox;
+    private Node selectedNode;
 
     @FXML
     private void initialize(){
@@ -32,11 +34,24 @@ public class SidebarController {
         chapters.add(new Chapter(2, "Chapter 2"));
 
         for(int i = 0; i < chapters.size(); i++){
-            Node node = SidebarElementController.createElement(chapters.get(i));
+            Node node = SidebarElementController.createElement(chapters.get(i), this);
             chapterBox.getChildren().add(node);
     }
     }
     public void setChapters(){
         loadChapters();
+    }
+
+    @Override
+    public void select(Node newlySelected){
+        if(selectedNode == newlySelected){
+            return;
+        }
+
+        if(selectedNode != null){
+            selectedNode.getStyleClass().remove("selected");
+        }
+
+        selectedNode= newlySelected;
     }
 }

@@ -16,7 +16,7 @@ import java.util.Objects;
 public class App extends Application {
 
     private static final String FXML_PATH = "/fxml/MainView.fxml";
-    private static final List<String> CSS_PATHS = Arrays.asList("/style/index.css", "/style/chapterEditorPage.css");
+    private static final List<String> CSS_PATHS = Arrays.asList("/style/index.css", "/style/chapterEditorPage.css", "/style/sidebar.css");
 
     private Stage primaryStage;
     private Scene scene;

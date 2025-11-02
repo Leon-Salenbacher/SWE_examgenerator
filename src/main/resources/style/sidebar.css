@@ -1,0 +1,105 @@
+.sidebar-item {
+    -fx-color: white;
+
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+    -fx-padding: 10 14;
+    -fx-spacing: 10;
+}
+
+.sidebar-item .text{
+    -fx-color:white;
+}
+
+.sidebar-item:hover {
+    -fx-background-color: rgba(123, 97, 255, 0.12);
+}
+
+.selected {
+    -fx-background-color: rgba(124, 77, 255, 0.18);
+    -fx-border-color: #7C4DFF;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-border-width: 1;
+}
+
+/* Parent */
+.sidebar-parent {
+    -fx-background-radius: 6;
+    -fx-spacing: 6;
+    -fx-padding: 4 0;
+}
+
+.sidebar-parent.open {
+    -fx-background-color: rgba(123, 97, 255, 0.1);
+    -fx-background-radius: 12;
+}
+
+.sidebar-parent .sidebar-item-header {
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 10;
+    -fx-padding: 8 12;
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.sidebar-parent.open .sidebar-item-header {
+    -fx-background-color: rgba(123, 97, 255, 0.22);
+    -fx-background-radius: 10;
+}
+
+.sidebar-parent.open .sidebar-item-label {
+    -fx-text-fill: #F3F0FF;
+}
+
+.sidebar-parent .sidebar-chevron {
+    -fx-opacity: 0.7;
+}
+
+.sidebar-parent.open .sidebar-chevron {
+    -fx-opacity: 1;
+}
+
+/* Child */
+.sidebar-child {
+    -fx-background-radius: 6;
+}
+
+.sidebar-child {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12 8 26;
+    -fx-spacing: 8;
+    -fx-cursor: hand;
+}
+
+.sidebar-child:hover {
+    -fx-background-color: rgba(123, 97, 255, 0.12);
+}
+
+.sidebar-child.selected {
+    -fx-background-color: rgba(123, 97, 255, 0.35);
+}
+
+.sidebar-child.selected .sidebar-item-label {
+    -fx-text-fill: #FFFFFF;
+}
+
+.sidebar-item-label {
+    -fx-text-fill: #E5E5E5;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.sidebar-child .sidebar-item-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #C9C7D6;
+}
+
+.subtasks-container {
+    -fx-spacing: 6;
+    -fx-padding: 6 0 0 18;
+    -fx-background-color: transparent;
+}
+

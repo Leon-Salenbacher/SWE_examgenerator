@@ -5,15 +5,19 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.image.ImageView?>
-<VBox fx:controller="controller.sidebar.SidebarParentElementController" xmlns:fx="http://javafx.com/fxml" styleClass="sidebar-chapter">
-    <HBox onMouseClicked="#toggleOpen">
+<?import javafx.geometry.Insets?>
+<VBox fx:id="root" onMouseClicked="#handleSelect" fx:controller="controller.sidebar.SidebarParentElementController" xmlns:fx="http://javafx.com/fxml" styleClass="sidebar-parent">
+    <HBox onMouseClicked="#toggleOpen" alignment="CENTER_LEFT" spacing="8" styleClass="sidebar-item sidebar-item-header">
+        <padding>
+            <Insets top="8" right="12" bottom="8" left="16"/>
+        </padding>
         <ImageView fx:id="chevronImg"
                    fitWidth="14" fitHeight="14"
                    pickOnBounds="true" preserveRatio="true"/>
-        <Label fx:id="title"/>
+        <Label fx:id="title" styleClass="text"/>
         <Pane HBox.hgrow="ALWAYS"/>
     </HBox>
-    <VBox styleClass="subtasks-container" fx:id="childContainer" visible="false" managed="false">
+    <VBox spacing="4" styleClass="subtasks-container" fx:id="childContainer" visible="false" managed="false">
 
     </VBox>
 </VBox>

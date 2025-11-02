@@ -2,7 +2,10 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.control.Label?>
-<VBox styleClass="sidebar-chapter" xmlns:fx="http://javafx.com/fxml" fx:controller="controller.sidebar.SidebarChildElementController">
-    <Label fx:id="title">Variant 1</Label>
-
+<?import javafx.geometry.Insets?>
+<VBox fx:id="root" onMouseClicked="#handleSelect" styleClass="sidebar-item sidebar-child" xmlns:fx="http://javafx.com/fxml" fx:controller="controller.sidebar.SidebarChildElementController" spacing="4">
+    <padding>
+        <Insets top="6" right="12" bottom="6" left="32" />
+    </padding>
+    <Label fx:id="title" styleClass="text"/>
 </VBox>
