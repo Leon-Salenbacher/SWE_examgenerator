@@ -1,0 +1,10 @@
+.subtask-item {
+    -fx-text-fill: #EDEDED;
+    -fx-font-size: 14px;
+}
+.subtasks-box {
+    -fx-background-color: transparent;
+    -fx-border-color: #5E5E5E;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}

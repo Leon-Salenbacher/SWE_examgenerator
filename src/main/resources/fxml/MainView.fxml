@@ -5,11 +5,11 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controller.MainController">
+            fx:controller="controller.MainController" styleClass="root">
 
     <!-- Header (oben) -->
     <top>
-        <HBox prefHeight="80" style="-fx-background-color: #D3D3D3;">
+        <HBox prefHeight="80" styleClass="header-container">
             <padding>
                 <Insets top="10" left="20" right="20" bottom="10"/>
             </padding>
@@ -23,11 +23,7 @@
 
     <!-- Content (Mitte) -->
     <center>
-        <AnchorPane style="-fx-background-color: #FFFFFF;">
-            <padding>
-                <Insets top="10" left="10" right="10" bottom="10"/>
-            </padding>
-        </AnchorPane>
+        <fx:include source="elements/ChapterEditor.fxml" fx:id="chapterEditor" />
     </center>
 
 </BorderPane>

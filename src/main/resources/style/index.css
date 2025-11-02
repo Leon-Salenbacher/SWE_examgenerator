@@ -1,3 +1,76 @@
 .sidebar-container{
-    -fx-background-color: gray;
+    -fx-background-color: #242424;
+}
+
+.header-container{
+-fx-background-color: #2B2B2B;
+}
+
+.root{
+-fx-background-color: #1C1C1C;
+}
+
+.header-label{
+    -fx-text-fill: #EDEDED;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.section-label{
+    -fx-text-fill: #C7C7C7;
+    -fx-font-size: 12px;
+}
+
+.title-field {
+    -fx-background-color: #2A2A2A;
+    -fx-text-fill: #EDEDED;
+    -fx-prompt-text-fill: #6E6E6E;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-border-color: transparent;
+}
+
+
+.add-row {
+    -fx-spacing: 8;
+}
+
+.plus-icon {
+    -fx-fill: #EDEDED;
+}
+
+.add-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #EDEDED;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.action-bar {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-spacing: 10;
+}
+
+.danger-button {
+    -fx-background-color: #E53935;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-padding: 8 14 8 14;
+}
+
+.secondary-button {
+    -fx-background-color: #2F2F2F;
+    -fx-text-fill: #EDEDED;
+    -fx-background-radius: 8;
+    -fx-padding: 8 14 8 14;
+}
+
+
+/* Hover effects */
+.danger-button:hover {
+    -fx-background-color: #D32F2F;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #3A3A3A;
 }

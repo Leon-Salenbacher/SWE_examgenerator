@@ -34,7 +34,7 @@ public class SidebarParentElementController extends SidebarChildElementControlle
 
     protected void loadChevron(){
         try{
-            chevronImg.setImage(new Image(getClass().getResource("icons/chevron-down.png").toExternalForm()));
+            chevronImg.setImage(new Image(getClass().getResource("/icons/chevron-down.png").toExternalForm()));
         }catch(NullPointerException e){
             e.printStackTrace();
         }

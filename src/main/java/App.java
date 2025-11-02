@@ -9,12 +9,14 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class App extends Application {
 
     private static final String FXML_PATH = "/fxml/MainView.fxml";
-    private static final String CSS_PATH  = "/style/index.css";
+    private static final List<String> CSS_PATHS = Arrays.asList("/style/index.css", "/style/chapterEditorPage.css");
 
     private Stage primaryStage;
     private Scene scene;
@@ -46,7 +48,9 @@ public class App extends Application {
         // new DevReloader(this::reloadUI).watchResourcesAsync();
     }
 
-    /** Lädt das FXML frisch und liefert die Wurzel zurück. */
+    /**
+     * Lädt das FXML frisch und liefert die Wurzel zurück.
+     */
     private Parent loadRoot() {
         URL fxml = getClass().getResource(FXML_PATH);
         Objects.requireNonNull(fxml, "FXML not found on classpath at " + FXML_PATH);
@@ -57,16 +61,27 @@ public class App extends Application {
         }
     }
 
-    /** Lädt CSS neu (cleart die Stylesheets und hängt sie erneut an). */
+    /**
+     * Lädt CSS neu (cleart die Stylesheets und hängt sie erneut an).
+     */
     private void applyCss(Scene targetScene) {
-        URL css = getClass().getResource(CSS_PATH);
-        Objects.requireNonNull(css, "CSS not found on classpath at " + CSS_PATH);
-        targetScene.getStylesheets().clear();
-        // Cache-Busting ist bei classpath-URLs selten nötig; re-attach reicht i. d. R. aus
-        targetScene.getStylesheets().add(css.toExternalForm());
+        targetScene.getStylesheets().clear(); // clear once
+
+        for (String path : CSS_PATHS) {
+            URL css = getClass().getResource(path);
+            Objects.requireNonNull(css, "CSS not found on classpath at " + path);
+            targetScene.getStylesheets().add(css.toExternalForm());
+        }
+
+        // Optional: force re-apply of CSS to current root
+        if (targetScene.getRoot() != null) {
+            targetScene.getRoot().applyCss();
+        }
     }
 
-    /** Public, damit du sie auch aus Controllern oder Dev-Buttons triggern kannst. */
+    /**
+     * Public, damit du sie auch aus Controllern oder Dev-Buttons triggern kannst.
+     */
     public void reloadUI() {
         try {
             Parent newRoot = loadRoot();
@@ -82,7 +97,9 @@ public class App extends Application {
         launch(args);
     }
 
-    /** ---- Optionaler Dev-Watcher (leichtgewichtig) ---- */
+    /**
+     * ---- Optionaler Dev-Watcher (leichtgewichtig) ----
+     */
     static final class DevReloader {
         private final Runnable onChange;
 
@@ -94,14 +111,14 @@ public class App extends Application {
             // Passen: Pfad zum ausgegebenen Ressourcen-Ordner (IntelliJ kopiert hierher)
             // z.B. out/production/<module>/fxml  und  out/production/<module>/style
             // Oder bei Gradle: build/resources/main
-            Path[] candidates = new Path[] {
+            Path[] candidates = new Path[]{
                     Paths.get("out/production"), // IntelliJ (anpassen!)
                     Paths.get("build/resources/main") // Gradle (anpassen!)
             };
 
             for (Path base : candidates) {
                 if (Files.exists(base)) {
-                    Path fxmlDir  = findExisting(base, "fxml");
+                    Path fxmlDir = findExisting(base, "fxml");
                     Path styleDir = findExisting(base, "style");
                     startWatcherThread(fxmlDir, styleDir);
                     return;
