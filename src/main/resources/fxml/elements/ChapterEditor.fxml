@@ -29,7 +29,7 @@
                 <Label text="Subtasks" styleClass="section-label"/>
 
                 <!-- Bordered container -->
-                <VBox fx:id="subtasksBox" spacing="8.0" prefHeight="160.0" styleClass="subtask-box">
+                <VBox fx:id="subtasksBox" spacing="8.0" prefHeight="160.0" styleClass="subtasks-box">
                     <padding>
                         <Insets top="14" right="14" bottom="14" left="14"/>
                     </padding>
