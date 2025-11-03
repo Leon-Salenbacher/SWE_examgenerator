@@ -9,6 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import objects.Chapter;
+import objects.ChildObject;
 import objects.Subtask;
 import objects.Variant;
 
@@ -16,12 +17,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class SidebarController implements SidebarSelectionCoordinator {
     @FXML
     private Label label;
     @FXML private VBox chapterBox;
     private Node selectedNode;
+    private Consumer<Chapter> chapterSelectionListener;
 
     @FXML
     private void initialize(){
@@ -43,7 +46,7 @@ public class SidebarController implements SidebarSelectionCoordinator {
     }
 
     @Override
-    public void select(Node newlySelected){
+    public void select(Node newlySelected, ChildObject data){
         if(selectedNode == newlySelected){
             return;
         }
@@ -53,5 +56,14 @@ public class SidebarController implements SidebarSelectionCoordinator {
         }
 
         selectedNode= newlySelected;
+
+        if(chapterSelectionListener != null && data instanceof Chapter){
+            chapterSelectionListener.accept((Chapter) data);
+        }
+    }
+
+
+    public void setChapterSelectionListener(Consumer<Chapter> chapterSelectionListener){
+        this.chapterSelectionListener = chapterSelectionListener;
     }
 }

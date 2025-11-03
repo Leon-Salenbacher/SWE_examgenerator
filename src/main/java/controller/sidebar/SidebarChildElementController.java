@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import objects.ChildObject;
 
 public class SidebarChildElementController {
     @FXML
@@ -13,7 +14,7 @@ public class SidebarChildElementController {
     protected VBox root;
 
     protected SidebarSelectionCoordinator selectionCoordinator;
-
+    protected ChildObject data;
 
     public void setTitle(String titleText){
         title.setText(titleText);
@@ -23,10 +24,14 @@ public class SidebarChildElementController {
         this.selectionCoordinator = sidebarSelectionCoordinator;
     }
 
+    public void setData(ChildObject data){
+        this.data = data;
+    }
+
     @FXML
     protected void handleSelect(MouseEvent event){
         if(selectionCoordinator != null){
-            selectionCoordinator.select(root);
+            selectionCoordinator.select(root, data);
         }
 
         ObservableList<String> styleClasses = root.getStyleClass();

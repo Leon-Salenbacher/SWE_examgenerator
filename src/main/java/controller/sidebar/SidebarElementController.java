@@ -19,6 +19,7 @@ public interface SidebarElementController {
             SidebarParentElementController controller = loader.getController();
             controller.setTitle(element.getTitle());
             controller.setSelectionCoordinator(selectionCoordinator);
+            controller.setData(element);
             controller.loadChildElements(element.getChildElements());
             return node;
         } catch (IOException e) {
@@ -40,6 +41,7 @@ public interface SidebarElementController {
             SidebarChildElementController controller = loader.getController();
             controller.setSelectionCoordinator(sidebarSelectionCoordinator);
             controller.setTitle(element.getTitle());
+            controller.setData(element);
             return node;
         }catch(IOException e){
             throw new IllegalStateException("Unable to load sidebar child element", e);

@@ -16,7 +16,7 @@
         <VBox spacing="14.0" AnchorPane.topAnchor="16.0" AnchorPane.rightAnchor="16.0"
               AnchorPane.bottomAnchor="16.0" AnchorPane.leftAnchor="16.0" styleClass="chapterEditor-container">
             <!-- Header -->
-            <Label text="Chapter 1"  styleClass="header-label"/>
+            <Label text="Select a chapter"  styleClass="header-label" fx:id="headerLabel"/>
 
             <!-- Title -->
             <VBox spacing="6.0">
@@ -33,12 +33,6 @@
                     <padding>
                         <Insets top="14" right="14" bottom="14" left="14"/>
                     </padding>
-
-                    <!-- Example item (remove/clone dynamically in controller) -->
-                    <HBox spacing="8.0">
-                        <Label text="Subtask 1 (5P) (5 Variants)" styleClass="subtask-item"/>
-                    </HBox>
-                    <!-- You can add more rows programmatically into subtasksBox -->
                 </VBox>
 
                 <!-- Add Subtask row -->
