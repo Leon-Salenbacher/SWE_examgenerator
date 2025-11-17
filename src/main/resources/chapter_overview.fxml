@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="720.0" prefWidth="960.0" style="-fx-background-color: #202225;" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="56.0" spacing="16.0" style="-fx-background-color: #1A1B1F;" BorderPane.alignment="CENTER">
+            <children>
+                <Label text="Chapter" textFill="WHITE" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <HBox spacing="12.0">
+                    <children>
+                        <Button prefHeight="32.0" prefWidth="32.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;">🔍</Button>
+                        <Button prefHeight="32.0" prefWidth="32.0" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 14px;">⚙</Button>
+                    </children>
+                </HBox>
+            </children>
+            <padding>
+                <Insets left="24.0" right="24.0" />
+            </padding>
+        </HBox>
+    </top>
+    <left>
+        <VBox prefWidth="260.0" spacing="16.0" style="-fx-background-color: #18191C; -fx-padding: 24 16 24 16;" BorderPane.alignment="CENTER">
+            <children>
+                <Label text="Chapters" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #8F9098;" />
+                <VBox spacing="12.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <VBox spacing="8.0" style="-fx-background-color: #2F49D0; -fx-background-radius: 12; -fx-padding: 16 12 16 12;">
+                            <children>
+                                <Label text="Chapter 1" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                                <VBox spacing="6.0" style="-fx-background-color: rgba(0,0,0,0.2); -fx-background-radius: 8; -fx-padding: 12 8 12 12;">
+                                    <children>
+                                        <Label text="Subtask 1" style="-fx-text-fill: white;" />
+                                        <Label text="variant 1" style="-fx-text-fill: #D6DAFF;" />
+                                        <Label text="variant 2" style="-fx-text-fill: #D6DAFF;" />
+                                        <Label text="Subtask 2" style="-fx-text-fill: white;" />
+                                        <Label text="variant 1" style="-fx-text-fill: #D6DAFF;" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+                        <VBox spacing="8.0">
+                            <children>
+                                <Label text="Chapter 2" style="-fx-text-fill: #B7B9BD; -fx-padding: 8 0 8 12;" />
+                                <Label text="Chapter 3" style="-fx-text-fill: #B7B9BD; -fx-padding: 8 0 8 12;" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+                <Button maxWidth="1.7976931348623157E308" style="-fx-background-color: transparent; -fx-text-fill: #4A89FF; -fx-font-weight: bold;" text="+ Create Chapter">
+                    <padding>
+                        <Insets top="12.0" right="12.0" bottom="12.0" left="12.0" />
+                    </padding>
+                </Button>
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <VBox alignment="TOP_LEFT" spacing="24.0" style="-fx-padding: 32 32 32 32;">
+            <children>
+                <Label text="Chapter 1" textFill="WHITE" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+                <GridPane hgap="16.0" vgap="16.0">
+                    <columnConstraints>
+                        <ColumnConstraints halignment="LEFT" hgrow="NEVER" minWidth="120.0" percentWidth="25.0" />
+                        <ColumnConstraints hgrow="ALWAYS" percentWidth="75.0" />
+                    </columnConstraints>
+                    <children>
+                        <Label style="-fx-text-fill: #b7b9bd;" text="Title" GridPane.rowIndex="0" />
+                        <TextField promptText="Title" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-background-color: #1E1F24; -fx-text-fill: white; -fx-background-radius: 8; -fx-border-color: transparent; -fx-padding: 10 12 10 12;" />
+                        <Label style="-fx-text-fill: #b7b9bd;" text="Subtasks" GridPane.rowIndex="1" />
+                        <VBox spacing="16.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <children>
+                                <VBox spacing="12.0" style="-fx-background-color: #2C2D33; -fx-background-radius: 12; -fx-padding: 16;">
+                                    <children>
+                                        <Label text="Subtask 1 (5P) (5 Variants)" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                                        <TextArea prefHeight="120.0" style="-fx-background-color: #1E1F24; -fx-text-fill: white; -fx-background-radius: 8; -fx-border-color: transparent; -fx-padding: 12;" text="Beschreibung der Teilaufgabe" wrapText="true" />
+                                    </children>
+                                </VBox>
+                                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                    <children>
+                                        <Button mnemonicParsing="false" style="-fx-background-color: transparent; -fx-text-fill: #4A89FF; -fx-font-weight: bold;" text="+ Add Subtask" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Button style="-fx-background-color: #2F3136; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 18 8 18;" text="Button" />
+                                        <Button style="-fx-background-color: #2F3136; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 18 8 18;" text="Button" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </GridPane>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>
