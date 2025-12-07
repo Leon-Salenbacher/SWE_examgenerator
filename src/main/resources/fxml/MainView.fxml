@@ -23,7 +23,7 @@
 
     <!-- Content (Mitte) -->
     <center>
-        <fx:include source="elements/ChapterEditor.fxml" fx:id="chapterEditor" />
+        <fx:include source="elements/EditorHost.fxml" fx:id="editorHost" />
     </center>
 
 </BorderPane>

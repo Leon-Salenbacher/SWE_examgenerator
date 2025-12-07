@@ -41,7 +41,7 @@ public class Variant implements ChildObject {
 
     @Override
     public String getTitle() {
-        return String.valueOf(this.getId());
+        return this.question != null && !this.question.isBlank() ? this.question : String.valueOf(this.getId());
     }
 
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="controller.editor.ChildEditorController"
+      spacing="14.0"
+      styleClass="chapterEditor-container">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16" />
+    </padding>
+
+    <Label fx:id="headerLabel" text="Variante" styleClass="header-label" />
+
+    <VBox spacing="6.0">
+        <Label text="Frage" styleClass="section-label" />
+        <TextArea fx:id="questionField" promptText="Frage" prefRowCount="4" />
+    </VBox>
+
+    <VBox spacing="6.0">
+        <Label text="Lösung" styleClass="section-label" />
+        <TextArea fx:id="solutionField" promptText="Lösung" prefRowCount="4" />
+    </VBox>
+
+    <Region VBox.vgrow="ALWAYS" />
+
+    <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="action-bar">
+        <Button text="Löschen" styleClass="danger-button" />
+        <Button text="Speichern" styleClass="secondary-button" />
+    </HBox>
+</VBox>

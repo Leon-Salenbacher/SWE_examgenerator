@@ -20,11 +20,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class SidebarController implements SidebarSelectionCoordinator {
-    @FXML
-    private Label label;
+
     @FXML private VBox chapterBox;
     private Node selectedNode;
-    private Consumer<Chapter> chapterSelectionListener;
+    private Consumer<ChildObject> selectionListener;
 
     @FXML
     private void initialize(){
@@ -33,7 +32,38 @@ public class SidebarController implements SidebarSelectionCoordinator {
 
     private void loadChapters() {
         List<Chapter> chapters = new ArrayList<Chapter>();
-        chapters.add(new Chapter(1, "Chapter 1", Arrays.asList(new Subtask(1, "subtask 1", 1, Arrays.asList(new Variant(1, "Question 1", "Solution 1"), new Variant(2, "Question 2", "Solution 2"))), new Subtask(2, "subtask 2", 1))));
+        chapters.add(
+                new Chapter(
+                        1,
+                        "Chapter 1",
+                        Arrays.asList(
+                                new Subtask(
+                                        1,
+                                        "subtask 1",
+                                        5,
+                                        1,
+                                        Arrays.asList(
+                                                new Variant(
+                                                        1,
+                                                        "Question 1",
+                                                        "Solution 1"
+                                                ),
+                                                new Variant(
+                                                        2,
+                                                        "Question 2",
+                                                        "Solution 2"
+                                                )
+                                        )
+                                ),
+                                new Subtask(
+                                        2,
+                                        "subtask 2",
+                                        7,
+                                        1
+                                )
+                        )
+                )
+        );
         chapters.add(new Chapter(2, "Chapter 2"));
 
         for(int i = 0; i < chapters.size(); i++){
@@ -57,13 +87,13 @@ public class SidebarController implements SidebarSelectionCoordinator {
 
         selectedNode= newlySelected;
 
-        if(chapterSelectionListener != null && data instanceof Chapter){
-            chapterSelectionListener.accept((Chapter) data);
+        if(selectionListener != null){
+            selectionListener.accept(data);
         }
     }
 
 
-    public void setChapterSelectionListener(Consumer<Chapter> chapterSelectionListener){
-        this.chapterSelectionListener = chapterSelectionListener;
+    public void setSelectionListener(Consumer<ChildObject> selectionListener) {
+        this.selectionListener = selectionListener;
     }
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.StackPane?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="controller.editor.EditorHostController"
+           styleClass="chapterEditor-container">
+    <children>
+        <StackPane fx:id="contentHost" />
+    </children>
+</StackPane>

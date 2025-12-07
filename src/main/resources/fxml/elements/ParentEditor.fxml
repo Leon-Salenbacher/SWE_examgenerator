@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="controller.editor.ParentEditorController"
+      spacing="14.0"
+      styleClass="chapterEditor-container">
+    <padding>
+        <Insets top="16" right="16" bottom="16" left="16" />
+    </padding>
+
+    <Label fx:id="headerLabel" text="Editor" styleClass="header-label" />
+
+    <VBox spacing="6.0">
+        <Label text="Titel" styleClass="section-label" />
+        <TextField fx:id="titleField" promptText="Titel" styleClass="title-field" />
+    </VBox>
+
+    <VBox fx:id="pointsBox" spacing="6.0" visible="false" managed="false">
+        <Label text="Punkte" styleClass="section-label" />
+        <TextField fx:id="pointsField" promptText="Punkte" />
+    </VBox>
+
+    <VBox spacing="8.0">
+        <Label fx:id="childSectionLabel" text="Unterelemente" styleClass="section-label" />
+        <VBox fx:id="childList" spacing="6.0" styleClass="subtasks-box">
+            <padding>
+                <Insets top="12" right="12" bottom="12" left="12" />
+            </padding>
+        </VBox>
+    </VBox>
+
+    <Region VBox.vgrow="ALWAYS" />
+
+    <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="action-bar">
+        <Button text="Löschen" styleClass="danger-button" />
+        <Button text="Speichern" styleClass="secondary-button" />
+    </HBox>
+</VBox>

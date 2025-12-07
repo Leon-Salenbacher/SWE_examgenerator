@@ -1,7 +1,9 @@
 package controller;
 
+import controller.editor.EditorHostController;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import objects.ChildObject;
 
 public class MainController {
     @FXML
@@ -9,17 +11,17 @@ public class MainController {
     @FXML
     private SidebarController sidebarController;
     @FXML
-    private ChapterEditorController chapterEditorController;
+    private EditorHostController editorHostController;
 
     @FXML
     private void initialize(){
-        if(sidebarController != null && chapterEditorController != null){
-            sidebarController.setChapterSelectionListener(chapterEditorController::displayChapter);
+        if(sidebarController != null && editorHostController != null){
+            sidebarController.setSelectionListener(this::handleSelection);
         }
     }
 
     @FXML
-    private void onClick() {
-        label.setText("Button clicked!");
+    private void handleSelection(ChildObject selection){
+        editorHostController.displayObject(selection);
     }
 }
