@@ -42,6 +42,7 @@ public class SidebarParentElementController extends SidebarChildElementControlle
 
     @FXML
     protected void toggleOpen(){
+        selectSelf();
         setOpen(!open, true);
     }
 
@@ -57,6 +58,14 @@ public class SidebarParentElementController extends SidebarChildElementControlle
         //inhalt on-off
         childContainer.setVisible(open);
         childContainer.setManaged(open);
+
+        if(open){
+            if(!root.getStyleClass().contains("open")){
+                root.getStyleClass().add("open");
+            }
+        }else{
+            root.getStyleClass().remove("open");
+        }
 
         //rotate Chevron
         double toAngle = open ? 0 : -90;

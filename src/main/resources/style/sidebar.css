@@ -1,11 +1,28 @@
+.sidebar-container{
+    -fx-padding: 14 12;
+    -fx-spacing: 14;
+    -fx-background-color: linear-gradient(to bottom, #241f36, #1c192a);
+    -fx-background-radius: 0 12 12 0;
+}
+
+.sidebar-heading {
+    -fx-text-fill: #F1ECFF;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 8;
+    -fx-background-color: rgba(124, 77, 255, 0.18);
+    -fx-background-radius: 8;
+}
+
+
 .sidebar-item {
     -fx-color: white;
-
     -fx-background-color: transparent;
     -fx-background-radius: 10;
     -fx-padding: 10 14;
     -fx-spacing: 10;
 }
+
 
 .sidebar-item-label{
     -fx-text-fill: #FFFFFF;

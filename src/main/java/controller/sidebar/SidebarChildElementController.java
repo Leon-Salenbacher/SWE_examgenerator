@@ -30,6 +30,10 @@ public class SidebarChildElementController {
 
     @FXML
     protected void handleSelect(MouseEvent event){
+        selectSelf();
+    }
+
+    protected void selectSelf(){
         if(selectionCoordinator != null){
             selectionCoordinator.select(root, data);
         }
