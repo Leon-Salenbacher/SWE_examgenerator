@@ -49,6 +49,7 @@ public class SidebarController implements SidebarSelectionCoordinator {
                                         "subtask 1",
                                         5,
                                         1,
+                                        Arrays.asList("Exam"),
                                         Arrays.asList(
                                                 new Variant(
                                                         1,
@@ -66,7 +67,8 @@ public class SidebarController implements SidebarSelectionCoordinator {
                                         2,
                                         "subtask 2",
                                         7,
-                                        1
+                                        1,
+                                        Arrays.asList("Practice")
                                 )
                         )
                 )

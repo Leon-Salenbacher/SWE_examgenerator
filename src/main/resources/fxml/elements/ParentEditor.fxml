@@ -24,6 +24,13 @@
         <TextField fx:id="pointsField" promptText="Points" styleClass="dark-input"/>
     </VBox>
 
+
+    <VBox fx:id="labelsBox" spacing="6.0" visible="false" managed="false">
+        <Label fx:id="labelsLabel" text="Labels" styleClass="section-label" />
+        <TextField fx:id="labelsField" promptText="Practice, Exam" styleClass="dark-input" />
+    </VBox>
+
+
     <VBox spacing="8.0">
         <Label fx:id="childSectionLabel" text="Unterelemente" styleClass="section-label" />
         <VBox fx:id="childList" spacing="6.0" styleClass="subtasks-box">

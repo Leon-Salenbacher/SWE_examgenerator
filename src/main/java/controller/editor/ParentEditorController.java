@@ -34,6 +34,15 @@ public class ParentEditorController {
     private Label childSectionLabel;
 
     @FXML
+    private VBox labelsBox;
+
+    @FXML
+    private Label labelsLabel;
+
+    @FXML
+    private TextField labelsField;
+
+    @FXML
     private Label titleLabel;
     @FXML
     private Label pointsLabel;
@@ -73,6 +82,13 @@ public class ParentEditorController {
                 //keep previos value, when input is not a valid integer
                 pointsField.setText(oldValue);
             }
+        });
+
+        labelsField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!(currentParent instanceof Subtask)) {
+                return;
+            }
+            ((Subtask) currentParent).setLabels(parseLabels(newValue));
         });
 
         displayPlaceholder();
@@ -137,6 +153,8 @@ public class ParentEditorController {
         pointsField.clear();
         pointsBox.setVisible(false);
         pointsBox.setManaged(false);
+        toggleLabels(false);
+        labelsField.clear();
         childList.getChildren().setAll(createEmptyRow());
         currentParent = null;
     }
@@ -149,6 +167,7 @@ public class ParentEditorController {
         headerLabel.setText(defaultText(chapter.getTitle(), localizationService.get("parentEditor.header.chapter")));
         titleField.setText(defaultText(chapter.getTitle(), ""));
         togglePoints(false);
+        toggleLabels(false);
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.subtasks"));
         renderChildren(chapter.getChildElements());
     }
@@ -158,7 +177,9 @@ public class ParentEditorController {
         headerLabel.setText(defaultText(subtask.getTitle(), localizationService.get("parentEditor.header.subtask")));
         titleField.setText(defaultText(subtask.getTitle(), ""));
         togglePoints(true);
+        toggleLabels(true);
         pointsField.setText(String.valueOf(subtask.getPoints()));
+        labelsField.setText(String.join(", ", defaultLabels(subtask.getLabels())));
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.variants"));
         renderChildren(subtask.getChildElements());
     }
@@ -175,11 +196,35 @@ public class ParentEditorController {
         pointsBox.setVisible(visible);
         pointsBox.setManaged(visible);
     }
+
+    private void toggleLabels(boolean visible){
+        labelsBox.setVisible(visible);
+        labelsBox.setManaged(visible);
+    }
+
+    private List<String> parseLabels(String input){
+        if(input == null || input.isBlank()){
+            return List.of();
+        }
+
+        return List.of(input.split(","))
+                .stream()
+                .map(String::trim)
+                .filter(value -> !value.isBlank())
+                .toList();
+    }
+
+    private List<String> defaultLabels(List<String> labels){
+        return labels == null ? List.of() : labels;
+    }
+
     private void applyTranslations() {
         titleLabel.setText(localizationService.get("parentEditor.title"));
         titleField.setPromptText(localizationService.get("parentEditor.title.prompt"));
         pointsLabel.setText(localizationService.get("parentEditor.points"));
         pointsField.setPromptText(localizationService.get("parentEditor.points.prompt"));
+        labelsLabel.setText(localizationService.get("parentEditor.labels"));
+        labelsField.setPromptText(localizationService.get("parentEditor.labels.prompt"));
         deleteButton.setText(localizationService.get("editor.delete"));
         saveButton.setText(localizationService.get("editor.save"));
 
