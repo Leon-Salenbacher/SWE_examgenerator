@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import objects.Chapter;
@@ -41,9 +42,13 @@ public class SidebarParentElementController extends SidebarChildElementControlle
     }
 
     @FXML
-    protected void toggleOpen(){
+    protected void toggleOpen(MouseEvent event){
         selectSelf();
         setOpen(!open, true);
+
+        if(event != null){
+            event.consume();
+        }
     }
 
     @Override

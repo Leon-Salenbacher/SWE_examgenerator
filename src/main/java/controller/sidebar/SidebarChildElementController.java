@@ -31,6 +31,9 @@ public class SidebarChildElementController {
     @FXML
     protected void handleSelect(MouseEvent event){
         selectSelf();
+        if(event != null){
+            event.consume();
+        }
     }
 
     protected void selectSelf(){
