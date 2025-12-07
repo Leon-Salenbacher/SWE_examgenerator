@@ -13,12 +13,12 @@
             <padding>
                 <Insets top="10" left="20" right="20" bottom="10"/>
             </padding>
-            <Label text="Exam Generator" styleClass="header-label" />
+            <Label fx:id="titleLabel" text="Exam Generator" styleClass="header-label" />
             <Region HBox.hgrow="ALWAYS" />
-            <Button text="Optionen" onAction="#handleOpenOptions" styleClass="header-button" />
-            <Button text="XML importieren" onAction="#handleImportXml" styleClass="header-button" />
-            <Button text="XML exportieren" onAction="#handleExportXml" styleClass="header-button" />
-            <Button text="Klausur generieren" onAction="#handleGenerateExam" styleClass="primary-button" />
+            <Button fx:id="optionsButton" text="Options" onAction="#handleOpenOptions" styleClass="header-button" />
+            <Button fx:id="importButton" text="Import XML" onAction="#handleImportXml" styleClass="header-button" />
+            <Button fx:id="exportButton" text="Export XML" onAction="#handleExportXml" styleClass="header-button" />
+            <Button fx:id="generateButton" text="Generate Exam" onAction="#handleGenerateExam" styleClass="primary-button" />
         </HBox>
     </top>
 

@@ -5,6 +5,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
+import service.LocalizationService;
 
 import java.io.IOException;
 import java.net.URL;
@@ -20,6 +21,7 @@ public class App extends Application {
 
     private Stage primaryStage;
     private Scene scene;
+    private final LocalizationService localizationService = LocalizationService.getInstance();
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -30,7 +32,10 @@ public class App extends Application {
 
         applyCss(scene);
 
-        stage.setTitle("Exam Generator");
+        stage.setTitle(localizationService.get("app.title"));
+        localizationService.localeProperty().addListener((obs, oldLocale, newLocale) ->
+                primaryStage.setTitle(localizationService.get("app.title"))
+                );
         stage.setScene(scene);
         stage.setWidth(1200);
         stage.setHeight(800);

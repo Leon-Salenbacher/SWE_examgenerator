@@ -12,22 +12,22 @@
         <Insets top="16" right="16" bottom="16" left="16" />
     </padding>
 
-    <Label fx:id="headerLabel" text="Variante" styleClass="header-label" />
+    <Label fx:id="headerLabel" text="Variant" styleClass="header-label" />
 
     <VBox spacing="6.0">
-        <Label text="Frage" styleClass="section-label" />
-        <TextArea fx:id="questionField" promptText="Frage" prefRowCount="4" styleClass="dark-input" />
+        <Label fx:id="questionLabel" text="Question" styleClass="section-label" />
+        <TextArea fx:id="questionField" promptText="Question" prefRowCount="4" styleClass="dark-input" />
     </VBox>
 
     <VBox spacing="6.0">
-        <Label text="Lösung" styleClass="section-label" />
-        <TextArea fx:id="solutionField" promptText="Lösung" prefRowCount="4" styleClass="dark-input"/>
+        <Label fx:id="solutionLabel" text="Solution" styleClass="section-label" />
+        <TextArea fx:id="solutionField" promptText="Solution" prefRowCount="4" styleClass="dark-input"/>
     </VBox>
 
     <Region VBox.vgrow="ALWAYS" />
 
     <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="action-bar">
-        <Button text="Löschen" styleClass="danger-button" />
-        <Button text="Speichern" styleClass="secondary-button" />
+        <Button fx:id="deleteButton" text="Delete" styleClass="danger-button" />
+        <Button fx:id="saveButton" text="Save" styleClass="secondary-button" />
     </HBox>
 </VBox>

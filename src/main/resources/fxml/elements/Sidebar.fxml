@@ -4,6 +4,6 @@
 <?import javafx.scene.control.Label?>
 <VBox xmlns:fx="http://javafx.com/fxml"
       fx:controller="controller.SidebarController" styleClass="sidebar-container">
-    <Label text="Gliederung" styleClass="sidebar-heading" />
+    <Label fx:id="headingLabel" text="Outline" styleClass="sidebar-heading" />
     <VBox fx:id="chapterBox" spacing="8" />
 </VBox>

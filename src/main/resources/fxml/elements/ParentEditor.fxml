@@ -15,13 +15,13 @@
     <Label fx:id="headerLabel" text="Editor" styleClass="header-label" />
 
     <VBox spacing="6.0">
-        <Label text="Titel" styleClass="section-label" />
-        <TextField fx:id="titleField" promptText="Titel" styleClass="title-field" />
+        <Label fx:id="titleLabel" text="Title" styleClass="section-label" />
+        <TextField fx:id="titleField" promptText="Title" styleClass="title-field" />
     </VBox>
 
     <VBox fx:id="pointsBox" spacing="6.0" visible="false" managed="false">
-        <Label text="Punkte" styleClass="section-label" />
-        <TextField fx:id="pointsField" promptText="Punkte" styleClass="dark-input"/>
+        <Label fx:id="pointsLabel" text="Points" styleClass="section-label" />
+        <TextField fx:id="pointsField" promptText="Points" styleClass="dark-input"/>
     </VBox>
 
     <VBox spacing="8.0">
@@ -36,7 +36,7 @@
     <Region VBox.vgrow="ALWAYS" />
 
     <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="action-bar">
-        <Button text="Löschen" styleClass="danger-button" />
-        <Button text="Speichern" styleClass="secondary-button" />
+        <Button fx:id="deleteButton" text="Delete" styleClass="danger-button" />
+        <Button fx:id="saveButton" text="Save" styleClass="secondary-button" />
     </HBox>
 </VBox>

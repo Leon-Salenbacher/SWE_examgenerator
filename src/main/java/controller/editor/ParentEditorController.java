@@ -3,6 +3,7 @@ package controller.editor;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -10,6 +11,7 @@ import objects.Chapter;
 import objects.ChildObject;
 import objects.ParentObject;
 import objects.Subtask;
+import service.LocalizationService;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,20 +34,30 @@ public class ParentEditorController {
     private Label childSectionLabel;
 
     @FXML
+    private Label titleLabel;
+    @FXML
+    private Label pointsLabel;
+    @FXML
+    private Button deleteButton;
+    @FXML
+    private Button saveButton;
+
+    @FXML
     private VBox childList;
 
     private ParentObject<? extends ChildObject> currentParent;
     private Consumer<ChildObject> selectionHandler;
+    private final LocalizationService localizationService = LocalizationService.getInstance();
 
     @FXML
     private void initialize(){
         titleField.textProperty().addListener((observable, oldValue, newValue) -> {
             if(currentParent instanceof Chapter){
                 ((Chapter) currentParent).setTitle(newValue);
-                headerLabel.setText(defaultText(newValue, "Kapitel"));
+                headerLabel.setText(defaultText(newValue, localizationService.get("parentEditor.header.chapter")));
             }else if(currentParent instanceof Subtask){
                 ((Subtask) currentParent).setTitle(newValue);
-                headerLabel.setText(defaultText(newValue, "Subtask"));
+                headerLabel.setText(defaultText(newValue, localizationService.get("parentEditor.header.subtask")));
             }
         });
 
@@ -64,6 +76,8 @@ public class ParentEditorController {
         });
 
         displayPlaceholder();
+        localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
+        applyTranslations();
     }
 
     public void displayParent(ParentObject<? extends ChildObject> parent){
@@ -112,13 +126,13 @@ public class ParentEditorController {
     }
 
     private Node createEmptyRow(){
-        Label placeholder = new Label("Keine Einträge vorhanden");
+        Label placeholder = new Label(localizationService.get("editor.noEntries"));
         placeholder.getStyleClass().add("subtask-item");
         return placeholder;
     }
 
     private void displayPlaceholder(){
-        headerLabel.setText("Bitte Element wählen");
+        headerLabel.setText(localizationService.get("editor.placeholder"));
         titleField.clear();
         pointsField.clear();
         pointsBox.setVisible(false);
@@ -132,32 +146,51 @@ public class ParentEditorController {
     }
 
     private void displayChapter(Chapter chapter){
-        headerLabel.setText(defaultText(chapter.getTitle(), "Kapitel"));
+        headerLabel.setText(defaultText(chapter.getTitle(), localizationService.get("parentEditor.header.chapter")));
         titleField.setText(defaultText(chapter.getTitle(), ""));
         togglePoints(false);
-        childSectionLabel.setText("Subtasks");
+        childSectionLabel.setText(localizationService.get("parentEditor.childSection.subtasks"));
         renderChildren(chapter.getChildElements());
     }
 
     private void displaySubtask(Subtask subtask){
         headerLabel.setText(defaultText(subtask.getTitle(), "Subtask"));
+        headerLabel.setText(defaultText(subtask.getTitle(), localizationService.get("parentEditor.header.subtask")));
         titleField.setText(defaultText(subtask.getTitle(), ""));
         togglePoints(true);
         pointsField.setText(String.valueOf(subtask.getPoints()));
-        childSectionLabel.setText("Varianten");
+        childSectionLabel.setText(localizationService.get("parentEditor.childSection.variants"));
         renderChildren(subtask.getChildElements());
     }
 
     private void displayGeneric(ParentObject<? extends ChildObject> parent){
-        headerLabel.setText(defaultText(parent.getTitle(), "Element"));
+        headerLabel.setText(defaultText(parent.getTitle(), localizationService.get("parentEditor.header.generic")));
         titleField.setText(defaultText(parent.getTitle(), ""));
         togglePoints(false);
-        childSectionLabel.setText("Untereelemente");
+        childSectionLabel.setText(localizationService.get("parentEditor.childSection.generic"));
         renderChildren(parent.getChildElements());
     }
 
     private void togglePoints(boolean visible){
         pointsBox.setVisible(visible);
         pointsBox.setManaged(visible);
+    }
+    private void applyTranslations() {
+        titleLabel.setText(localizationService.get("parentEditor.title"));
+        titleField.setPromptText(localizationService.get("parentEditor.title.prompt"));
+        pointsLabel.setText(localizationService.get("parentEditor.points"));
+        pointsField.setPromptText(localizationService.get("parentEditor.points.prompt"));
+        deleteButton.setText(localizationService.get("editor.delete"));
+        saveButton.setText(localizationService.get("editor.save"));
+
+        if (currentParent == null) {
+            displayPlaceholder();
+        } else if (currentParent instanceof Chapter) {
+            displayChapter((Chapter) currentParent);
+        } else if (currentParent instanceof Subtask) {
+            displaySubtask((Subtask) currentParent);
+        } else {
+            displayGeneric(currentParent);
+        }
     }
 }

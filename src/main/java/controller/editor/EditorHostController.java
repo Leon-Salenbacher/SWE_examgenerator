@@ -7,8 +7,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import objects.ChildObject;
 import objects.ParentObject;
+import service.LocalizationService;
 
 import java.io.IOException;
+import java.util.Locale;
 
 public class EditorHostController {
     @FXML
@@ -16,13 +18,18 @@ public class EditorHostController {
 
     private Node parentEditorRoot;
     private Node childEditorRoot;
+    private Label placeholderLabel;
 
     private ParentEditorController parentEditorController;
     private ChildEditorController childEditorController;
 
+    private final LocalizationService localizationService = LocalizationService.getInstance();
+
     @FXML
     private void initialize(){
         showPlaceholder();
+        localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
+        applyTranslations();
     }
 
     public void displayObject(ChildObject data){
@@ -55,9 +62,18 @@ public class EditorHostController {
     }
 
     private void showPlaceholder(){
-        Label placeholder = new Label("Bitte Element aus der Sidebar auswählen");
-        placeholder.getStyleClass().add("section-label");
-        contentHost.getChildren().setAll(placeholder);
+        if (placeholderLabel == null) {
+            placeholderLabel = new Label();
+            placeholderLabel.getStyleClass().add("section-label");
+        }
+        placeholderLabel.setText(localizationService.get("editor.selectPrompt"));
+        contentHost.getChildren().setAll(placeholderLabel);
+    }
+
+    private void applyTranslations() {
+        if (contentHost.getChildren().contains(placeholderLabel)) {
+            showPlaceholder();
+        }
     }
 
     private void ensureParentEditor(){

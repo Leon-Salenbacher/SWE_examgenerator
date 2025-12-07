@@ -12,22 +12,29 @@ import objects.Chapter;
 import objects.ChildObject;
 import objects.Subtask;
 import objects.Variant;
+import service.LocalizationService;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 public class SidebarController implements SidebarSelectionCoordinator {
 
     @FXML private VBox chapterBox;
+    @FXML
+    private Label headingLabel;
     private Node selectedNode;
     private Consumer<ChildObject> selectionListener;
+    private final LocalizationService localizationService = LocalizationService.getInstance();
 
     @FXML
     private void initialize(){
         this.loadChapters();
+        applyTranslations();
+        localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
     }
 
     private void loadChapters() {
@@ -96,4 +103,11 @@ public class SidebarController implements SidebarSelectionCoordinator {
     public void setSelectionListener(Consumer<ChildObject> selectionListener) {
         this.selectionListener = selectionListener;
     }
+
+    private void applyTranslations() {
+        if (headingLabel != null) {
+            headingLabel.setText(localizationService.get("sidebar.heading"));
+        }
+    }
+
 }
