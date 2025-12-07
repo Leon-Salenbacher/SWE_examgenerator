@@ -66,7 +66,7 @@ public class ChildEditorController {
     }
 
     @FXML
-    private void intialize(){
+    private void initialize(){
         localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
         applyTranslations();
 

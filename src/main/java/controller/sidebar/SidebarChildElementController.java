@@ -7,7 +7,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import objects.ChildObject;
 
-public class SidebarChildElementController {
+public class SidebarChildElementController implements SidebarElementController{
     @FXML
     protected Label title;
     @FXML

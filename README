@@ -1,0 +1,33 @@
+# SWE Exam Generator
+
+Dieses Projekt ist eine JavaFX-Anwendung, die einen Editor zum Erstellen und Exportieren von Prüfungen bereitstellt.
+
+## Vorraussetzungen
+- Java 21
+- JavaFX 21
+- Eine IDE mit JavaFX-Unterstützung (z. B. IntelliJ IDEA) wird empfohlen.
+
+## Projektstruktur (relevant für das Einbinden der Ressourcen)
+- `src/main/java` enthält den Application-Startpunkt (`App`) und alle Controller/Klassen.
+- `src/main/resources/fxml` enthält die FXML-Dateien (z. B. `MainView.fxml`).
+- `src/main/resources/style` enthält die CSS-Dateien.
+- Weitere Ressourcen wie Icons und Übersetzungen liegen ebenfalls unter `src/main/resources`.
+
+## Einrichtung in IntelliJ IDEA (empfohlen)
+1. **JDK 21 wählen**: In den Projekteinstellungen als Projekt-SDK und Sprachlevel einstellen.
+2. **JavaFX SDK 21 hinzufügen**:
+   - JavaFX SDK 21 herunterladen (z. B. von https://openjfx.io) und entpacken.
+   - Unter `Project Structure` → `Libraries` die entpackten JavaFX-`lib`-Dateien als Bibliothek hinzufügen.
+   - Für Run/Debug-Konfiguration (Application, Main-Class `App`):
+     - VM-Options setzen, damit JavaFX gefunden wird:
+       `--module-path <PFAD_ZUM_JAVAFX_SDK>/lib --add-modules javafx.controls,javafx.fxml`
+3. **Ressourcen-Kopie aktivieren**: Sicherstellen, dass IntelliJ die Ressourcen (`src/main/resources`) beim Build kopiert (Standard bei IntelliJ-Projekten).
+4. **Starten**: Run-Konfiguration ausführen. Die Anwendung lädt `MainView.fxml` und die CSS-Dateien automatisch.
+
+## Sprachen/Internationalisierung
+Die `LocalizationService`-Klasse lädt Übersetzungen aus `src/main/resources/i18n`. Beim Start wird der Fenstertitel aus den Sprachdateien gesetzt; Änderungen am Locale aktualisieren den Titel automatisch.
+
+## Troubleshooting
+- **Fehlende JavaFX-Klassen**: VM-Options prüfen (`--module-path` + `--add-modules`).
+- **FXML wird nicht gefunden**: Pfad muss im Klassenpfad liegen (`/fxml/...`), sonst wirft der Loader eine `IllegalStateException`.
+- **CSS wird nicht angewendet**: Sicherstellen, dass die Ressourcen in den Build-Output kopiert werden oder nach dem Reload (F5) neu geladen werden.
