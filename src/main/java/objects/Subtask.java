@@ -5,19 +5,23 @@ import java.util.List;
 public class Subtask implements ParentObject<Variant> {
     private int id;
     private String title;
+    private int points;
     private int chapterId;
+
     private List<Variant> variants;
 
-    public Subtask(int id, String title, int chapterId, List<Variant> variants) {
+    public Subtask(int id, String title, int points, int chapterId, List<Variant> variants) {
         this.id = id;
         this.title = title;
+        this.points = points;
         this.chapterId = chapterId;
         this.variants = variants;
     }
 
-    public Subtask(int id, String title, int chapterId) {
+    public Subtask(int id, String title, int points, int chapterId) {
         this.id = id;
         this.title = title;
+        this.points = points;
         this.chapterId = chapterId;
     }
 
@@ -40,6 +44,14 @@ public class Subtask implements ParentObject<Variant> {
         this.title = title;
     }
 
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
     public int getChapterId() {
         return chapterId;
     }
@@ -60,5 +72,6 @@ public class Subtask implements ParentObject<Variant> {
     public List<Variant> getChildElements() {
         return this.getVariants();
     }
+
 
 }
