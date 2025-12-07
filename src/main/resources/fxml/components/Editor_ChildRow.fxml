@@ -6,15 +6,16 @@
 <?import javafx.scene.layout.Pane?>
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
+      fx:id="root"
       fx:controller="controller.editor.EditorChildRowController"
       alignment="CENTER_LEFT"
       spacing="10.0"
-      styleClass="sidebar-item sidebar-child">
+      styleClass="sidebar-item sidebar-child"
+    onMouseClicked="#handleOpen">
     <padding>
         <Insets top="8" right="12" bottom="8" left="12" />
     </padding>
 
     <Label fx:id="titleLabel" styleClass="sidebar-item-label" />
     <Pane HBox.hgrow="ALWAYS" />
-    <Button fx:id="openButton" text="Öffnen" mnemonicParsing="false" onAction="#handleOpen" />
 </HBox>

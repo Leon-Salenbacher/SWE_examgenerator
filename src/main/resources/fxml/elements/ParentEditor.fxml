@@ -21,7 +21,7 @@
 
     <VBox fx:id="pointsBox" spacing="6.0" visible="false" managed="false">
         <Label text="Punkte" styleClass="section-label" />
-        <TextField fx:id="pointsField" promptText="Punkte" />
+        <TextField fx:id="pointsField" promptText="Punkte" styleClass="dark-input"/>
     </VBox>
 
     <VBox spacing="8.0">

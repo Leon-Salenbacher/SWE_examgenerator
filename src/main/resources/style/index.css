@@ -10,6 +10,17 @@
 -fx-background-color: #1C1C1C;
 }
 
+.dark-input {
+    -fx-background-color: #2A2A2A;
+    -fx-control-inner-background: #2A2A2A;
+    -fx-text-fill: #EDEDED;
+    -fx-prompt-text-fill: #6E6E6E;
+    -fx-background-radius: 8;
+    -fx-padding: 10;
+    -fx-border-color: transparent;
+}
+
+
 .header-label{
     -fx-text-fill: #EDEDED;
     -fx-font-size: 28px;

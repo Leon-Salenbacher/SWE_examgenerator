@@ -16,12 +16,12 @@
 
     <VBox spacing="6.0">
         <Label text="Frage" styleClass="section-label" />
-        <TextArea fx:id="questionField" promptText="Frage" prefRowCount="4" />
+        <TextArea fx:id="questionField" promptText="Frage" prefRowCount="4" styleClass="dark-input" />
     </VBox>
 
     <VBox spacing="6.0">
         <Label text="Lösung" styleClass="section-label" />
-        <TextArea fx:id="solutionField" promptText="Lösung" prefRowCount="4" />
+        <TextArea fx:id="solutionField" promptText="Lösung" prefRowCount="4" styleClass="dark-input"/>
     </VBox>
 
     <Region VBox.vgrow="ALWAYS" />

@@ -1,7 +1,6 @@
 package controller.editor;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import objects.ChildObject;
 
@@ -11,9 +10,6 @@ public class EditorChildRowController {
 
     @FXML
     private Label titleLabel;
-
-    @FXML
-    private Button openButton;
 
     private ChildObject data;
     private Consumer<ChildObject> selectionHandler;
