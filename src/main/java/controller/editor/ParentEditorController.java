@@ -50,6 +50,8 @@ public class ParentEditorController {
     private Button deleteButton;
     @FXML
     private Button saveButton;
+    @FXML
+    private Button createButton;
 
     @FXML
     private VBox childList;
@@ -123,6 +125,7 @@ public class ParentEditorController {
             childList.getChildren().add(createEmptyRow());
             return;
         }
+
 
         for(ChildObject child : children){
             childList.getChildren().add(createChildRow(child));
@@ -237,5 +240,13 @@ public class ParentEditorController {
         } else {
             displayGeneric(currentParent);
         }
+    }
+
+    public void toggleAddNewChild(){
+        displayPlaceholder();
+        this.createButton.setVisible(true);
+        this.createButton.setManaged(true);
+        this.saveButton.setVisible(false);
+        this.saveButton.setManaged(false);
     }
 }
