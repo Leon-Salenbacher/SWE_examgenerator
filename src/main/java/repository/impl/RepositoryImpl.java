@@ -17,7 +17,6 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
     private final XMLStorageConnector xmlStorageConnector;
 
 
-
     protected RepositoryImpl(XMLStorageConnector xmlStorageConnector){
         this.xmlStorageConnector = xmlStorageConnector;
     }

@@ -19,7 +19,4 @@ public interface Repository <T extends DataObject> {
     T update(T object);
 
     void deleteById(int id);
-
-
-
 }
