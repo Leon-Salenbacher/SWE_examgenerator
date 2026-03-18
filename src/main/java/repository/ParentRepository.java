@@ -10,8 +10,10 @@ public interface ParentRepository<
             C extends ChildObject>
         extends Repository<T>{
 
-    public T addChild(C child);
-    public List<C> getChilds(String id);
-    public T removeChild(String id, String childId);
+
+
+    public T addChild(int id, C child);
+    public List<C> getChilds(int id);
+    public T removeChild(int id, int childId);
 
 }
