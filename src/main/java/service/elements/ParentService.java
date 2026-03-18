@@ -1,8 +1,16 @@
-package service;
+package service.elements;
 
+import objects.Chapter;
 import objects.ParentObject;
 
-public interface ParentService<T extends ParentObject<?>> {
+public interface ParentService<
+            T extends ParentObject<?>,
+            C extends
+        >
+        extends DataObjectService<
+            T,
+
+        > {
 
     public T create(ParentCreateDto newParent);
 
@@ -10,7 +18,7 @@ public interface ParentService<T extends ParentObject<?>> {
 
     public void delete(String id);
 
-    public record ParentCreateDto(
+    public record ParentCreateDto extends CreateDto(
             String title
     ){}
 

@@ -1,4 +1,4 @@
-package service;
+package service.elements;
 
 import objects.Chapter;
 
