@@ -1,6 +1,8 @@
 package repository.impl;
 
 import exceptions.XmlStorageException;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import objects.DataObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -143,5 +145,25 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
 
         parent.removeChild(element);
         xmlStorageConnector.saveDocument();
+    }
+
+    protected void mapElementData(Element element, T target){
+        target.setId(mapId(element));
+    }
+
+    protected int mapId(Element element) {
+        return Integer.parseInt(element.getAttribute(ID_ATTRIBUTE_NAME));
+    }
+
+    protected String getStringAttribute(Element element, String attributeName) {
+        return element.getAttribute(attributeName);
+    }
+
+    protected int getIntAttribute(Element element, String attributeName) {
+        String value = getStringAttribute(element, attributeName);
+        if (value == null || value.isBlank()) {
+            return 0;
+        }
+        return Integer.parseInt(value);
     }
 }

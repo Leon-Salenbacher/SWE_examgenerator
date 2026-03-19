@@ -1,42 +1,43 @@
 package repository.impl;
 
 import exceptions.XmlStorageException;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import objects.ChildObject;
 import objects.ParentObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import repository.ChildRepository;
 import repository.ParentRepository;
 import repository.XMLStorageConnector;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
 public abstract class ParentRepositoryImpl<
         T extends ParentObject<C>,
         C extends ChildObject>
         extends ChildRepositoryImpl<T> implements ParentRepository<T, C> {
+    private final ChildRepositoryImpl<C> childRepository;
 
-    protected ParentRepositoryImpl(XMLStorageConnector xmlStorageConnector) {
+    protected ParentRepositoryImpl(XMLStorageConnector xmlStorageConnector, ChildRepositoryImpl<C> childRepository) {
         super(xmlStorageConnector);
+        this.childRepository = childRepository;
     }
 
     protected abstract String getChildTagName();
 
-    protected abstract C mapChild(Element childElement);
-
     protected abstract void writeChild(Element childElement, C child);
 
 
-    protected ParentObject mapParentObject(Element element){
-        ChildObject childObject = this.mapChildObject(element);
-        return new ParentObject(
-                childObject.id(),
-                childObject.title()
-        );
+    protected void mapParentObject(Element element, T target){
+        this.mapChildElement(element, target);
+        target.setChildElements(mapChildren(element));
     }
 
-    protected List<C> mapChildren(Element parentElement){
+    private List<C> mapChildren(Element parentElement){
         List<C> children = new ArrayList<>();
         NodeList childNodes = parentElement.getChildNodes();
         for(int i = 0; i < childNodes.getLength(); i++){
@@ -45,10 +46,23 @@ public abstract class ParentRepositoryImpl<
                     node instanceof Element childElement
                             && getChildTagName().equals(childElement.getTagName())
             ){
-                children.add(mapChild(childElement));
+                children.add(childRepository.mapElement(childElement));
             }
         }
         return children;
+    }
+
+    //TODO improve, needed? is used in remove and add, but on mapChildren its n^2
+    private List<Element> mapChildElements(Element parentElement) {
+        List<Element> childElements = new ArrayList<>();
+        NodeList childNodes = parentElement.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node node = childNodes.item(i);
+            if (node instanceof Element childElement && getChildTagName().equals(childElement.getTagName())) {
+                childElements.add(childElement);
+            }
+        }
+        return childElements;
     }
 
     @Override
@@ -126,17 +140,7 @@ public abstract class ParentRepositoryImpl<
                         ));
     }
 
-    private List<Element> mapChildElements(Element parentElement) {
-        List<Element> childElements = new ArrayList<>();
-        NodeList childNodes = parentElement.getChildNodes();
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node node = childNodes.item(i);
-            if (node instanceof Element childElement && getChildTagName().equals(childElement.getTagName())) {
-                childElements.add(childElement);
-            }
-        }
-        return childElements;
-    }
+
 
     private void removeNestedChildren(Element parentElement) {
         for (Element childElement : mapChildElements(parentElement)) {
@@ -155,12 +159,4 @@ public abstract class ParentRepositoryImpl<
             parentElement.appendChild(childElement);
         }
     }
-
-    protected record ParentObject(
-            int id,
-            String title
-    ){
-
-    }
-
 }

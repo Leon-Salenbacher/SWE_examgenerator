@@ -1,5 +1,10 @@
 package repository.detailed.impl;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import objects.Subtask;
 import objects.Variant;
 import org.w3c.dom.Element;
@@ -11,8 +16,8 @@ public class SubtaskRepositoryImpl
         extends ParentRepositoryImpl<Subtask, Variant>
         implements SubtaskRepository {
 
-    public SubtaskRepositoryImpl(XMLStorageConnector xmlStorageConnector){
-        super(xmlStorageConnector);
+    public SubtaskRepositoryImpl(XMLStorageConnector xmlStorageConnector, VariantRepositoryImpl variantRepository){
+        super(xmlStorageConnector, variantRepository);
     }
 
     @Override
@@ -26,10 +31,10 @@ public class SubtaskRepositoryImpl
     }
 
     @Override
-    protected Subtask mapElement(Element element){
-        int id = Integer.parseInt(element.getAttribute(ID_ATTRIBUTE_NAME));
-        String title = element.getAttribute(TITLE_ATTRIBUTE_NAME)
+    public Subtask mapElement(Element element){
     }
+
+    protected void mapElement
 
 
 

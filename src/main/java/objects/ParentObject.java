@@ -2,6 +2,8 @@ package objects;
 
 import java.util.List;
 
-public interface ParentObject<T extends DataObject> extends ChildObject {
-    public List<T> getChildElements();
+public interface ParentObject<C extends ChildObject> extends ChildObject {
+    public void setChildElements(List<C> childObjects);
+    public void addChildElement(C childObject);
+    public List<C> getChildElements();
 }

@@ -1,5 +1,6 @@
 package repository.impl;
 
+import lombok.*;
 import objects.ChildObject;
 import org.w3c.dom.Element;
 import repository.ChildRepository;
@@ -9,27 +10,18 @@ public abstract class ChildRepositoryImpl<T extends ChildObject>
         extends RepositoryImpl<T>
     implements ChildRepository<T>{
 
+    public abstract T mapElement(Element element);
+
     public ChildRepositoryImpl(XMLStorageConnector xmlStorageConnector) {
         super(xmlStorageConnector);
-    }
-
-    private int mapId(Element element){
-        return Integer.parseInt(element.getAttribute(ID_ATTRIBUTE_NAME));
     }
 
     private String mapTitle(Element element){
         return element.getAttribute(TITLE_ATTRIBUTE_NAME);
     }
 
-    protected ChildObject mapChildObject(Element element){
-        return new ChildObject(
-            mapId(element),
-            mapTitle(element)
-        );
+    protected void mapChildElement(Element element, T target){
+        this.mapElementData(element, target);
+        target.setTitle(mapTitle(element));
     }
-
-    protected record ChildObject(
-            int id,
-            String title
-    ){}
 }

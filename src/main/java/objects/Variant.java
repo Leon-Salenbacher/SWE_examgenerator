@@ -1,9 +1,13 @@
 package objects;
 
-import javax.xml.crypto.Data;
+import lombok.Data;
 
+import java.util.List;
+
+@Data
 public class Variant implements ChildObject {
     private int id;
+    private String title;
     private String question;
     private String solution;
 
@@ -13,30 +17,8 @@ public class Variant implements ChildObject {
         this.solution = solution;
     }
 
-    @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getQuestion() {
-        return question;
-    }
-
-    public void setQuestion(String question) {
-        this.question = question;
-    }
-
-    public String getSolution() {
-        return solution;
-    }
-
-    public void setSolution(String solution) {
-        this.solution = solution;
+    public void setLabels(List<String> labels) {
+        this.labels = defaultLabels(labels);
     }
 
     @Override

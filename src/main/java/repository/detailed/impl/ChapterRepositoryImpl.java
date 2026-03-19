@@ -1,6 +1,7 @@
 package repository.detailed.impl;
 
 import objects.Chapter;
+import objects.ParentObject;
 import objects.Subtask;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -16,8 +17,8 @@ public class ChapterRepositoryImpl
     extends ParentRepositoryImpl<Chapter, Subtask>
     implements ChapterRepository {
 
-    public ChapterRepositoryImpl(XMLStorageConnector xmlStorageConnector){
-        super(xmlStorageConnector);
+    public ChapterRepositoryImpl(XMLStorageConnector xmlStorageConnector, SubtaskRepositoryImpl subtaskRepository){
+        super(xmlStorageConnector, subtaskRepository);
     }
 
     @Override
@@ -31,18 +32,14 @@ public class ChapterRepositoryImpl
     }
 
     @Override
-    protected Chapter mapElement(Element element){
-        ParentObject parentObject = this.mapParentObject(element);
-        List<Subtask> subtasks = mapChildren(element).stream()
-                .map(subtask -> ensureChapterId(
-                        subtask,
-                        parentObject.id())
-                )
-                .toList();
-        return new Chapter(
-                parentObject.id(),
-                parentObject.title(),
-                subtasks);
+    public Chapter mapElement(Element element){
+        Chapter chapter = new Chapter();
+        this.mapChapterElement(element, chapter);
+        return chapter;
+    }
+
+    private void mapChapterElement(Element element, Chapter target){
+        this.mapParentObject(element, target);
     }
 
     @Override

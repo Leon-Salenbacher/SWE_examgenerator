@@ -1,10 +1,16 @@
 package objects;
 
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
+@Getter
+@Setter
+@NoArgsConstructor
+@SuperBuilder
 public class Subtask implements ParentObject<Variant> {
     private int id;
     private String title;
@@ -23,7 +29,6 @@ public class Subtask implements ParentObject<Variant> {
         this.variants = variants;
     }
 
-
     public Subtask(int id, String title, int points, int chapterId, List<String> labels) {
         this(id, title, points, chapterId, labels, null);
     }
@@ -39,55 +44,14 @@ public class Subtask implements ParentObject<Variant> {
         return new ArrayList<>(labels);
     }
 
+    @Override
+    public void setChildElements(List<Variant> childElements){
+        this.variants = childElements;
+    }
 
     @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public int getPoints() {
-        return points;
-    }
-
-    public void setPoints(int points) {
-        this.points = points;
-    }
-
-    public int getChapterId() {
-        return chapterId;
-    }
-
-    public void setChapterId(int chapterId) {
-        this.chapterId = chapterId;
-    }
-
-    public List<Variant> getVariants() {
-        return variants;
-    }
-
-    public void setVariants(List<Variant> variants) {
-        this.variants = variants;
-    }
-
-    public List<String> getLabels() {
-        return labels;
-    }
-
-    public void setLabels(List<String> labels) {
-        this.labels = defaultLabels(labels);
+    public void addChildElement(Variant childElement){
+        this.variants.add(childElement);
     }
 
     @Override
