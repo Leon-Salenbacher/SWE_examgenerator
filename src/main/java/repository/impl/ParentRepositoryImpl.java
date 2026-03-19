@@ -32,9 +32,14 @@ public abstract class ParentRepositoryImpl<
     protected abstract void writeChild(Element childElement, C child);
 
 
-    protected void mapParentObject(Element element, T target){
-        this.mapChildElement(element, target);
+    protected void mapParentElementAttributes(Element element, T target){
         target.setChildElements(mapChildren(element));
+    }
+
+    @Override
+    protected void mapElementFields(Element element, T target){
+        super.mapElementFields(element, target);
+        this.mapParentElementAttributes(element, target);
     }
 
     private List<C> mapChildren(Element parentElement){

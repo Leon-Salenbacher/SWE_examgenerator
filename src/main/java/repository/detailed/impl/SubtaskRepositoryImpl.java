@@ -1,10 +1,5 @@
 package repository.detailed.impl;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 import objects.Subtask;
 import objects.Variant;
 import org.w3c.dom.Element;
@@ -30,13 +25,15 @@ public class SubtaskRepositoryImpl
         return CHILD_TAG_NAME;
     }
 
+
     @Override
-    public Subtask mapElement(Element element){
+    protected void mapElementFields(Element element, Subtask target){
+        super.mapElementFields(element, target);
     }
 
-    protected void mapElement
+    private void mapSubtaskAttributes(Element element, Subtask target){
 
-
+    }
 
 
 

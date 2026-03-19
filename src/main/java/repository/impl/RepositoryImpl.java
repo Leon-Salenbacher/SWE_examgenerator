@@ -34,7 +34,24 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
      * @param element
      * @return
      */
-    protected abstract T mapElement(Element element);
+    protected T mapElement(Element element){
+        T target = createEmptyInstance();
+        this.mapElementFields(element, target);
+        return target;
+    }
+
+    /**
+     * Maps the ELement into the target Obeject structure.
+     * @param element
+     * @param target
+     */
+    protected void mapElementFields(Element element, T target){
+        this.mapElementFields(element, target);
+    }
+
+
+
+    protected abstract T createEmptyInstance();
 
     /**
      * Write object as element in xml

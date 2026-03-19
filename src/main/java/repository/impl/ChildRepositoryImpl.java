@@ -10,8 +10,6 @@ public abstract class ChildRepositoryImpl<T extends ChildObject>
         extends RepositoryImpl<T>
     implements ChildRepository<T>{
 
-    public abstract T mapElement(Element element);
-
     public ChildRepositoryImpl(XMLStorageConnector xmlStorageConnector) {
         super(xmlStorageConnector);
     }
@@ -20,8 +18,16 @@ public abstract class ChildRepositoryImpl<T extends ChildObject>
         return element.getAttribute(TITLE_ATTRIBUTE_NAME);
     }
 
-    protected void mapChildElement(Element element, T target){
+    @Override
+    protected void mapElementFields(Element element, T target){
+        super.mapElementFields(element, target);
+        this.mapChildElementAttributes(element, target);
+    }
+
+    protected void mapChildElementAttributes(Element element, T target){
         this.mapElementData(element, target);
         target.setTitle(mapTitle(element));
     }
+
+
 }
