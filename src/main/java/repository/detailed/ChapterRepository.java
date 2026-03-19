@@ -1,7 +1,8 @@
-package repository;
+package repository.detailed;
 
 import objects.Chapter;
 import objects.Subtask;
+import repository.ParentRepository;
 
 public interface ChapterRepository extends ParentRepository<Chapter, Subtask> {
 

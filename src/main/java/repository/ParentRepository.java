@@ -8,7 +8,7 @@ import java.util.List;
 public interface ParentRepository<
             T extends ParentObject<C>,
             C extends ChildObject>
-        extends Repository<T>{
+        extends ChildRepository<T>{
 
 
 

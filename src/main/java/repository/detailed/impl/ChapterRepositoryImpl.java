@@ -1,18 +1,16 @@
-package repository.impl;
+package repository.detailed.impl;
 
 import objects.Chapter;
 import objects.Subtask;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import repository.ChapterRepository;
-import repository.ParentRepository;
-import repository.SubtaskRepository;
+import repository.detailed.ChapterRepository;
+import repository.detailed.SubtaskRepository;
 import repository.XMLStorageConnector;
+import repository.impl.ParentRepositoryImpl;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class ChapterRepositoryImpl
     extends ParentRepositoryImpl<Chapter, Subtask>
@@ -34,9 +32,17 @@ public class ChapterRepositoryImpl
 
     @Override
     protected Chapter mapElement(Element element){
-        int id = Integer.parseInt(element.getAttribute(ID_ATTRIBUTE_NAME));
-        String title = element.getAttribute(TITLE_ATTRIBUTE_NAME);
-        return new Chapter(id, title, mapSubtasks(element, id));
+        ParentObject parentObject = this.mapParentObject(element);
+        List<Subtask> subtasks = mapChildren(element).stream()
+                .map(subtask -> ensureChapterId(
+                        subtask,
+                        parentObject.id())
+                )
+                .toList();
+        return new Chapter(
+                parentObject.id(),
+                parentObject.title(),
+                subtasks);
     }
 
     @Override
@@ -54,22 +60,20 @@ public class ChapterRepositoryImpl
         return new Subtask(id, title, points, chapterId);
     }
 
-    private List<Subtask> mapSubtasks(Element chapterElement, int chapterId){
-        List<Subtask> subtasks = new ArrayList<>();
-        NodeList children = chapterElement.getChildNodes();
-        for(int i = 0; i < children.getLength(); i++){
-            Node node = children.item(i);
-            if(node instanceof Element childElement && getChildTagName().equals(childElement.getTagName())){
-                Subtask subtask = mapChild(childElement);
-                if(subtask.getChapterId()  == 0){
-                    subtask.setChapterId(chapterId);
-                }
-                subtasks.add(subtask);
-            }
-        }
-        return subtasks;
+    @Override
+    protected void writeChild(Element childElement, Subtask child) {
+        childElement.setAttribute(ID_ATTRIBUTE_NAME, Integer.toString(child.getId()));
+        childElement.setAttribute(TITLE_ATTRIBUTE_NAME, child.getTitle() == null ? "" : child.getTitle());
+        childElement.setAttribute(SubtaskRepository.POINT_ATTRIBUTE_LABEL, Integer.toString(child.getPoints()));
+        childElement.setAttribute(SubtaskRepository.PARENT_ID_ATTRIBUTE_LABEL, Integer.toString(child.getChapterId()));
     }
 
+    private Subtask ensureChapterId(Subtask subtask, int chapterId) {
+        if (subtask.getChapterId() == 0) {
+            subtask.setChapterId(chapterId);
+        }
+        return subtask;
+    }
 
     private int parseIntAttribute(Element element, String attributeName){
         String value = element.getAttribute(attributeName);
@@ -78,6 +82,4 @@ public class ChapterRepositoryImpl
         }
         return Integer.parseInt(value);
     }
-
-
 }
