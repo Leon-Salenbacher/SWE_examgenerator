@@ -29,7 +29,6 @@ public abstract class ParentRepositoryImpl<
 
     protected abstract String getChildTagName();
 
-    protected abstract void writeChild(Element childElement, C child);
 
 
     protected void mapParentElementAttributes(Element element, T target){
@@ -98,8 +97,7 @@ public abstract class ParentRepositoryImpl<
                         String.format("No %s entry found for id %d.",
                                 getElementTagName(), id)
                 ));
-        Element childElement = getDocument().createElement(getChildTagName());
-        writeChild(childElement, child);
+        Element childElement = childRepository.createElement(child);
         parentElement.appendChild(childElement);
         getXMLStorageService().saveDocument();
 
@@ -159,8 +157,7 @@ public abstract class ParentRepositoryImpl<
         }
 
         for (C child : children) {
-            Element childElement = getDocument().createElement(getChildTagName());
-            writeChild(childElement, child);
+            Element childElement = childRepository.createElement(child);
             parentElement.appendChild(childElement);
         }
     }

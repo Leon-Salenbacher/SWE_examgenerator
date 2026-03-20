@@ -49,16 +49,4 @@ public class ChapterRepositoryImpl
         element.setAttribute(TITLE_ATTRIBUTE_NAME, object.getTitle() == null ? "" : object.getTitle());
         //TODO add placeholder for child elements
     }
-
-
-    @Override
-    protected void writeChild(Element childElement, Subtask child) {
-        //TODO can ChildRepo be used? problem: implementing there a create with given parent we need to implement it there to
-        childElement.setAttribute(ID_ATTRIBUTE_NAME, Integer.toString(child.getId()));
-        childElement.setAttribute(TITLE_ATTRIBUTE_NAME, child.getTitle() == null ? "" : child.getTitle());
-        childElement.setAttribute(SubtaskRepository.POINT_ATTRIBUTE_LABEL, Integer.toString(child.getPoints()));
-        childElement.setAttribute(SubtaskRepository.PARENT_ID_ATTRIBUTE_LABEL, Integer.toString(child.getChapterId()));
-    }
-
-
 }
