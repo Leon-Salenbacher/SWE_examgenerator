@@ -1,5 +1,11 @@
 package objects;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
 import javax.xml.crypto.Data;
 import java.util.List;
 import java.util.Map;
@@ -9,25 +15,32 @@ import java.util.Map;
  * Implementations expose their XML attributes so generic repository code can
  * handle common save and update operations.
  */
-public interface DataObject {
-    String ID_ATTRIBUTE_LABEL = "id";
+@Getter
+@Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+public abstract class DataObject {
+    public static final String ID_ATTRIBUTE_LABEL = "id";
 
-    int getId();
-    void setId(int id);
+    @XmlField(ID_ATTRIBUTE_LABEL)
+    protected int id;
+
 
     /**
-     * Returns all XML attributes that should be written for this objects.
+     * Returns all XML attributes that should be written for this object.
      * The map key is the XML attribute name, the value is the serialized value.
      * @return
      */
-    Map<String, String> getAttributes();
+    public Map<String, String> getAttributes(){
+        return DataObjectReflectionSupport.getAttributes(this);
+    }
 
     /**
      * Convenience method for code that only needs the configured attribute names.
      * @return
      */
-    default List<String> getAttributeNames(){
-        return List.copyOf(getAttributes().keySet());
+    public List<String> getAttributeNames(){
+        return DataObjectReflectionSupport.getAttributeNames(getClass());
     }
-
 }

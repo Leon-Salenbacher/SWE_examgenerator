@@ -1,9 +1,29 @@
 package objects;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
 import java.util.List;
 
-public interface ParentObject<C extends ChildObject> extends ChildObject {
-    void setChildElements(List<C> childObjects);
-    void addChildElement(C childObject);
-    List<C> getChildElements();
+@Getter
+@Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+public abstract class ParentObject<C extends ChildObject> extends ChildObject {
+    public static final String CHILD_TAG_NAME = "child";
+
+    @XmlField(CHILD_TAG_NAME)
+    protected List<C> childElements = new ArrayList<>();
+
+    public void setChildElements(List<C> childElements){
+        this.childElements = childElements == null ? new ArrayList<>() : new ArrayList<>(childElements);
+    }
+    public void addChildElement(C childElement){
+        this.childElements.add(childElement);
+    }
 }

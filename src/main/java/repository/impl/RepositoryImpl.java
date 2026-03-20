@@ -2,8 +2,8 @@ package repository.impl;
 
 import exceptions.XmlStorageException;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import objects.DataObject;
+import objects.DataObjectReflectionSupport;
 import org.w3c.dom.*;
 import repository.Repository;
 import repository.XMLStorageConnector;
@@ -109,7 +109,7 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
     protected Optional<Element> findElementById(int id){
         return getElementsByTagName().stream()
                 .filter(element -> Integer.toString(id)
-                        .equals(element.getAttribute(ID_ATTRIBUTE_NAME)))
+                        .equals(element.getAttribute(DataObject.ID_ATTRIBUTE_LABEL)))
                 .findFirst();
     }
 
@@ -162,23 +162,13 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
     }
 
     protected void mapElementData(Element element, T target){
-        target.setId(mapId(element));
-    }
-
-    protected int mapId(Element element) {
-        return Integer.parseInt(element.getAttribute(ID_ATTRIBUTE_NAME));
-    }
-
-    protected String getStringAttribute(Element element, String attributeName) {
-        return element.getAttribute(attributeName);
-    }
-
-    protected int getIntAttribute(Element element, String attributeName) {
-        String value = getStringAttribute(element, attributeName);
-        if (value == null || value.isBlank()) {
-            return 0;
+        NamedNodeMap attributes = element.getAttributes();
+        Map<String, String> mappedAttributes = new LinkedHashMap<>();
+        for(int i = 0; i<attributes.getLength(); i++){
+            Node attribute = attributes.item(i);
+            mappedAttributes.put(attribute.getNodeName(), attribute.getNodeValue());
         }
-        return Integer.parseInt(value);
+        DataObjectReflectionSupport.applyAttributes(target, mappedAttributes);
     }
 
     private void clearAttributes(Element element, List<String> attributeNamesToKeep) {

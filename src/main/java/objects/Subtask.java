@@ -8,61 +8,21 @@ import java.util.*;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
-public class Subtask implements ParentObject<Variant> {
-    private int id;
-    private String title;
+public class Subtask extends ParentObject<Variant> {
+    public static final String ELEMENT_TAG_NAME = "Subtask";
+    public static final String CHILD_ELEMENT_TAG ="Variant";
+    public static final String POINT_ATTRIBUTE_LABEL ="points";
+    public static final String CHAPTER_ID_ATTRIBUTE_LABEL = "chapterId";
+    public static final String LABELS_ATTRIBUTE_LABEL = "labels";
+
+    @XmlField(POINT_ATTRIBUTE_LABEL)
     private int points;
+    @XmlField(CHAPTER_ID_ATTRIBUTE_LABEL)
     private int chapterId;
 
+    @XmlField(LABELS_ATTRIBUTE_LABEL)
     private List<String> labels = new ArrayList<>();
-    private List<Variant> variants = new ArrayList<>();
-
-    public Subtask(int id, String title, int points, int chapterId, List<String> labels, List<Variant> variants) {
-        this.id = id;
-        this.title = title;
-        this.points = points;
-        this.chapterId = chapterId;
-        this.labels = defaultLabels(labels);
-        this.variants = variants == null ? new ArrayList<>() : new ArrayList<>(variants);
-    }
-
-    public Subtask(int id, String title, int points, int chapterId, List<String> labels) {
-        this(id, title, points, chapterId, labels, null);
-    }
-
-    public Subtask(int id, String title, int points, int chapterId) {
-        this(id, title, points, chapterId, List.of(), null);
-    }
-
-    private List<String> defaultLabels(List<String> labels) {
-        return labels == null ? new ArrayList<>() : new ArrayList<>(labels);
-    }
-
-    @Override
-    public void setChildElements(List<Variant> childElements){
-        this.variants = childElements == null ? new ArrayList<>() : new ArrayList<>(childElements);
-    }
-
-    @Override
-    public void addChildElement(Variant childElement){
-        this.variants.add(childElement);
-    }
-
-    @Override
-    public List<Variant> getChildElements() {
-        return this.getVariants();
-    }
-
-    @Override
-    public Map<String, String> getAttributes(){
-        Map<String, String> attributes = new LinkedHashMap<>();
-        attributes.put("id", Integer.toString(id));
-        attributes.put("title", title == null ? "" : title);
-        attributes.put("points", Integer.toString(points));
-        attributes.put("chapterId", Integer.toString(chapterId));
-        attributes.put("labels", String.join(",", defaultLabels(labels)));
-        return attributes;
-    }
 
 }
