@@ -1,5 +1,6 @@
 package objects;
 
+import javax.xml.crypto.Data;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,8 @@ import java.util.Map;
  * handle common save and update operations.
  */
 public interface DataObject {
+    String ID_ATTRIBUTE_LABEL = "id";
+
     int getId();
     void setId(int id);
 
@@ -26,4 +29,5 @@ public interface DataObject {
     default List<String> getAttributeNames(){
         return List.copyOf(getAttributes().keySet());
     }
+
 }
