@@ -3,9 +3,9 @@ package repository;
 import objects.ChildObject;
 
 /**
- * The Repository to manage the persistence of {@link ChildObject}s
+ * Marker contract for repositories that persist simple {@link ChildObject} instances.
  *
- * @param <T> The target element.
+ * @param <T> Entity type handled by the repository
  */
 public interface ChildRepository <T extends ChildObject> extends Repository<T> {
 

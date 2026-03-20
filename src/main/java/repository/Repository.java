@@ -9,53 +9,62 @@ import java.util.Optional;
 /**
  * Generic persistence contract for {@link DataObject} instances.
  *
+ * <p>
+ *     Implementations encapsulate how entities are loaded from and written to the
+ *     underlying storage technology. The interface intentionally models only the
+ *     minimal CRUD operations that are shared by all repositories in this package.
+ *     More specialised repository contracts may extend this interface with
+ *     aggregate-specific read or write operations.
+ * </p>
+ *
  * @param <T> entity type handled by the repository
  */
-public interface Repository <T extends DataObject> {
+public interface Repository<T extends DataObject> {
 
     /**
-     * The label of the attribute field id
-     */
-    String ID_ATTRIBUTE_NAME = "id";
-
-    /**
-     * The label of the attribute field title
-     */
-    String TITLE_ATTRIBUTE_NAME = "title";
-
-    /**
-     * Finds the target Entity by the id, and returns an {@link Optional}
-     * Entity.
+     * Looks up a single entity by its identifier.
      *
-     * @param id the id of the Entity
-     * @return Returns the target Element {@see T}
+     * @param id unique identifier of the entity to resolve
+     * @return an {@link Optional} containing the matching entity or an empty
+     * optional when no entity with the given id exists.
       */
     Optional<T> findById(int id);
 
     /**
-     * Finds all target Entities, that exist in the DB.
-     * @return
+     * Loads every entity currently persisted for the repository's element type.
+     *
+     * @return immutable or mutable list of all known entities, depending on the
+     * concrete implementation
      */
     List<T> findAll();
 
     /**
-     * Persistent the given object.
-     * @param object
-     * @return
+     * Persists a new entity instance.
+     *
+     * <p>
+     *     Implementations usually append the object to the configured storage and
+     *     return the same instance for fluent usage.
+     * </p>
+     *
+     * @param object entity to persist
+     * @return the persisted entity instance.
      */
     T save(T object);
 
     /**
-     * Updates the given object values of the given Entity.
-     * @param object the entity with new values.
-     * @return Returns the updated entity
-     * @throws NoSuchElementException the given Object doesn't exist as a persistent Entity
+     * Replace the persisted state of an already existing entity.
+     *
+     * @param object entity containing the new values that should be stored.
+     * @return the updated entity instance
+     * @throws NoSuchElementException if the entity does not yet exist in the persistent storage.
      */
     T update(T object) throws NoSuchElementException;
 
     /**
-     * Deletes a persistent Entity by the given id.
-     * @param id the id of the entity.
+     * Removes the entity with the given identifier from persistent storage.
+     *
+     * @param id unique identifier of the entity that should be deleted.
+     * @throws NoSuchElementException if the entity with the identifier doesn't exist.
      */
-    void deleteById(int id);
+    void deleteById(int id) throws NoSuchElementException;
 }
