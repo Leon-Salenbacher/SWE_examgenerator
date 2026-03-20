@@ -28,25 +28,13 @@ public class ChapterRepositoryImpl
         return CHILD_TAG_NAME;
     }
 
-    @Override
-    protected void mapElementFields(Element element, Chapter target){
-        super.mapElementFields(element, target);
-        this.mapChapterAttributes(element, target);
-    }
-
-    private void mapChapterAttributes(Element element, Chapter target){
-
-    }
-
 
     protected Chapter createEmptyInstance(){
         return new Chapter();
     }
 
     @Override
-    protected void writeElement(Element element, Chapter object){
-        element.setAttribute(ID_ATTRIBUTE_NAME, Integer.toString(object.getId()));
-        element.setAttribute(TITLE_ATTRIBUTE_NAME, object.getTitle() == null ? "" : object.getTitle());
-        //TODO add placeholder for child elements
+    protected void mapElementFields(Element element, Chapter target){
+        super.mapElementFields(element, target);
     }
 }

@@ -1,10 +1,16 @@
 package objects;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
+@NoArgsConstructor
+@SuperBuilder
 public class Variant implements ChildObject {
     private int id;
     private String title;
@@ -17,13 +23,22 @@ public class Variant implements ChildObject {
         this.solution = solution;
     }
 
-    public void setLabels(List<String> labels) {
-        this.labels = defaultLabels(labels);
-    }
 
     @Override
     public String getTitle() {
-        return this.question != null && !this.question.isBlank() ? this.question : String.valueOf(this.getId());
+        if (title != null && !title.isBlank()) {
+            return title;
+        }
+        return question != null && !question.isBlank() ? question : String.valueOf(id);
     }
 
+    @Override
+    public Map<String, String> getAttributes() {
+        Map<String, String> attributes = new LinkedHashMap<>();
+        attributes.put("id", Integer.toString(id));
+        attributes.put("title", getTitle() == null ? "" : getTitle());
+        attributes.put("question", question == null ? "" : question);
+        attributes.put("solution", solution == null ? "" : solution);
+        return attributes;
+    }
 }

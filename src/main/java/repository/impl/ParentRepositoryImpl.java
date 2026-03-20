@@ -20,6 +20,7 @@ public abstract class ParentRepositoryImpl<
         T extends ParentObject<C>,
         C extends ChildObject>
         extends ChildRepositoryImpl<T> implements ParentRepository<T, C> {
+
     private final ChildRepositoryImpl<C> childRepository;
 
     protected ParentRepositoryImpl(XMLStorageConnector xmlStorageConnector, ChildRepositoryImpl<C> childRepository) {
@@ -29,44 +30,14 @@ public abstract class ParentRepositoryImpl<
 
     protected abstract String getChildTagName();
 
-
-
-    protected void mapParentElementAttributes(Element element, T target){
-        target.setChildElements(mapChildren(element));
-    }
-
     @Override
     protected void mapElementFields(Element element, T target){
         super.mapElementFields(element, target);
         this.mapParentElementAttributes(element, target);
     }
 
-    private List<C> mapChildren(Element parentElement){
-        List<C> children = new ArrayList<>();
-        NodeList childNodes = parentElement.getChildNodes();
-        for(int i = 0; i < childNodes.getLength(); i++){
-            Node node = childNodes.item(i);
-            if(
-                    node instanceof Element childElement
-                            && getChildTagName().equals(childElement.getTagName())
-            ){
-                children.add(childRepository.mapElement(childElement));
-            }
-        }
-        return children;
-    }
-
-    //TODO improve, needed? is used in remove and add, but on mapChildren its n^2
-    private List<Element> mapChildElements(Element parentElement) {
-        List<Element> childElements = new ArrayList<>();
-        NodeList childNodes = parentElement.getChildNodes();
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node node = childNodes.item(i);
-            if (node instanceof Element childElement && getChildTagName().equals(childElement.getTagName())) {
-                childElements.add(childElement);
-            }
-        }
-        return childElements;
+    private void mapParentElementAttributes(Element element, T target){
+        target.setChildElements(mapChildren(element));
     }
 
     @Override
@@ -91,59 +62,35 @@ public abstract class ParentRepositoryImpl<
     }
 
     @Override
-    public T addChild(int id, C child) throws XmlStorageException{
-        Element parentElement = findElementById(id)
-                .orElseThrow(() -> new XmlStorageException(
-                        String.format("No %s entry found for id %d.",
-                                getElementTagName(), id)
-                ));
-        Element childElement = childRepository.createElement(child);
-        parentElement.appendChild(childElement);
-        getXMLStorageService().saveDocument();
-
-        return findById(id)
-                .orElseThrow(() -> new XmlStorageException(
-                        String.format("Failed to reload %s entry after adding child for id %d.",
-                                getElementTagName(), id)
-                ));
-    }
-
-    @Override
-    public List<C> getChilds(int id){
+    public List<C> findAllChildren(int id){
         return findById(id)
                 .map(ParentObject::getChildElements)
                 .orElse(List.of());
     }
 
-    @Override
-    public T removeChild(int id, int childId){
-        Element parentElement = findElementById(id)
-                .orElseThrow(() -> new XmlStorageException(
-                        String.format("No %s entry found for id %d.",
-                                getElementTagName(), id)
-                ));
-
-        Element childElement = mapChildElements(parentElement).stream()
-                .filter(element -> Integer.toString(childId)
-                        .equals(element.getAttribute(ID_ATTRIBUTE_NAME)))
-                .findFirst()
-                .orElseThrow(() -> new XmlStorageException(
-                        String.format("No %s entry found for id %d in parent with id %d.",
-                                getChildTagName(), childId, id)
-                ));
-
-        parentElement.removeChild(childElement);
-        getXMLStorageService().saveDocument();
-
-        return findById(id)
-                .orElseThrow(() ->
-                        new XmlStorageException(
-                                String.format("Failed to reload %s after removing child Element for id %d.",
-                                        getElementTagName(), id)
-                        ));
+    private List<C> mapChildren(Element parentElement) {
+        List<C> children = new ArrayList<>();
+        NodeList childNodes = parentElement.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node node = childNodes.item(i);
+            if (node instanceof Element childElement && getChildTagName().equals(childElement.getTagName())) {
+                children.add(childRepository.mapElement(childElement));
+            }
+        }
+        return children;
     }
 
-
+    private List<Element> mapChildElements(Element parentElement) {
+        List<Element> childElements = new ArrayList<>();
+        NodeList childNodes = parentElement.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node node = childNodes.item(i);
+            if (node instanceof Element childElement && getChildTagName().equals(childElement.getTagName())) {
+                childElements.add(childElement);
+            }
+        }
+        return childElements;
+    }
 
     private void removeNestedChildren(Element parentElement) {
         for (Element childElement : mapChildElements(parentElement)) {

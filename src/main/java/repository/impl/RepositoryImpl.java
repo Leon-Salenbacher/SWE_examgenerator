@@ -4,16 +4,11 @@ import exceptions.XmlStorageException;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import objects.DataObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 import repository.Repository;
 import repository.XMLStorageConnector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public abstract class RepositoryImpl<T extends DataObject> implements Repository<T> {
     private final XMLStorageConnector xmlStorageConnector;
@@ -46,10 +41,8 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
      * @param target
      */
     protected void mapElementFields(Element element, T target){
-        this.mapElementFields(element, target);
+        this.mapElementData(element, target);
     }
-
-
 
     protected abstract T createEmptyInstance();
 
@@ -58,7 +51,10 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
      * @param element
      * @param object
      */
-    protected abstract void writeElement(Element element, T object);
+    protected void writeElement(Element element, T object){
+        clearAttributes(element, object.getAttributeNames());
+        object.getAttributes().forEach(element::setAttribute);
+    }
 
     /**
      * Returns the {@link XMLStorageConnector}
@@ -89,7 +85,7 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
      * Returns all {@link Element}s, that are stored with the tag on
      * @return
      */
-    private List<Element> getElementByTagName(){
+    private List<Element> getElementsByTagName(){
         Document document = getDocument();
         NodeList nodeList = document.getElementsByTagName(getElementTagName());
         List<Element> elements = new ArrayList<>();
@@ -111,8 +107,9 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
     }
 
     protected Optional<Element> findElementById(int id){
-        return getElementByTagName().stream()
-                .filter(element -> Integer.toString(id).equals(element.getAttribute("id")))
+        return getElementsByTagName().stream()
+                .filter(element -> Integer.toString(id)
+                        .equals(element.getAttribute(ID_ATTRIBUTE_NAME)))
                 .findFirst();
     }
 
@@ -123,7 +120,7 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
 
     @Override
     public List<T> findAll(){
-        return getElementByTagName().stream()
+        return getElementsByTagName().stream()
                 .map(this::mapElement)
                 .toList();
     }
@@ -140,7 +137,7 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
     public T update(T object){
         Element element = findElementById(object.getId())
                 .orElseThrow(() -> new XmlStorageException(
-                        "No " + getElementByTagName() + " entry found for id " + object.getId() + "."
+                        "No " + getElementTagName() + " entry found for id " + object.getId() + "."
                 ));
 
         writeElement(element, object);
@@ -182,5 +179,18 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
             return 0;
         }
         return Integer.parseInt(value);
+    }
+
+    private void clearAttributes(Element element, List<String> attributeNamesToKeep) {
+        Set<String> keep = new HashSet<>(attributeNamesToKeep);
+        NamedNodeMap existingAttributes = element.getAttributes();
+        List<String> attributesToRemove = new ArrayList<>();
+        for (int i = 0; i < existingAttributes.getLength(); i++) {
+            Node attribute = existingAttributes.item(i);
+            if (!keep.contains(attribute.getNodeName())) {
+                attributesToRemove.add(attribute.getNodeName());
+            }
+        }
+        attributesToRemove.forEach(element::removeAttribute);
     }
 }

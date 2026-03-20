@@ -7,9 +7,9 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 /**
- * The Repository sets of all methods, to handle the persistence of a {@link DataObject}.
+ * Generic persistence contract for {@link DataObject} instances.
  *
- * @param <T> the target element.
+ * @param <T> entity type handled by the repository
  */
 public interface Repository <T extends DataObject> {
 

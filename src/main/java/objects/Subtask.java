@@ -3,9 +3,7 @@ package objects;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @Setter
@@ -17,8 +15,8 @@ public class Subtask implements ParentObject<Variant> {
     private int points;
     private int chapterId;
 
-    private List<String> labels;
-    private List<Variant> variants;
+    private List<String> labels = new ArrayList<>();
+    private List<Variant> variants = new ArrayList<>();
 
     public Subtask(int id, String title, int points, int chapterId, List<String> labels, List<Variant> variants) {
         this.id = id;
@@ -26,7 +24,7 @@ public class Subtask implements ParentObject<Variant> {
         this.points = points;
         this.chapterId = chapterId;
         this.labels = defaultLabels(labels);
-        this.variants = variants;
+        this.variants = variants == null ? new ArrayList<>() : new ArrayList<>(variants);
     }
 
     public Subtask(int id, String title, int points, int chapterId, List<String> labels) {
@@ -34,19 +32,16 @@ public class Subtask implements ParentObject<Variant> {
     }
 
     public Subtask(int id, String title, int points, int chapterId) {
-        this(id, title, points, chapterId, Collections.emptyList(), null);
+        this(id, title, points, chapterId, List.of(), null);
     }
 
     private List<String> defaultLabels(List<String> labels) {
-        if (labels == null) {
-            return new ArrayList<>();
-        }
-        return new ArrayList<>(labels);
+        return labels == null ? new ArrayList<>() : new ArrayList<>(labels);
     }
 
     @Override
     public void setChildElements(List<Variant> childElements){
-        this.variants = childElements;
+        this.variants = childElements == null ? new ArrayList<>() : new ArrayList<>(childElements);
     }
 
     @Override
@@ -59,5 +54,15 @@ public class Subtask implements ParentObject<Variant> {
         return this.getVariants();
     }
 
+    @Override
+    public Map<String, String> getAttributes(){
+        Map<String, String> attributes = new LinkedHashMap<>();
+        attributes.put("id", Integer.toString(id));
+        attributes.put("title", title == null ? "" : title);
+        attributes.put("points", Integer.toString(points));
+        attributes.put("chapterId", Integer.toString(chapterId));
+        attributes.put("labels", String.join(",", defaultLabels(labels)));
+        return attributes;
+    }
 
 }
