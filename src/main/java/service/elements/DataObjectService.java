@@ -8,16 +8,16 @@ import java.util.NoSuchElementException;
 
 public interface DataObjectService<
         T extends DataObject,
-        C //command (giving parameter for creation and update)
+        CMD //command (parameter object for create and update)
         > {
 
     T getById(int id) throws NoSuchElementException;
 
     List<T> getAll();
 
-    T create(C command);
+    T create(CMD command);
 
-    T update(int id, C command);
+    T update(int id, CMD command);
 
     void delete(int id) throws NoSuchElementException;
 }

@@ -1,24 +1,41 @@
 package service.impl.elements;
 
 import objects.Chapter;
-import service.elements.ChapterService;
+import objects.Subtask;
+import repository.ParentRepository;
+import service.elements.ParentService;
 
-public class ChapterServiceImpl implements ChapterService {
+import java.util.NoSuchElementException;
+
+public class ChapterServiceImpl
+        extends ParentServiceImpl<
+            Chapter,
+            Subtask,
+            ChapterServiceImpl.ChapterCommand
+        > {
+
+    public ChapterServiceImpl(ParentRepository<Chapter, Subtask> repository) {
+        super(repository);
+    }
+
+
 
 
     @Override
-    public Chapter create(ParentCreateDto newParent) {
-        return null;
+    protected Chapter mapCreateCommand(ChapterCommand command){
+        Chapter chapter = new Chapter();
+        chapter.setTitle(command.title());
+        return chapter;
     }
 
     @Override
-    public Chapter update(ParentUpdateDto updateParent) {
-        return null;
+    protected Chapter mapUpdateCommand(Chapter current, ChapterCommand command){
+        current.setTitle(command.title());
+        return current;
     }
 
-    @Override
-    public void delete(String id) {
 
+    public interface ChapterCommand extends ParentCommand {
     }
 
 

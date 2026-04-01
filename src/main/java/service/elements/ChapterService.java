@@ -1,7 +1,0 @@
-package service.elements;
-
-import objects.Chapter;
-
-public interface ChapterService extends ParentService<Chapter> {
-
-}
