@@ -7,7 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import objects.ChildObject;
 import objects.ParentObject;
-import service.LocalizationService;
+import service.impl.LocalizationService;
 
 import java.io.IOException;
 

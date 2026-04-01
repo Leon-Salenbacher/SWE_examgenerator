@@ -11,7 +11,7 @@ import objects.Chapter;
 import objects.ChildObject;
 import objects.ParentObject;
 import objects.Subtask;
-import service.LocalizationService;
+import service.impl.LocalizationService;
 
 import java.io.IOException;
 import java.util.List;

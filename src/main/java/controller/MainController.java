@@ -4,7 +4,7 @@ import controller.editor.EditorHostController;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import objects.ChildObject;
-import service.LocalizationService;
+import service.impl.LocalizationService;
 
 import java.util.LinkedHashMap;
 import java.util.Locale;

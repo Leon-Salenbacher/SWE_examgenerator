@@ -6,23 +6,11 @@ import objects.ParentObject;
 public interface ParentService<
             T extends ParentObject<?>,
             C extends ChildObject
-        >
-        extends DataObjectService<
-            T
-        > {
+        > extends DataObjectService<T,ParentService.ParentCommand>{
 
-    public T create(ParentCreateDto newParent);
 
-    public T update(ParentUpdateDto updateParent);
 
-    public void delete(String id);
-
-    public record ParentCreateDto extends CreateDto(
-            String title
-    ){}
-
-    public record ParentUpdateDto(
-            String id,
-            String title
-    ){}
+    interface ParentCommand{
+        String title();
+    }
 }

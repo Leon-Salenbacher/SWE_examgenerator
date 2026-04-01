@@ -1,10 +1,8 @@
 package controller;
 
 import controller.sidebar.SidebarElementController;
-import controller.sidebar.SidebarParentElementController;
 import controller.sidebar.SidebarSelectionCoordinator;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -12,13 +10,11 @@ import objects.Chapter;
 import objects.ChildObject;
 import objects.Subtask;
 import objects.Variant;
-import service.LocalizationService;
+import service.impl.LocalizationService;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.Consumer;
 
 public class SidebarController implements SidebarSelectionCoordinator {

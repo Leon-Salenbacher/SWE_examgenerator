@@ -6,7 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import objects.ChildObject;
 import objects.Variant;
-import service.LocalizationService;
+import service.impl.LocalizationService;
 
 
 public class ChildEditorController {

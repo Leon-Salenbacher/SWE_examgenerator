@@ -1,8 +1,9 @@
-package service.elements;
+package service.impl.elements;
 
 import objects.Chapter;
+import service.elements.ChapterService;
 
-public class ChapterServiceImpl implements ChapterService{
+public class ChapterServiceImpl implements ChapterService {
 
 
     @Override
