@@ -11,7 +11,6 @@ import java.util.Map;
 @Getter
 @Setter
 @SuperBuilder
-@AllArgsConstructor
 @NoArgsConstructor
 public class Chapter extends ParentObject<Subtask>{
     public static final String ELEMENT_TAG_NAME = "Chapter";

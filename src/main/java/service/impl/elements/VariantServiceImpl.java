@@ -15,7 +15,7 @@ public class VariantServiceImpl
     public VariantServiceImpl(ChildRepository<Variant> repository){
         super(repository);
     }
-    
+
     @Override
     protected Variant mapCreateCommand(VariantCommand command){
         Variant variant = new Variant();
