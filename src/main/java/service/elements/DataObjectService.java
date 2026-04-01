@@ -13,14 +13,14 @@ public interface DataObjectService<
      * @param newElement
      * @return
      */
-    public T create(C newElement) ;
+    T create(C newElement) ;
 
-    public T update(U updatedElement) throws ;
+    T update(U updatedElement) throws ;
 
-    public void delete(String id);
+    void delete(String id);
 
 
-    public record CreateDto(){
+    record CreateDto(){
 
     }
 

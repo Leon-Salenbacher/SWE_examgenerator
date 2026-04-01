@@ -89,6 +89,11 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
         }
     }
 
+    /**
+     * Makes sure an XML file exist, if not it will create one.
+     *
+     * @throws XmlStorageException if failed to initialize a new XML document.
+     */
     private void ensureFileExists() throws XmlStorageException{
         if (Files.exists(xmlPath)) {
             return;
@@ -96,10 +101,13 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
 
         try {
             Path parent = xmlPath.getParent();
+            //TODO move create out or change method name!
             if (parent != null) {
                 Files.createDirectories(parent);
             }
             Files.writeString(xmlPath, "<ExamGenerator/>");
+            //TODO magic string remove!
+
         } catch (IOException e) {
             throw new XmlStorageException("Failed to initialize XML document at " + xmlPath + '.', e);
         }

@@ -1,15 +1,14 @@
 package service.elements;
 
-import objects.Chapter;
+import objects.ChildObject;
 import objects.ParentObject;
 
 public interface ParentService<
             T extends ParentObject<?>,
-            C extends
+            C extends ChildObject
         >
         extends DataObjectService<
-            T,
-
+            T
         > {
 
     public T create(ParentCreateDto newParent);

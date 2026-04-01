@@ -16,10 +16,10 @@ public interface ChapterRepository extends ParentRepository<Chapter, Subtask> {
     /**
      * XML tag name used for chapter elements
      */
-    public static final String ELEMENT_TAG_NAME = "Chapter";
+    String ELEMENT_TAG_NAME = "Chapter";
 
     /**
      * XML tag name used for nested subtask elements.
      */
-    public static final String CHILD_TAG_NAME = "Subtask";
+    String CHILD_TAG_NAME = "Subtask";
 }

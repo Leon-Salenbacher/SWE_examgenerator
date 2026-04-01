@@ -10,7 +10,6 @@ import objects.ParentObject;
 import service.LocalizationService;
 
 import java.io.IOException;
-import java.util.Locale;
 
 public class EditorHostController {
     @FXML
@@ -28,7 +27,9 @@ public class EditorHostController {
     @FXML
     private void initialize(){
         showPlaceholder();
-        localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
+        localizationService
+                .localeProperty()
+                .addListener((obs, oldLocale, newLocale) -> applyTranslations());
         applyTranslations();
     }
 

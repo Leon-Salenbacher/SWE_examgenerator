@@ -123,6 +123,11 @@ public class DataObjectReflectionSupport {
                     .filter(value -> !value.isBlank())
                     .toList();
         }
-        throw new IllegalStateException("Unsupported XML field type '" + type.getName() + "' for field '" + field.getName() + "'.");
+        throw new IllegalStateException(
+                "Unsupported XML field type '%s' for field '%s'.".formatted(
+                        type.getName(),
+                        field.getName()
+                )
+        );
     }
 }
