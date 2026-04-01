@@ -1,0 +1,10 @@
+<ExamGenerator>
+    <Chapter id="1" title="Chapter 1">
+        <Subtask id="1" title="subtask 1" points="5" chapterId="1" labels="Exam">
+            <Variant id="1" title="Question 1" question="Question 1" solution="Solution 1"/>
+            <Variant id="2" title="Question 2" question="Question 2" solution="Solution 2"/>
+        </Subtask>
+        <Subtask id="2" title="subtask 2" points="7" chapterId="1" labels="Practice"/>
+    </Chapter>
+    <Chapter id="2" title="Chapter 2"/>
+</ExamGenerator>

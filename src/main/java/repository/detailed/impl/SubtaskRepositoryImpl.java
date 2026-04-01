@@ -21,7 +21,7 @@ public class SubtaskRepositoryImpl
 
     @Override
     protected String getChildTagName(){
-        return Subtask.CHILD_TAG_NAME;
+        return Subtask.CHILD_ELEMENT_TAG;
     }
 
     @Override

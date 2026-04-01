@@ -1,5 +1,6 @@
 package controller;
 
+import config.ApplicationContext;
 import controller.sidebar.SidebarElementController;
 import controller.sidebar.SidebarSelectionCoordinator;
 import javafx.fxml.FXML;
@@ -11,6 +12,7 @@ import objects.ChildObject;
 import objects.Subtask;
 import objects.Variant;
 import service.impl.LocalizationService;
+import service.impl.elements.ChapterServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +27,11 @@ public class SidebarController implements SidebarSelectionCoordinator {
     private Node selectedNode;
     private Consumer<ChildObject> selectionListener;
     private final LocalizationService localizationService = LocalizationService.getInstance();
+    private final ChapterServiceImpl chapterService;
+
+    public SidebarController() {
+        chapterService = ApplicationContext.getInstance().getChapterService();
+    }
 
     @FXML
     private void initialize(){
@@ -34,47 +41,13 @@ public class SidebarController implements SidebarSelectionCoordinator {
     }
 
     private void loadChapters() {
-        List<Chapter> chapters = new ArrayList<Chapter>();
-        chapters.add(
-                new Chapter(
-                        1,
-                        "Chapter 1",
-                        Arrays.asList(
-                                new Subtask(
-                                        1,
-                                        "subtask 1",
-                                        5,
-                                        1,
-                                        Arrays.asList("Exam"),
-                                        Arrays.asList(
-                                                new Variant(
-                                                        1,
-                                                        "Question 1",
-                                                        "Solution 1"
-                                                ),
-                                                new Variant(
-                                                        2,
-                                                        "Question 2",
-                                                        "Solution 2"
-                                                )
-                                        )
-                                ),
-                                new Subtask(
-                                        2,
-                                        "subtask 2",
-                                        7,
-                                        1,
-                                        Arrays.asList("Practice")
-                                )
-                        )
-                )
-        );
-        chapters.add(new Chapter(2, "Chapter 2"));
+        List<Chapter> chapters = chapterService.getAll();
+        chapterBox.getChildren().clear();
 
-        for(int i = 0; i < chapters.size(); i++){
-            Node node = SidebarElementController.createElement(chapters.get(i), this);
+        for(Chapter chapter : chapters){
+            Node node = SidebarElementController.createElement(chapter, this);
             chapterBox.getChildren().add(node);
-    }
+        }
     }
     public void setChapters(){
         loadChapters();

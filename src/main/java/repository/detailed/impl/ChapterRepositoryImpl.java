@@ -21,7 +21,7 @@ public class ChapterRepositoryImpl
 
     @Override
     protected String getChildTagName(){
-        return Chapter.CHILD_TAG_NAME;
+        return Chapter.CHILD_ELEMENT_TAG_NAME;
     }
 
     @Override
