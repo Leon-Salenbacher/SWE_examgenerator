@@ -38,7 +38,7 @@
                 <Insets top="12" right="12" bottom="12" left="12" />
             </padding>
         </VBox>
-        <Button fx:id="addChild" text="Create" styleClass="secondary-button" onMouseClicked="#toggleAddNewChild"/>
+        <Button fx:id="addChild" text="Create" styleClass="secondary-button" onAction="#toggleAddNewChild"/>
     </VBox>
 
     <Region VBox.vgrow="ALWAYS" />
@@ -46,6 +46,6 @@
     <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="action-bar">
         <Button fx:id="deleteButton" text="Delete" styleClass="danger-button" />
         <Button fx:id="saveButton" text="Save" styleClass="secondary-button" onAction="#handleSave" />
-        <Button fx:id="createButton" text="Create" styleClass="secondary-button" />
+        <Button fx:id="createButton" text="Create" styleClass="secondary-button" onAction="#handleCreate" visible="false" managed="false" />
     </HBox>
 </VBox>

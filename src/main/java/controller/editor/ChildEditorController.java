@@ -42,8 +42,13 @@ public class ChildEditorController {
     private Button saveButton;
 
     private Variant currentVariant;
+    private Runnable dataChangedHandler;
     private final LocalizationService localizationService = LocalizationService.getInstance();
     private final VariantServiceImpl variantService = ApplicationContext.getInstance().getVariantService();
+
+    public void setDataChangedHandler(Runnable dataChangedHandler) {
+        this.dataChangedHandler = dataChangedHandler;
+    }
 
     public void displayChild(ChildObject child){
         if(child == null){
@@ -157,5 +162,8 @@ public class ChildEditorController {
 
         currentVariant = variantService.update(currentVariant.getId(), command);
         headerLabel.setText(defaultText(currentVariant.getQuestion(), localizationService.get("childEditor.header.variant", currentVariant.getId())));
+        if (dataChangedHandler != null) {
+            dataChangedHandler.run();
+        }
     }
 }

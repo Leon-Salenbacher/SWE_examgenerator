@@ -17,7 +17,6 @@ import java.util.List;
 public abstract class ParentObject<C extends ChildObject> extends ChildObject {
     public static final String CHILD_TAG_NAME = "child";
 
-    @XmlField(CHILD_TAG_NAME)
     protected List<C> childElements = new ArrayList<>();
 
     public void setChildElements(List<C> childElements){

@@ -21,6 +21,7 @@ public class EditorHostController {
 
     private ParentEditorController parentEditorController;
     private ChildEditorController childEditorController;
+    private Runnable dataChangedHandler;
 
     private final LocalizationService localizationService = LocalizationService.getInstance();
 
@@ -77,6 +78,16 @@ public class EditorHostController {
         }
     }
 
+    public void setDataChangedHandler(Runnable dataChangedHandler) {
+        this.dataChangedHandler = dataChangedHandler;
+        if (parentEditorController != null) {
+            parentEditorController.setDataChangedHandler(dataChangedHandler);
+        }
+        if (childEditorController != null) {
+            childEditorController.setDataChangedHandler(dataChangedHandler);
+        }
+    }
+
     private void ensureParentEditor(){
         if(parentEditorController != null){
             return;
@@ -91,6 +102,7 @@ public class EditorHostController {
 
         parentEditorController = loader.getController();
         parentEditorController.setSelectionHandler(this::displayObject);
+        parentEditorController.setDataChangedHandler(dataChangedHandler);
     }
 
     private void ensureChildEditor() {
@@ -106,5 +118,6 @@ public class EditorHostController {
         }
 
         childEditorController = loader.getController();
+        childEditorController.setDataChangedHandler(dataChangedHandler);
     }
 }
