@@ -34,9 +34,6 @@ import java.util.function.Consumer;
 
 public class ParentEditorController {
     @FXML
-    private Label headerLabel;
-
-    @FXML
     private Label typeLabel;
 
     @FXML
@@ -130,10 +127,8 @@ public class ParentEditorController {
             }
             if(currentParent instanceof Chapter){
                 ((Chapter) currentParent).setTitle(newValue);
-                headerLabel.setText(defaultText(newValue, localizationService.get("parentEditor.header.chapter")));
             }else if(currentParent instanceof Subtask){
                 ((Subtask) currentParent).setTitle(newValue);
-                headerLabel.setText(defaultText(newValue, localizationService.get("parentEditor.header.subtask")));
             }
         });
 
@@ -240,7 +235,6 @@ public class ParentEditorController {
     private void displayPlaceholder(){
         createMode = false;
         typeLabel.setText("Editor");
-        headerLabel.setText(localizationService.get("editor.placeholder"));
         titleField.clear();
         pointsField.clear();
         pointsBox.setVisible(false);
@@ -263,7 +257,6 @@ public class ParentEditorController {
     private void displayChapter(Chapter chapter){
         createMode = false;
         typeLabel.setText(localizationService.get("parentEditor.header.chapter"));
-        headerLabel.setText(defaultText(chapter.getTitle(), localizationService.get("parentEditor.header.chapter")));
         titleField.setText(defaultText(chapter.getTitle(), ""));
         togglePoints(false);
         toggleLabels(false);
@@ -277,7 +270,6 @@ public class ParentEditorController {
     private void displaySubtask(Subtask subtask){
         createMode = false;
         typeLabel.setText(localizationService.get("parentEditor.header.subtask"));
-        headerLabel.setText(defaultText(subtask.getTitle(), localizationService.get("parentEditor.header.subtask")));
         titleField.setText(defaultText(subtask.getTitle(), ""));
         togglePoints(true);
         toggleLabels(true);
@@ -293,7 +285,6 @@ public class ParentEditorController {
     private void displayGeneric(ParentObject<? extends ChildObject> parent){
         createMode = false;
         typeLabel.setText(localizationService.get("parentEditor.header.generic"));
-        headerLabel.setText(defaultText(parent.getTitle(), localizationService.get("parentEditor.header.generic")));
         titleField.setText(defaultText(parent.getTitle(), ""));
         togglePoints(false);
         toggleLabels(false);
@@ -350,7 +341,7 @@ public class ParentEditorController {
         solutionField.setPromptText(localizationService.get("childEditor.solution.prompt"));
         deleteButton.setText(localizationService.get("editor.delete"));
         saveButton.setText(localizationService.get("editor.save"));
-        addChild.setText("+ " + localizationService.get("editor.createChild"));
+        addChild.setText(localizationService.get("editor.createChild"));
         createButton.setText(localizationService.get("editor.create"));
 
         if (currentParent == null) {
@@ -425,19 +416,16 @@ public class ParentEditorController {
 
         if (currentParent instanceof Chapter) {
             typeLabel.setText(localizationService.get("parentEditor.header.createSubtask"));
-            headerLabel.setText(localizationService.get("parentEditor.header.createSubtask"));
             togglePoints(true);
             toggleLabels(true);
             toggleVariantFields(false);
         } else if (currentParent instanceof Subtask) {
             typeLabel.setText(localizationService.get("parentEditor.header.createVariant"));
-            headerLabel.setText(localizationService.get("parentEditor.header.createVariant"));
             togglePoints(false);
             toggleLabels(false);
             toggleVariantFields(true);
         } else {
             typeLabel.setText(localizationService.get("parentEditor.header.generic"));
-            headerLabel.setText(localizationService.get("parentEditor.header.generic"));
             togglePoints(false);
             toggleLabels(false);
             toggleVariantFields(false);
@@ -473,7 +461,11 @@ public class ParentEditorController {
                 };
                 currentParent = chapterService.update(chapter.getId(), command);
                 displayParent(currentParent);
-                notifyDataChanged();
+                if (navigationHandler != null) {
+                    navigationHandler.accept(currentParent);
+                } else {
+                    notifyDataChanged();
+                }
                 if (feedbackHandler != null) {
                     feedbackHandler.accept(new EditorFeedbackRequest(currentParent, localizationService.get("editor.save.success"), true));
                 } else {
@@ -514,7 +506,11 @@ public class ParentEditorController {
 
                 currentParent = subtaskService.update(subtask.getId(), command);
                 displayParent(currentParent);
-                notifyDataChanged();
+                if (navigationHandler != null) {
+                    navigationHandler.accept(currentParent);
+                } else {
+                    notifyDataChanged();
+                }
                 if (feedbackHandler != null) {
                     feedbackHandler.accept(new EditorFeedbackRequest(currentParent, localizationService.get("editor.save.success"), true));
                 } else {

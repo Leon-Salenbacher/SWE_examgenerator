@@ -20,9 +20,6 @@ import javafx.util.Duration;
 public class ChildEditorController {
 
     @FXML
-    private Label headerLabel;
-
-    @FXML
     private Label typeLabel;
 
     @FXML
@@ -56,6 +53,7 @@ public class ChildEditorController {
     private Runnable dataChangedHandler;
     private java.util.function.Consumer<ChildObject> displayHandler;
     private java.util.function.Consumer<EditorFeedbackRequest> feedbackHandler;
+    private java.util.function.Consumer<ChildObject> navigationHandler;
     private final LocalizationService localizationService = LocalizationService.getInstance();
     private final VariantServiceImpl variantService = ApplicationContext.getInstance().getVariantService();
     private final VariantValidator variantValidator = new VariantValidator();
@@ -75,6 +73,10 @@ public class ChildEditorController {
         this.feedbackHandler = feedbackHandler;
     }
 
+    public void setNavigationHandler(java.util.function.Consumer<ChildObject> navigationHandler) {
+        this.navigationHandler = navigationHandler;
+    }
+
     public void displayChild(ChildObject child){
         if(child == null){
             displayPlaceholder();
@@ -86,7 +88,6 @@ public class ChildEditorController {
             return;
         }
 
-        headerLabel.setText(child.getTitle());
         titleField.clear();
         questionField.clear();
         solutionField.clear();
@@ -96,7 +97,6 @@ public class ChildEditorController {
     private void displayVariant(Variant variant){
         this.currentVariant = variant;
         typeLabel.setText("Variant");
-        headerLabel.setText(defaultText(variant.getQuestion(), localizationService.get("childEditor.header.variant", variant.getId())));
         titleField.setText(variant.getTitle());
         questionField.setText(variant.getQuestion());
         solutionField.setText(variant.getSolution());
@@ -105,7 +105,6 @@ public class ChildEditorController {
 
     private void displayPlaceholder(){
         typeLabel.setText("Editor");
-        headerLabel.setText(localizationService.get("editor.placeholder"));
         titleField.clear();
         questionField.clear();
         solutionField.clear();
@@ -129,7 +128,6 @@ public class ChildEditorController {
             clearFeedback();
             if(currentVariant != null){
                 currentVariant.setQuestion(newValue);
-                headerLabel.setText(defaultText(newValue, localizationService.get("childEditor.header.variant", currentVariant.getId())));
             }
         });
 
@@ -156,12 +154,6 @@ public class ChildEditorController {
         deleteButton.setText(localizationService.get("editor.delete"));
         saveButton.setText(localizationService.get("editor.save"));
 
-        if (currentVariant == null) {
-            headerLabel.setText(localizationService.get("editor.placeholder"));
-        } else {
-            headerLabel.setText(defaultText(currentVariant.getQuestion(),
-                    localizationService.get("childEditor.header.variant", currentVariant.getId())));
-        }
     }
 
     @FXML
@@ -200,8 +192,9 @@ public class ChildEditorController {
             };
 
             currentVariant = variantService.update(currentVariant.getId(), command);
-            headerLabel.setText(defaultText(currentVariant.getQuestion(), localizationService.get("childEditor.header.variant", currentVariant.getId())));
-            if (dataChangedHandler != null) {
+            if (navigationHandler != null) {
+                navigationHandler.accept(currentVariant);
+            } else if (dataChangedHandler != null) {
                 dataChangedHandler.run();
             }
             if (feedbackHandler != null) {

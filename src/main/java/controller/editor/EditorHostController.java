@@ -144,6 +144,7 @@ public class EditorHostController {
         childEditorController.setDataChangedHandler(dataChangedHandler);
         childEditorController.setDisplayHandler(this::displayObject);
         childEditorController.setFeedbackHandler(this::displayObjectWithFeedback);
+        childEditorController.setNavigationHandler(navigationHandler);
     }
 
     private void applyPendingFeedback(ChildObject data) {

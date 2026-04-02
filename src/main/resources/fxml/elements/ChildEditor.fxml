@@ -12,10 +12,9 @@
         <Insets top="16" right="16" bottom="16" left="16" />
     </padding>
 
-    <VBox spacing="6.0">
+    <HBox alignment="CENTER_LEFT">
         <Label fx:id="typeLabel" text="Variant" styleClass="editor-type-badge" />
-        <Label fx:id="headerLabel" text="Variant" styleClass="header-label" />
-    </VBox>
+    </HBox>
 
     <VBox spacing="6.0">
         <Label fx:id="titleLabel" text="Title" styleClass="section-label" />
@@ -36,7 +35,7 @@
 
     <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="action-bar">
         <Label fx:id="actionFeedbackLabel" text="" styleClass="action-feedback" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" visible="false" managed="false" />
-        <Button fx:id="deleteButton" text="Delete" styleClass="danger-button" />
-        <Button fx:id="saveButton" text="Save" styleClass="primary-button" onAction="#handleSave" />
+        <Button fx:id="deleteButton" text="Delete" styleClass="editor-danger-button" />
+        <Button fx:id="saveButton" text="Save" styleClass="editor-primary-button" onAction="#handleSave" />
     </HBox>
 </VBox>
