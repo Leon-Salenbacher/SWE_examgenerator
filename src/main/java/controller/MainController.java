@@ -34,6 +34,7 @@ public class MainController {
         if(sidebarController != null && editorHostController != null){
             sidebarController.setSelectionListener(this::handleSelection);
             editorHostController.setDataChangedHandler(sidebarController::setChapters);
+            editorHostController.setNavigationHandler(sidebarController::refreshAndRevealSelection);
         }
 
         applyTranslations();

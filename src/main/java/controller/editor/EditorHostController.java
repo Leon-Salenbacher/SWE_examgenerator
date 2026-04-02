@@ -10,6 +10,7 @@ import objects.ParentObject;
 import service.impl.LocalizationService;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public class EditorHostController {
     @FXML
@@ -22,6 +23,8 @@ public class EditorHostController {
     private ParentEditorController parentEditorController;
     private ChildEditorController childEditorController;
     private Runnable dataChangedHandler;
+    private Consumer<ChildObject> navigationHandler;
+    private EditorFeedbackRequest pendingFeedback;
 
     private final LocalizationService localizationService = LocalizationService.getInstance();
 
@@ -45,6 +48,8 @@ public class EditorHostController {
         }else{
             showChildEditor(data);
         }
+
+        applyPendingFeedback(data);
     }
 
     private void showParentEditor(ParentObject<? extends ChildObject> data){
@@ -88,6 +93,21 @@ public class EditorHostController {
         }
     }
 
+    public void setNavigationHandler(Consumer<ChildObject> navigationHandler) {
+        this.navigationHandler = navigationHandler;
+        if (parentEditorController != null) {
+            parentEditorController.setNavigationHandler(navigationHandler);
+        }
+    }
+
+    public void displayObjectWithFeedback(EditorFeedbackRequest feedbackRequest) {
+        if (feedbackRequest == null) {
+            return;
+        }
+        pendingFeedback = feedbackRequest;
+        displayObject(feedbackRequest.data());
+    }
+
     private void ensureParentEditor(){
         if(parentEditorController != null){
             return;
@@ -102,6 +122,9 @@ public class EditorHostController {
 
         parentEditorController = loader.getController();
         parentEditorController.setSelectionHandler(this::displayObject);
+        parentEditorController.setDisplayHandler(this::displayObject);
+        parentEditorController.setFeedbackHandler(this::displayObjectWithFeedback);
+        parentEditorController.setNavigationHandler(navigationHandler);
         parentEditorController.setDataChangedHandler(dataChangedHandler);
     }
 
@@ -119,5 +142,32 @@ public class EditorHostController {
 
         childEditorController = loader.getController();
         childEditorController.setDataChangedHandler(dataChangedHandler);
+        childEditorController.setDisplayHandler(this::displayObject);
+        childEditorController.setFeedbackHandler(this::displayObjectWithFeedback);
+    }
+
+    private void applyPendingFeedback(ChildObject data) {
+        if (pendingFeedback == null || data == null) {
+            return;
+        }
+
+        if (!sameObject(pendingFeedback.data(), data)) {
+            return;
+        }
+
+        if (data instanceof ParentObject<?>) {
+            parentEditorController.showTransientFeedback(pendingFeedback.message(), pendingFeedback.success());
+        } else {
+            childEditorController.showTransientFeedback(pendingFeedback.message(), pendingFeedback.success());
+        }
+
+        pendingFeedback = null;
+    }
+
+    private boolean sameObject(ChildObject left, ChildObject right) {
+        if (left == null || right == null) {
+            return false;
+        }
+        return left.getClass().equals(right.getClass()) && left.getId() == right.getId();
     }
 }

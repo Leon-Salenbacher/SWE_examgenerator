@@ -16,6 +16,7 @@ import objects.DataObject;
 import objects.ParentObject;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 public class SidebarParentElementController extends SidebarChildElementController implements  SidebarElementController{
@@ -31,6 +32,7 @@ public class SidebarParentElementController extends SidebarChildElementControlle
     @FXML
     protected void initialize(){
         loadChevron();
+        setOpen(false, false);
     }
 
     protected void loadChevron(){
@@ -43,10 +45,29 @@ public class SidebarParentElementController extends SidebarChildElementControlle
 
     @FXML
     protected void toggleOpen(MouseEvent event){
+        boolean wasSelected = root.getStyleClass().contains("selected");
         selectSelf();
-        setOpen(!open, true);
+        if (wasSelected) {
+            setOpen(!open, true);
+        } else {
+            setOpen(true, true);
+        }
 
         if(event != null){
+            event.consume();
+        }
+    }
+
+    @FXML
+    @Override
+    protected void handleSelect(MouseEvent event) {
+        boolean wasSelected = root.getStyleClass().contains("selected");
+        selectSelf();
+        if (!wasSelected) {
+            setOpen(true, true);
+        }
+
+        if (event != null) {
             event.consume();
         }
     }
@@ -103,6 +124,40 @@ public class SidebarParentElementController extends SidebarChildElementControlle
 
     protected void onOpen(){
         setOpen(true, true);
+    }
+
+    public boolean isOpen() {
+        return open;
+    }
+
+    public void applyOpenState(boolean value) {
+        setOpen(value, false);
+    }
+
+    public List<Node> getChildNodes() {
+        return Collections.unmodifiableList(childContainer.getChildren());
+    }
+
+    public SidebarChildElementController revealPathTo(ChildObject target) {
+        if (matchesData(target)) {
+            return this;
+        }
+
+        for (Node childNode : childContainer.getChildren()) {
+            Object userData = childNode.getUserData();
+            if (userData instanceof SidebarParentElementController parentController) {
+                SidebarChildElementController match = parentController.revealPathTo(target);
+                if (match != null) {
+                    setOpen(true, false);
+                    return match;
+                }
+            } else if (userData instanceof SidebarChildElementController childController && childController.matchesData(target)) {
+                setOpen(true, false);
+                return childController;
+            }
+        }
+
+        return null;
     }
 
 

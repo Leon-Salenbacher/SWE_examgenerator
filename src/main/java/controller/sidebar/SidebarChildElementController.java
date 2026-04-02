@@ -47,4 +47,19 @@ public class SidebarChildElementController implements SidebarElementController{
         }
     }
 
+    public void selectNode() {
+        selectSelf();
+    }
+
+    public boolean matchesData(ChildObject target) {
+        if (data == null || target == null) {
+            return false;
+        }
+        return data.getClass().equals(target.getClass()) && data.getId() == target.getId();
+    }
+
+    public ChildObject getData() {
+        return data;
+    }
+
 }

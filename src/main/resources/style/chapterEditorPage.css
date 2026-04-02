@@ -11,12 +11,33 @@
 
 .action-feedback {
     -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 8 12 8 12;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-background-color: rgba(255, 255, 255, 0.04);
 }
 
 .feedback-success {
-    -fx-text-fill: #59c36a;
+    -fx-text-fill: #dfffe6;
+    -fx-background-color: rgba(49, 163, 84, 0.22);
+    -fx-border-color: rgba(106, 222, 140, 0.95);
 }
 
 .feedback-error {
-    -fx-text-fill: #ff6b6b;
+    -fx-text-fill: #ffe1e1;
+    -fx-background-color: rgba(201, 59, 59, 0.22);
+    -fx-border-color: rgba(255, 116, 116, 0.95);
+}
+
+.editor-type-badge {
+    -fx-text-fill: #d8d2ff;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 4 10 4 10;
+    -fx-background-color: rgba(122, 89, 255, 0.18);
+    -fx-border-color: rgba(122, 89, 255, 0.55);
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
 }

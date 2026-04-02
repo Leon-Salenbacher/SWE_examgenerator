@@ -1,6 +1,9 @@
 package controller.editor;
 
 import config.ApplicationContext;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -10,11 +13,17 @@ import objects.ChildObject;
 import objects.Variant;
 import service.impl.LocalizationService;
 import service.impl.elements.VariantServiceImpl;
+import validation.ValidationResult;
+import validation.VariantValidator;
+import javafx.util.Duration;
 
 public class ChildEditorController {
 
     @FXML
     private Label headerLabel;
+
+    @FXML
+    private Label typeLabel;
 
     @FXML
     private Label questionLabel;
@@ -45,13 +54,25 @@ public class ChildEditorController {
 
     private Variant currentVariant;
     private Runnable dataChangedHandler;
+    private java.util.function.Consumer<ChildObject> displayHandler;
+    private java.util.function.Consumer<EditorFeedbackRequest> feedbackHandler;
     private final LocalizationService localizationService = LocalizationService.getInstance();
     private final VariantServiceImpl variantService = ApplicationContext.getInstance().getVariantService();
+    private final VariantValidator variantValidator = new VariantValidator();
     private static final String FEEDBACK_SUCCESS_STYLE = "feedback-success";
     private static final String FEEDBACK_ERROR_STYLE = "feedback-error";
+    private PauseTransition feedbackHideTransition;
 
     public void setDataChangedHandler(Runnable dataChangedHandler) {
         this.dataChangedHandler = dataChangedHandler;
+    }
+
+    public void setDisplayHandler(java.util.function.Consumer<ChildObject> displayHandler) {
+        this.displayHandler = displayHandler;
+    }
+
+    public void setFeedbackHandler(java.util.function.Consumer<EditorFeedbackRequest> feedbackHandler) {
+        this.feedbackHandler = feedbackHandler;
     }
 
     public void displayChild(ChildObject child){
@@ -74,6 +95,7 @@ public class ChildEditorController {
 
     private void displayVariant(Variant variant){
         this.currentVariant = variant;
+        typeLabel.setText("Variant");
         headerLabel.setText(defaultText(variant.getQuestion(), localizationService.get("childEditor.header.variant", variant.getId())));
         titleField.setText(variant.getTitle());
         questionField.setText(variant.getQuestion());
@@ -82,6 +104,7 @@ public class ChildEditorController {
     }
 
     private void displayPlaceholder(){
+        typeLabel.setText("Editor");
         headerLabel.setText(localizationService.get("editor.placeholder"));
         titleField.clear();
         questionField.clear();
@@ -123,6 +146,7 @@ public class ChildEditorController {
     }
 
     private void applyTranslations() {
+        typeLabel.setText(currentVariant == null ? "Editor" : "Variant");
         titleLabel.setText(localizationService.get("childEditor.title"));
         titleField.setPromptText(localizationService.get("childEditor.title.prompt"));
         questionLabel.setText(localizationService.get("childEditor.question"));
@@ -147,6 +171,12 @@ public class ChildEditorController {
         }
 
         try {
+            ValidationResult validationResult = variantValidator.validate(currentVariant);
+            if (!validationResult.isValid()) {
+                showErrorFeedback(validationResult.message());
+                return;
+            }
+
             VariantServiceImpl.VariantCommand command = new VariantServiceImpl.VariantCommand() {
                 @Override
                 public String title() {
@@ -171,9 +201,13 @@ public class ChildEditorController {
 
             currentVariant = variantService.update(currentVariant.getId(), command);
             headerLabel.setText(defaultText(currentVariant.getQuestion(), localizationService.get("childEditor.header.variant", currentVariant.getId())));
-            showSuccessFeedback(localizationService.get("editor.save.success"));
             if (dataChangedHandler != null) {
                 dataChangedHandler.run();
+            }
+            if (feedbackHandler != null) {
+                feedbackHandler.accept(new EditorFeedbackRequest(currentVariant, localizationService.get("editor.save.success"), true));
+            } else {
+                showSuccessFeedback(localizationService.get("editor.save.success"));
             }
         } catch (Exception exception) {
             showErrorFeedback(localizationService.get("editor.save.failed", messageOrFallback(exception)));
@@ -181,20 +215,57 @@ public class ChildEditorController {
     }
 
     private void showSuccessFeedback(String message) {
-        actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
-        actionFeedbackLabel.getStyleClass().add(FEEDBACK_SUCCESS_STYLE);
-        actionFeedbackLabel.setText(message);
+        showFeedback(message, FEEDBACK_SUCCESS_STYLE);
     }
 
     private void showErrorFeedback(String message) {
+        showFeedback(message, FEEDBACK_ERROR_STYLE);
+    }
+
+    private void showFeedback(String message, String styleClass) {
+        if (feedbackHideTransition != null) {
+            feedbackHideTransition.stop();
+        }
         actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
-        actionFeedbackLabel.getStyleClass().add(FEEDBACK_ERROR_STYLE);
+        actionFeedbackLabel.getStyleClass().add(styleClass);
         actionFeedbackLabel.setText(message);
+        actionFeedbackLabel.setVisible(true);
+        actionFeedbackLabel.setManaged(true);
+        actionFeedbackLabel.setOpacity(1);
+        actionFeedbackLabel.setScaleX(1);
+        actionFeedbackLabel.setScaleY(1);
+
+        ScaleTransition pulse = new ScaleTransition(Duration.millis(180), actionFeedbackLabel);
+        pulse.setFromX(0.96);
+        pulse.setFromY(0.96);
+        pulse.setToX(1.0);
+        pulse.setToY(1.0);
+        pulse.play();
+
+        feedbackHideTransition = new PauseTransition(Duration.seconds(5));
+        feedbackHideTransition.setOnFinished(event -> {
+            FadeTransition fade = new FadeTransition(Duration.millis(260), actionFeedbackLabel);
+            fade.setFromValue(1.0);
+            fade.setToValue(0.0);
+            fade.setOnFinished(finished -> clearFeedback());
+            fade.play();
+        });
+        feedbackHideTransition.play();
+    }
+
+    public void showTransientFeedback(String message, boolean success) {
+        showFeedback(message, success ? FEEDBACK_SUCCESS_STYLE : FEEDBACK_ERROR_STYLE);
     }
 
     private void clearFeedback() {
+        if (feedbackHideTransition != null) {
+            feedbackHideTransition.stop();
+        }
         actionFeedbackLabel.setText("");
         actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
+        actionFeedbackLabel.setVisible(false);
+        actionFeedbackLabel.setManaged(false);
+        actionFeedbackLabel.setOpacity(1);
     }
 
     private String messageOrFallback(Exception exception) {

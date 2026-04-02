@@ -1,11 +1,15 @@
 package controller.editor;
 
 import config.ApplicationContext;
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
@@ -17,6 +21,11 @@ import objects.Variant;
 import service.impl.LocalizationService;
 import service.impl.elements.ChapterServiceImpl;
 import service.impl.elements.SubtaskServiceImpl;
+import validation.ChapterValidator;
+import validation.SubtaskValidator;
+import validation.ValidationResult;
+import validation.VariantValidator;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +35,9 @@ import java.util.function.Consumer;
 public class ParentEditorController {
     @FXML
     private Label headerLabel;
+
+    @FXML
+    private Label typeLabel;
 
     @FXML
     private TextField titleField;
@@ -55,6 +67,24 @@ public class ParentEditorController {
     private Label titleLabel;
 
     @FXML
+    private VBox questionBox;
+
+    @FXML
+    private Label questionLabel;
+
+    @FXML
+    private TextArea questionField;
+
+    @FXML
+    private VBox solutionBox;
+
+    @FXML
+    private Label solutionLabel;
+
+    @FXML
+    private TextArea solutionField;
+
+    @FXML
     private Label pointsLabel;
 
     @FXML
@@ -74,13 +104,20 @@ public class ParentEditorController {
 
     private ParentObject<? extends ChildObject> currentParent;
     private Consumer<ChildObject> selectionHandler;
+    private Consumer<ChildObject> displayHandler;
+    private Consumer<EditorFeedbackRequest> feedbackHandler;
+    private Consumer<ChildObject> navigationHandler;
     private Runnable dataChangedHandler;
     private boolean createMode;
     private final LocalizationService localizationService = LocalizationService.getInstance();
     private final ChapterServiceImpl chapterService = ApplicationContext.getInstance().getChapterService();
     private final SubtaskServiceImpl subtaskService = ApplicationContext.getInstance().getSubtaskService();
+    private final ChapterValidator chapterValidator = new ChapterValidator();
+    private final SubtaskValidator subtaskValidator = new SubtaskValidator();
+    private final VariantValidator variantValidator = new VariantValidator();
     private static final String FEEDBACK_SUCCESS_STYLE = "feedback-success";
     private static final String FEEDBACK_ERROR_STYLE = "feedback-error";
+    private PauseTransition feedbackHideTransition;
 
     @FXML
     private void initialize(){
@@ -153,6 +190,18 @@ public class ParentEditorController {
         this.selectionHandler = selectionHandler;
     }
 
+    public void setDisplayHandler(Consumer<ChildObject> displayHandler) {
+        this.displayHandler = displayHandler;
+    }
+
+    public void setFeedbackHandler(Consumer<EditorFeedbackRequest> feedbackHandler) {
+        this.feedbackHandler = feedbackHandler;
+    }
+
+    public void setNavigationHandler(Consumer<ChildObject> navigationHandler) {
+        this.navigationHandler = navigationHandler;
+    }
+
     public void setDataChangedHandler(Runnable dataChangedHandler) {
         this.dataChangedHandler = dataChangedHandler;
     }
@@ -190,13 +239,17 @@ public class ParentEditorController {
 
     private void displayPlaceholder(){
         createMode = false;
+        typeLabel.setText("Editor");
         headerLabel.setText(localizationService.get("editor.placeholder"));
         titleField.clear();
         pointsField.clear();
         pointsBox.setVisible(false);
         pointsBox.setManaged(false);
         toggleLabels(false);
+        toggleVariantFields(false);
         labelsField.clear();
+        questionField.clear();
+        solutionField.clear();
         childList.getChildren().setAll(createEmptyRow());
         currentParent = null;
         clearFeedback();
@@ -209,10 +262,12 @@ public class ParentEditorController {
 
     private void displayChapter(Chapter chapter){
         createMode = false;
+        typeLabel.setText(localizationService.get("parentEditor.header.chapter"));
         headerLabel.setText(defaultText(chapter.getTitle(), localizationService.get("parentEditor.header.chapter")));
         titleField.setText(defaultText(chapter.getTitle(), ""));
         togglePoints(false);
         toggleLabels(false);
+        toggleVariantFields(false);
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.subtasks"));
         renderChildren(chapter.getChildElements());
         clearFeedback();
@@ -221,10 +276,12 @@ public class ParentEditorController {
 
     private void displaySubtask(Subtask subtask){
         createMode = false;
+        typeLabel.setText(localizationService.get("parentEditor.header.subtask"));
         headerLabel.setText(defaultText(subtask.getTitle(), localizationService.get("parentEditor.header.subtask")));
         titleField.setText(defaultText(subtask.getTitle(), ""));
         togglePoints(true);
         toggleLabels(true);
+        toggleVariantFields(false);
         pointsField.setText(String.valueOf(subtask.getPoints()));
         labelsField.setText(String.join(", ", defaultLabels(subtask.getLabels())));
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.variants"));
@@ -235,10 +292,12 @@ public class ParentEditorController {
 
     private void displayGeneric(ParentObject<? extends ChildObject> parent){
         createMode = false;
+        typeLabel.setText(localizationService.get("parentEditor.header.generic"));
         headerLabel.setText(defaultText(parent.getTitle(), localizationService.get("parentEditor.header.generic")));
         titleField.setText(defaultText(parent.getTitle(), ""));
         togglePoints(false);
         toggleLabels(false);
+        toggleVariantFields(false);
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.generic"));
         renderChildren(parent.getChildElements());
         clearFeedback();
@@ -253,6 +312,13 @@ public class ParentEditorController {
     private void toggleLabels(boolean visible){
         labelsBox.setVisible(visible);
         labelsBox.setManaged(visible);
+    }
+
+    private void toggleVariantFields(boolean visible) {
+        questionBox.setVisible(visible);
+        questionBox.setManaged(visible);
+        solutionBox.setVisible(visible);
+        solutionBox.setManaged(visible);
     }
 
     private List<String> parseLabels(String input){
@@ -278,9 +344,13 @@ public class ParentEditorController {
         pointsField.setPromptText(localizationService.get("parentEditor.points.prompt"));
         labelsLabel.setText(localizationService.get("parentEditor.labels"));
         labelsField.setPromptText(localizationService.get("parentEditor.labels.prompt"));
+        questionLabel.setText(localizationService.get("childEditor.question"));
+        questionField.setPromptText(localizationService.get("childEditor.question.prompt"));
+        solutionLabel.setText(localizationService.get("childEditor.solution"));
+        solutionField.setPromptText(localizationService.get("childEditor.solution.prompt"));
         deleteButton.setText(localizationService.get("editor.delete"));
         saveButton.setText(localizationService.get("editor.save"));
-        addChild.setText(localizationService.get("editor.createChild"));
+        addChild.setText("+ " + localizationService.get("editor.createChild"));
         createButton.setText(localizationService.get("editor.create"));
 
         if (currentParent == null) {
@@ -349,20 +419,28 @@ public class ParentEditorController {
         titleField.clear();
         pointsField.clear();
         labelsField.clear();
+        questionField.clear();
+        solutionField.clear();
         clearFeedback();
 
         if (currentParent instanceof Chapter) {
+            typeLabel.setText(localizationService.get("parentEditor.header.createSubtask"));
             headerLabel.setText(localizationService.get("parentEditor.header.createSubtask"));
             togglePoints(true);
             toggleLabels(true);
+            toggleVariantFields(false);
         } else if (currentParent instanceof Subtask) {
+            typeLabel.setText(localizationService.get("parentEditor.header.createVariant"));
             headerLabel.setText(localizationService.get("parentEditor.header.createVariant"));
             togglePoints(false);
             toggleLabels(false);
+            toggleVariantFields(true);
         } else {
+            typeLabel.setText(localizationService.get("parentEditor.header.generic"));
             headerLabel.setText(localizationService.get("parentEditor.header.generic"));
             togglePoints(false);
             toggleLabels(false);
+            toggleVariantFields(false);
         }
 
         updateActionButtons();
@@ -376,6 +454,12 @@ public class ParentEditorController {
 
         try {
             if(currentParent instanceof Chapter chapter){
+                ValidationResult validationResult = chapterValidator.validate(chapter);
+                if (!validationResult.isValid()) {
+                    showErrorFeedback(validationResult.message());
+                    return;
+                }
+
                 ChapterServiceImpl.ChapterCommand command = new ChapterServiceImpl.ChapterCommand() {
                     @Override
                     public String title() {
@@ -389,12 +473,22 @@ public class ParentEditorController {
                 };
                 currentParent = chapterService.update(chapter.getId(), command);
                 displayParent(currentParent);
-                showSuccessFeedback(localizationService.get("editor.save.success"));
                 notifyDataChanged();
+                if (feedbackHandler != null) {
+                    feedbackHandler.accept(new EditorFeedbackRequest(currentParent, localizationService.get("editor.save.success"), true));
+                } else {
+                    showSuccessFeedback(localizationService.get("editor.save.success"));
+                }
                 return;
             }
 
             if(currentParent instanceof Subtask subtask){
+                ValidationResult validationResult = subtaskValidator.validate(subtask);
+                if (!validationResult.isValid()) {
+                    showErrorFeedback(validationResult.message());
+                    return;
+                }
+
                 SubtaskServiceImpl.SubtaskCommand command = new SubtaskServiceImpl.SubtaskCommand() {
                     @Override
                     public String title() {
@@ -420,8 +514,12 @@ public class ParentEditorController {
 
                 currentParent = subtaskService.update(subtask.getId(), command);
                 displayParent(currentParent);
-                showSuccessFeedback(localizationService.get("editor.save.success"));
                 notifyDataChanged();
+                if (feedbackHandler != null) {
+                    feedbackHandler.accept(new EditorFeedbackRequest(currentParent, localizationService.get("editor.save.success"), true));
+                } else {
+                    showSuccessFeedback(localizationService.get("editor.save.success"));
+                }
             }
         } catch (Exception exception) {
             showErrorFeedback(localizationService.get("editor.save.failed", messageOrFallback(exception)));
@@ -443,11 +541,25 @@ public class ParentEditorController {
                 createdSubtask.setPoints(parsePointsInput());
                 createdSubtask.setLabels(new ArrayList<>(parseLabels(labelsField.getText())));
 
+                ValidationResult validationResult = subtaskValidator.validate(createdSubtask);
+                if (!validationResult.isValid()) {
+                    showErrorFeedback(validationResult.message());
+                    return;
+                }
+
                 Chapter updatedChapter = chapterService.getById(chapter.getId());
                 List<Subtask> children = new ArrayList<>(updatedChapter.getChildElements());
                 children.add(createdSubtask);
                 updatedChapter.setChildElements(children);
                 ApplicationContext.getInstance().getChapterRepository().update(updatedChapter);
+
+                if (navigationHandler != null) {
+                    navigationHandler.accept(createdSubtask);
+                }
+                if (feedbackHandler != null) {
+                    feedbackHandler.accept(new EditorFeedbackRequest(createdSubtask, localizationService.get("editor.create.success"), true));
+                    return;
+                }
 
                 showSuccessFeedback(localizationService.get("editor.create.success"));
                 notifyDataChanged();
@@ -463,14 +575,28 @@ public class ParentEditorController {
                 Variant createdVariant = new Variant();
                 createdVariant.setId(nextVariantId());
                 createdVariant.setTitle(titleField.getText());
-                createdVariant.setQuestion(titleField.getText());
-                createdVariant.setSolution("");
+                createdVariant.setQuestion(questionField.getText());
+                createdVariant.setSolution(solutionField.getText());
+
+                ValidationResult validationResult = variantValidator.validate(createdVariant);
+                if (!validationResult.isValid()) {
+                    showErrorFeedback(validationResult.message());
+                    return;
+                }
 
                 Subtask updatedSubtask = subtaskService.getById(subtask.getId());
                 List<Variant> children = new ArrayList<>(updatedSubtask.getChildElements());
                 children.add(createdVariant);
                 updatedSubtask.setChildElements(children);
                 ApplicationContext.getInstance().getSubtaskRepository().update(updatedSubtask);
+
+                if (navigationHandler != null) {
+                    navigationHandler.accept(createdVariant);
+                }
+                if (feedbackHandler != null) {
+                    feedbackHandler.accept(new EditorFeedbackRequest(createdVariant, localizationService.get("editor.create.success"), true));
+                    return;
+                }
 
                 showSuccessFeedback(localizationService.get("editor.create.success"));
                 notifyDataChanged();
@@ -490,20 +616,57 @@ public class ParentEditorController {
     }
 
     private void showSuccessFeedback(String message) {
-        actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
-        actionFeedbackLabel.getStyleClass().add(FEEDBACK_SUCCESS_STYLE);
-        actionFeedbackLabel.setText(message);
+        showFeedback(message, FEEDBACK_SUCCESS_STYLE);
     }
 
     private void showErrorFeedback(String message) {
+        showFeedback(message, FEEDBACK_ERROR_STYLE);
+    }
+
+    private void showFeedback(String message, String styleClass) {
+        if (feedbackHideTransition != null) {
+            feedbackHideTransition.stop();
+        }
         actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
-        actionFeedbackLabel.getStyleClass().add(FEEDBACK_ERROR_STYLE);
+        actionFeedbackLabel.getStyleClass().add(styleClass);
         actionFeedbackLabel.setText(message);
+        actionFeedbackLabel.setVisible(true);
+        actionFeedbackLabel.setManaged(true);
+        actionFeedbackLabel.setOpacity(1);
+        actionFeedbackLabel.setScaleX(1);
+        actionFeedbackLabel.setScaleY(1);
+
+        ScaleTransition pulse = new ScaleTransition(Duration.millis(180), actionFeedbackLabel);
+        pulse.setFromX(0.96);
+        pulse.setFromY(0.96);
+        pulse.setToX(1.0);
+        pulse.setToY(1.0);
+        pulse.play();
+
+        feedbackHideTransition = new PauseTransition(Duration.seconds(5));
+        feedbackHideTransition.setOnFinished(event -> {
+            FadeTransition fade = new FadeTransition(Duration.millis(260), actionFeedbackLabel);
+            fade.setFromValue(1.0);
+            fade.setToValue(0.0);
+            fade.setOnFinished(finished -> clearFeedback());
+            fade.play();
+        });
+        feedbackHideTransition.play();
+    }
+
+    public void showTransientFeedback(String message, boolean success) {
+        showFeedback(message, success ? FEEDBACK_SUCCESS_STYLE : FEEDBACK_ERROR_STYLE);
     }
 
     private void clearFeedback() {
+        if (feedbackHideTransition != null) {
+            feedbackHideTransition.stop();
+        }
         actionFeedbackLabel.setText("");
         actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
+        actionFeedbackLabel.setVisible(false);
+        actionFeedbackLabel.setManaged(false);
+        actionFeedbackLabel.setOpacity(1);
     }
 
     private String messageOrFallback(Exception exception) {

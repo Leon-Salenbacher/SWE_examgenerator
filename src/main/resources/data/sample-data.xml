@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <ExamGenerator>
-          
+                      
+  
+  
+  
+  
+  
+  
   
   
   <Chapter id="1" title="Chapter 1">
-            
+                                    
     
   
     
@@ -12,24 +18,94 @@
     
     
   
-    <Subtask chapterId="1" id="1" labels="Exam" points="545" title="subtask 154">
-      <Variant id="1" question="Question 1314" solution="Solution 1314" title="Question 1314"/>
-      <Variant id="2" question="Question 2" solution="Solution 2" title="Question 2"/>
+    
+    
+    
+    
+    
+  
+    
+    
+    
+    
+    
+                    
+    
+    
+    
+    
+                    
+    
+    
+    
+    
+                    
+    
+    
+    
+    
+                    
+    
+    
+    
+    
+                    
+    
+    
+    
+    
+                  
+  
+  
+  
+  
+    <Subtask chapterId="1" id="1" labels="Exam" points="545" title="subtask 1542rdfwerer">
+      <Variant id="1" question="Question 1314" solution="Solution 1314" title="Question 1314erer"/>
+      <Variant id="2" question="Question 2" solution="Solution 2" title="Question 2erer"/>
+      <Variant id="5" question="wgwrg" solution="wrg" title="wgwg"/>
     </Subtask>
-    <Subtask chapterId="1" id="2" labels="Practice" points="7" title="subtask 2"/>
-    <Subtask chapterId="1" id="3" labels="" points="0" title=""/>
-    <Subtask chapterId="1" id="4" labels="" points="2" title="df"/>
+    <Subtask chapterId="1" id="2" labels="Practicee" points="7" title="subtask 2"/>
+    <Subtask chapterId="1" id="3" labels="" points="0" title="er"/>
+    <Subtask chapterId="1" id="4" labels="fdaf" points="2" title="df">
+      <Variant id="4" question="efwfe" solution="grw" title="32455"/>
+    </Subtask>
     <Subtask chapterId="1" id="5" labels="wrewr" points="2" title="ewr">
       <Variant id="3" question="wre" solution="werwer" title="wer"/>
     </Subtask>
+    <Subtask chapterId="1" id="7" labels="" points="0" title=""/>
+    <Subtask chapterId="1" id="8" labels="fwf" points="3" title="wf"/>
   </Chapter>
-          
+                      
+  
+  
+  
+  
+  
+  
   
   
   <Chapter id="2" title="Chapter 2">
+                            
+    
+    
+    
+    
+    
     <Subtask chapterId="2" id="6" labels="ef" points="4" title="sdf"/>
+                          
+  
+  
+  
+  
+  
   </Chapter>
-      
+                  
+
+
+
+
+
+
 
 
 </ExamGenerator>
