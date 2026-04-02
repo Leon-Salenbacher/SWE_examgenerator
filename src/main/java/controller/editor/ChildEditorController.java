@@ -1,12 +1,15 @@
 package controller.editor;
 
+import config.ApplicationContext;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import objects.ChildObject;
 import objects.Variant;
 import service.impl.LocalizationService;
+import service.impl.elements.VariantServiceImpl;
 
 
 public class ChildEditorController {
@@ -16,6 +19,12 @@ public class ChildEditorController {
 
     @FXML
     private Label questionLabel;
+
+    @FXML
+    private Label titleLabel;
+
+    @FXML
+    private TextField titleField;
 
     @FXML
     private TextArea questionField;
@@ -34,6 +43,7 @@ public class ChildEditorController {
 
     private Variant currentVariant;
     private final LocalizationService localizationService = LocalizationService.getInstance();
+    private final VariantServiceImpl variantService = ApplicationContext.getInstance().getVariantService();
 
     public void displayChild(ChildObject child){
         if(child == null){
@@ -47,6 +57,7 @@ public class ChildEditorController {
         }
 
         headerLabel.setText(child.getTitle());
+        titleField.clear();
         questionField.clear();
         solutionField.clear();
     }
@@ -54,12 +65,14 @@ public class ChildEditorController {
     private void displayVariant(Variant variant){
         this.currentVariant = variant;
         headerLabel.setText(defaultText(variant.getQuestion(), localizationService.get("childEditor.header.variant", variant.getId())));
+        titleField.setText(variant.getTitle());
         questionField.setText(variant.getQuestion());
         solutionField.setText(variant.getSolution());
     }
 
     private void displayPlaceholder(){
         headerLabel.setText(localizationService.get("editor.placeholder"));
+        titleField.clear();
         questionField.clear();
         solutionField.clear();
         currentVariant = null;
@@ -69,6 +82,12 @@ public class ChildEditorController {
     private void initialize(){
         localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
         applyTranslations();
+
+        titleField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if(currentVariant != null){
+                currentVariant.setTitle(newValue);
+            }
+        });
 
         questionField.textProperty().addListener((observable, oldValue, newValue ) ->{
             if(currentVariant != null){
@@ -89,6 +108,8 @@ public class ChildEditorController {
     }
 
     private void applyTranslations() {
+        titleLabel.setText(localizationService.get("childEditor.title"));
+        titleField.setPromptText(localizationService.get("childEditor.title.prompt"));
         questionLabel.setText(localizationService.get("childEditor.question"));
         questionField.setPromptText(localizationService.get("childEditor.question.prompt"));
         solutionLabel.setText(localizationService.get("childEditor.solution"));
@@ -102,5 +123,39 @@ public class ChildEditorController {
             headerLabel.setText(defaultText(currentVariant.getQuestion(),
                     localizationService.get("childEditor.header.variant", currentVariant.getId())));
         }
+    }
+
+    @FXML
+    private void handleSave(){
+        if(currentVariant == null){
+            return;
+        }
+
+        VariantServiceImpl.VariantCommand command = new VariantServiceImpl.VariantCommand() {
+
+            @Override
+            public String title() {
+                return titleField.getText();
+            }
+
+            @Override
+            public String question() {
+                return questionField.getText();
+            }
+
+            @Override
+            public String solution() {
+                return solutionField.getText();
+            }
+
+
+            @Override
+            public Integer parentId() {
+                return null;
+            }
+        };
+
+        currentVariant = variantService.update(currentVariant.getId(), command);
+        headerLabel.setText(defaultText(currentVariant.getQuestion(), localizationService.get("childEditor.header.variant", currentVariant.getId())));
     }
 }

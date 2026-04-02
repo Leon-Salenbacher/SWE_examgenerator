@@ -15,6 +15,11 @@
     <Label fx:id="headerLabel" text="Variant" styleClass="header-label" />
 
     <VBox spacing="6.0">
+        <Label fx:id="titleLabel" text="Title" styleClass="section-label" />
+        <TextField fx:id="titleField" promptText="Title" styleClass="dark-input" />
+    </VBox>
+
+    <VBox spacing="6.0">
         <Label fx:id="questionLabel" text="Question" styleClass="section-label" />
         <TextArea fx:id="questionField" promptText="Question" prefRowCount="4" styleClass="dark-input" />
     </VBox>
@@ -28,6 +33,6 @@
 
     <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="action-bar">
         <Button fx:id="deleteButton" text="Delete" styleClass="danger-button" />
-        <Button fx:id="saveButton" text="Save" styleClass="secondary-button" />
+        <Button fx:id="saveButton" text="Save" styleClass="secondary-button" onAction="#handleSave" />
     </HBox>
 </VBox>

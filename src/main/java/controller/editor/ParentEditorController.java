@@ -1,5 +1,6 @@
 package controller.editor;
 
+import config.ApplicationContext;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -12,6 +13,8 @@ import objects.ChildObject;
 import objects.ParentObject;
 import objects.Subtask;
 import service.impl.LocalizationService;
+import service.impl.elements.ChapterServiceImpl;
+import service.impl.elements.SubtaskServiceImpl;
 
 import java.io.IOException;
 import java.util.List;
@@ -59,6 +62,8 @@ public class ParentEditorController {
     private ParentObject<? extends ChildObject> currentParent;
     private Consumer<ChildObject> selectionHandler;
     private final LocalizationService localizationService = LocalizationService.getInstance();
+    private final ChapterServiceImpl chapterService = ApplicationContext.getInstance().getChapterService();
+    private final SubtaskServiceImpl subtaskService = ApplicationContext.getInstance().getSubtaskService();;
 
     @FXML
     private void initialize(){
@@ -248,5 +253,47 @@ public class ParentEditorController {
         this.createButton.setManaged(true);
         this.saveButton.setVisible(false);
         this.saveButton.setManaged(false);
+    }
+
+    @FXML
+    private void handleSave(){
+        if(currentParent == null){
+            return;
+        }
+
+        if(currentParent instanceof Chapter chapter){
+            ChapterServiceImpl.ChapterCommand command = () -> titleField.getText();
+            currentParent = chapterService.update(chapter.getId(), command);
+            displayParent(currentParent);
+            return;
+        }
+
+        if(currentParent instanceof Subtask subtask){
+            SubtaskServiceImpl.SubtaskCommand command = new SubtaskServiceImpl.SubtaskCommand() {
+                @Override
+                public String title() {
+                    return titleField.getText();
+                }
+
+                @Override
+                public int points() {
+                    String value = pointsField.getText();
+                    return value == null || value.isBlank() ? 0 : Integer.parseInt(value);
+                }
+
+                @Override
+                public List<String> labels() {
+                    return parseLabels(labelsField.getText());
+                }
+
+                @Override
+                public Integer parentId() {
+                    return subtask.getChapterId();
+                }
+            };
+
+            currentParent = subtaskService.update(subtask.getId(), command);
+            displayParent(currentParent);
+        }
     }
 }
