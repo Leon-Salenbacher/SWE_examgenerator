@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
 import objects.Chapter;
 import objects.ChildObject;
@@ -39,6 +40,9 @@ public class ParentEditorController {
     private Label childSectionLabel;
 
     @FXML
+    private Label actionFeedbackLabel;
+
+    @FXML
     private VBox labelsBox;
 
     @FXML
@@ -49,12 +53,16 @@ public class ParentEditorController {
 
     @FXML
     private Label titleLabel;
+
     @FXML
     private Label pointsLabel;
+
     @FXML
     private Button deleteButton;
+
     @FXML
     private Button saveButton;
+
     @FXML
     private Button createButton;
 
@@ -71,10 +79,15 @@ public class ParentEditorController {
     private final LocalizationService localizationService = LocalizationService.getInstance();
     private final ChapterServiceImpl chapterService = ApplicationContext.getInstance().getChapterService();
     private final SubtaskServiceImpl subtaskService = ApplicationContext.getInstance().getSubtaskService();
+    private static final String FEEDBACK_SUCCESS_STYLE = "feedback-success";
+    private static final String FEEDBACK_ERROR_STYLE = "feedback-error";
 
     @FXML
     private void initialize(){
+        pointsField.setTextFormatter(createNumericFormatter());
+
         titleField.textProperty().addListener((observable, oldValue, newValue) -> {
+            clearFeedback();
             if (createMode) {
                 return;
             }
@@ -88,6 +101,7 @@ public class ParentEditorController {
         });
 
         pointsField.textProperty().addListener((observable, oldValue, newValue) -> {
+            clearFeedback();
             if (createMode) {
                 return;
             }
@@ -99,12 +113,12 @@ public class ParentEditorController {
                 int parsed = newValue == null || newValue.isBlank() ? 0 : Integer.parseInt(newValue);
                 ((Subtask) currentParent).setPoints(parsed);
             }catch(NumberFormatException ignored){
-                //keep previos value, when input is not a valid integer
                 pointsField.setText(oldValue);
             }
         });
 
         labelsField.textProperty().addListener((observable, oldValue, newValue) -> {
+            clearFeedback();
             if (createMode) {
                 return;
             }
@@ -151,7 +165,6 @@ public class ParentEditorController {
             return;
         }
 
-
         for(ChildObject child : children){
             childList.getChildren().add(createChildRow(child));
         }
@@ -186,11 +199,12 @@ public class ParentEditorController {
         labelsField.clear();
         childList.getChildren().setAll(createEmptyRow());
         currentParent = null;
+        clearFeedback();
         updateActionButtons();
     }
 
     private String defaultText(String value, String fallback){
-        return value == null ? fallback : value;
+        return value == null || value.isBlank() ? fallback : value;
     }
 
     private void displayChapter(Chapter chapter){
@@ -201,6 +215,7 @@ public class ParentEditorController {
         toggleLabels(false);
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.subtasks"));
         renderChildren(chapter.getChildElements());
+        clearFeedback();
         updateActionButtons();
     }
 
@@ -214,6 +229,7 @@ public class ParentEditorController {
         labelsField.setText(String.join(", ", defaultLabels(subtask.getLabels())));
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.variants"));
         renderChildren(subtask.getChildElements());
+        clearFeedback();
         updateActionButtons();
     }
 
@@ -225,6 +241,7 @@ public class ParentEditorController {
         toggleLabels(false);
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.generic"));
         renderChildren(parent.getChildElements());
+        clearFeedback();
         updateActionButtons();
     }
 
@@ -263,8 +280,8 @@ public class ParentEditorController {
         labelsField.setPromptText(localizationService.get("parentEditor.labels.prompt"));
         deleteButton.setText(localizationService.get("editor.delete"));
         saveButton.setText(localizationService.get("editor.save"));
-        addChild.setText("Create child");
-        createButton.setText("Create");
+        addChild.setText(localizationService.get("editor.createChild"));
+        createButton.setText(localizationService.get("editor.create"));
 
         if (currentParent == null) {
             displayPlaceholder();
@@ -279,8 +296,13 @@ public class ParentEditorController {
 
     private void updateActionButtons() {
         boolean hasParent = currentParent != null;
-        addChild.setVisible(hasParent);
-        addChild.setManaged(hasParent);
+        boolean showChildActions = hasParent && !createMode;
+        addChild.setVisible(showChildActions);
+        addChild.setManaged(showChildActions);
+        childSectionLabel.setVisible(showChildActions);
+        childSectionLabel.setManaged(showChildActions);
+        childList.setVisible(showChildActions);
+        childList.setManaged(showChildActions);
 
         createButton.setVisible(createMode);
         createButton.setManaged(createMode);
@@ -327,13 +349,14 @@ public class ParentEditorController {
         titleField.clear();
         pointsField.clear();
         labelsField.clear();
+        clearFeedback();
 
         if (currentParent instanceof Chapter) {
-            headerLabel.setText("Create new subtask");
+            headerLabel.setText(localizationService.get("parentEditor.header.createSubtask"));
             togglePoints(true);
             toggleLabels(true);
         } else if (currentParent instanceof Subtask) {
-            headerLabel.setText("Create new variant");
+            headerLabel.setText(localizationService.get("parentEditor.header.createVariant"));
             togglePoints(false);
             toggleLabels(false);
         } else {
@@ -351,51 +374,57 @@ public class ParentEditorController {
             return;
         }
 
-        if(currentParent instanceof Chapter chapter){
-            ChapterServiceImpl.ChapterCommand command = new ChapterServiceImpl.ChapterCommand() {
-                @Override
-                public String title() {
-                    return titleField.getText();
-                }
+        try {
+            if(currentParent instanceof Chapter chapter){
+                ChapterServiceImpl.ChapterCommand command = new ChapterServiceImpl.ChapterCommand() {
+                    @Override
+                    public String title() {
+                        return titleField.getText();
+                    }
 
-                @Override
-                public Integer parentId() {
-                    return null;
-                }
-            };
-            currentParent = chapterService.update(chapter.getId(), command);
-            displayParent(currentParent);
-            notifyDataChanged();
-            return;
-        }
+                    @Override
+                    public Integer parentId() {
+                        return null;
+                    }
+                };
+                currentParent = chapterService.update(chapter.getId(), command);
+                displayParent(currentParent);
+                showSuccessFeedback(localizationService.get("editor.save.success"));
+                notifyDataChanged();
+                return;
+            }
 
-        if(currentParent instanceof Subtask subtask){
-            SubtaskServiceImpl.SubtaskCommand command = new SubtaskServiceImpl.SubtaskCommand() {
-                @Override
-                public String title() {
-                    return titleField.getText();
-                }
+            if(currentParent instanceof Subtask subtask){
+                SubtaskServiceImpl.SubtaskCommand command = new SubtaskServiceImpl.SubtaskCommand() {
+                    @Override
+                    public String title() {
+                        return titleField.getText();
+                    }
 
-                @Override
-                public int points() {
-                    String value = pointsField.getText();
-                    return value == null || value.isBlank() ? 0 : Integer.parseInt(value);
-                }
+                    @Override
+                    public int points() {
+                        String value = pointsField.getText();
+                        return value == null || value.isBlank() ? 0 : Integer.parseInt(value);
+                    }
 
-                @Override
-                public List<String> labels() {
-                    return parseLabels(labelsField.getText());
-                }
+                    @Override
+                    public List<String> labels() {
+                        return parseLabels(labelsField.getText());
+                    }
 
-                @Override
-                public Integer parentId() {
-                    return subtask.getChapterId();
-                }
-            };
+                    @Override
+                    public Integer parentId() {
+                        return subtask.getChapterId();
+                    }
+                };
 
-            currentParent = subtaskService.update(subtask.getId(), command);
-            displayParent(currentParent);
-            notifyDataChanged();
+                currentParent = subtaskService.update(subtask.getId(), command);
+                displayParent(currentParent);
+                showSuccessFeedback(localizationService.get("editor.save.success"));
+                notifyDataChanged();
+            }
+        } catch (Exception exception) {
+            showErrorFeedback(localizationService.get("editor.save.failed", messageOrFallback(exception)));
         }
     }
 
@@ -405,48 +434,82 @@ public class ParentEditorController {
             return;
         }
 
-        if (currentParent instanceof Chapter chapter) {
-            Subtask createdSubtask = new Subtask();
-            createdSubtask.setId(nextSubtaskId());
-            createdSubtask.setChapterId(chapter.getId());
-            createdSubtask.setTitle(titleField.getText());
-            createdSubtask.setPoints(parsePointsInput());
-            createdSubtask.setLabels(new ArrayList<>(parseLabels(labelsField.getText())));
+        try {
+            if (currentParent instanceof Chapter chapter) {
+                Subtask createdSubtask = new Subtask();
+                createdSubtask.setId(nextSubtaskId());
+                createdSubtask.setChapterId(chapter.getId());
+                createdSubtask.setTitle(titleField.getText());
+                createdSubtask.setPoints(parsePointsInput());
+                createdSubtask.setLabels(new ArrayList<>(parseLabels(labelsField.getText())));
 
-            Chapter updatedChapter = chapterService.getById(chapter.getId());
-            List<Subtask> children = new ArrayList<>(updatedChapter.getChildElements());
-            children.add(createdSubtask);
-            updatedChapter.setChildElements(children);
-            ApplicationContext.getInstance().getChapterRepository().update(updatedChapter);
+                Chapter updatedChapter = chapterService.getById(chapter.getId());
+                List<Subtask> children = new ArrayList<>(updatedChapter.getChildElements());
+                children.add(createdSubtask);
+                updatedChapter.setChildElements(children);
+                ApplicationContext.getInstance().getChapterRepository().update(updatedChapter);
 
-            notifyDataChanged();
-            if (selectionHandler != null) {
-                selectionHandler.accept(createdSubtask);
-            } else {
-                displayParent(updatedChapter);
+                showSuccessFeedback(localizationService.get("editor.create.success"));
+                notifyDataChanged();
+                if (selectionHandler != null) {
+                    selectionHandler.accept(createdSubtask);
+                } else {
+                    displayParent(updatedChapter);
+                }
+                return;
             }
-            return;
-        }
 
-        if (currentParent instanceof Subtask subtask) {
-            Variant createdVariant = new Variant();
-            createdVariant.setId(nextVariantId());
-            createdVariant.setTitle(titleField.getText());
-            createdVariant.setQuestion(titleField.getText());
-            createdVariant.setSolution("");
+            if (currentParent instanceof Subtask subtask) {
+                Variant createdVariant = new Variant();
+                createdVariant.setId(nextVariantId());
+                createdVariant.setTitle(titleField.getText());
+                createdVariant.setQuestion(titleField.getText());
+                createdVariant.setSolution("");
 
-            Subtask updatedSubtask = subtaskService.getById(subtask.getId());
-            List<Variant> children = new ArrayList<>(updatedSubtask.getChildElements());
-            children.add(createdVariant);
-            updatedSubtask.setChildElements(children);
-            ApplicationContext.getInstance().getSubtaskRepository().update(updatedSubtask);
+                Subtask updatedSubtask = subtaskService.getById(subtask.getId());
+                List<Variant> children = new ArrayList<>(updatedSubtask.getChildElements());
+                children.add(createdVariant);
+                updatedSubtask.setChildElements(children);
+                ApplicationContext.getInstance().getSubtaskRepository().update(updatedSubtask);
 
-            notifyDataChanged();
-            if (selectionHandler != null) {
-                selectionHandler.accept(createdVariant);
-            } else {
-                displayParent(updatedSubtask);
+                showSuccessFeedback(localizationService.get("editor.create.success"));
+                notifyDataChanged();
+                if (selectionHandler != null) {
+                    selectionHandler.accept(createdVariant);
+                } else {
+                    displayParent(updatedSubtask);
+                }
             }
+        } catch (Exception exception) {
+            showErrorFeedback(localizationService.get("editor.create.failed", messageOrFallback(exception)));
         }
+    }
+
+    private TextFormatter<String> createNumericFormatter() {
+        return new TextFormatter<>(change -> change.getControlNewText().matches("\\d*") ? change : null);
+    }
+
+    private void showSuccessFeedback(String message) {
+        actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
+        actionFeedbackLabel.getStyleClass().add(FEEDBACK_SUCCESS_STYLE);
+        actionFeedbackLabel.setText(message);
+    }
+
+    private void showErrorFeedback(String message) {
+        actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
+        actionFeedbackLabel.getStyleClass().add(FEEDBACK_ERROR_STYLE);
+        actionFeedbackLabel.setText(message);
+    }
+
+    private void clearFeedback() {
+        actionFeedbackLabel.setText("");
+        actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
+    }
+
+    private String messageOrFallback(Exception exception) {
+        String message = exception.getMessage();
+        return message == null || message.isBlank()
+                ? localizationService.get("editor.error.unknown")
+                : message;
     }
 }

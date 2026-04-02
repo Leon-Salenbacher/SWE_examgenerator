@@ -8,3 +8,15 @@
     -fx-border-radius: 8;
     -fx-background-radius: 8;
 }
+
+.action-feedback {
+    -fx-font-size: 12px;
+}
+
+.feedback-success {
+    -fx-text-fill: #59c36a;
+}
+
+.feedback-error {
+    -fx-text-fill: #ff6b6b;
+}

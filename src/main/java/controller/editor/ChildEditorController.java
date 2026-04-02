@@ -11,7 +11,6 @@ import objects.Variant;
 import service.impl.LocalizationService;
 import service.impl.elements.VariantServiceImpl;
 
-
 public class ChildEditorController {
 
     @FXML
@@ -41,10 +40,15 @@ public class ChildEditorController {
     @FXML
     private Button saveButton;
 
+    @FXML
+    private Label actionFeedbackLabel;
+
     private Variant currentVariant;
     private Runnable dataChangedHandler;
     private final LocalizationService localizationService = LocalizationService.getInstance();
     private final VariantServiceImpl variantService = ApplicationContext.getInstance().getVariantService();
+    private static final String FEEDBACK_SUCCESS_STYLE = "feedback-success";
+    private static final String FEEDBACK_ERROR_STYLE = "feedback-error";
 
     public void setDataChangedHandler(Runnable dataChangedHandler) {
         this.dataChangedHandler = dataChangedHandler;
@@ -65,6 +69,7 @@ public class ChildEditorController {
         titleField.clear();
         questionField.clear();
         solutionField.clear();
+        clearFeedback();
     }
 
     private void displayVariant(Variant variant){
@@ -73,6 +78,7 @@ public class ChildEditorController {
         titleField.setText(variant.getTitle());
         questionField.setText(variant.getQuestion());
         solutionField.setText(variant.getSolution());
+        clearFeedback();
     }
 
     private void displayPlaceholder(){
@@ -81,6 +87,7 @@ public class ChildEditorController {
         questionField.clear();
         solutionField.clear();
         currentVariant = null;
+        clearFeedback();
     }
 
     @FXML
@@ -89,12 +96,14 @@ public class ChildEditorController {
         applyTranslations();
 
         titleField.textProperty().addListener((observable, oldValue, newValue) -> {
+            clearFeedback();
             if(currentVariant != null){
                 currentVariant.setTitle(newValue);
             }
         });
 
         questionField.textProperty().addListener((observable, oldValue, newValue ) ->{
+            clearFeedback();
             if(currentVariant != null){
                 currentVariant.setQuestion(newValue);
                 headerLabel.setText(defaultText(newValue, localizationService.get("childEditor.header.variant", currentVariant.getId())));
@@ -102,6 +111,7 @@ public class ChildEditorController {
         });
 
         solutionField.textProperty().addListener((observable, oldValue, newValue) -> {
+            clearFeedback();
             if(currentVariant != null){
                 currentVariant.setSolution(newValue);
             }
@@ -136,34 +146,61 @@ public class ChildEditorController {
             return;
         }
 
-        VariantServiceImpl.VariantCommand command = new VariantServiceImpl.VariantCommand() {
+        try {
+            VariantServiceImpl.VariantCommand command = new VariantServiceImpl.VariantCommand() {
+                @Override
+                public String title() {
+                    return titleField.getText();
+                }
 
-            @Override
-            public String title() {
-                return titleField.getText();
+                @Override
+                public String question() {
+                    return questionField.getText();
+                }
+
+                @Override
+                public String solution() {
+                    return solutionField.getText();
+                }
+
+                @Override
+                public Integer parentId() {
+                    return null;
+                }
+            };
+
+            currentVariant = variantService.update(currentVariant.getId(), command);
+            headerLabel.setText(defaultText(currentVariant.getQuestion(), localizationService.get("childEditor.header.variant", currentVariant.getId())));
+            showSuccessFeedback(localizationService.get("editor.save.success"));
+            if (dataChangedHandler != null) {
+                dataChangedHandler.run();
             }
-
-            @Override
-            public String question() {
-                return questionField.getText();
-            }
-
-            @Override
-            public String solution() {
-                return solutionField.getText();
-            }
-
-
-            @Override
-            public Integer parentId() {
-                return null;
-            }
-        };
-
-        currentVariant = variantService.update(currentVariant.getId(), command);
-        headerLabel.setText(defaultText(currentVariant.getQuestion(), localizationService.get("childEditor.header.variant", currentVariant.getId())));
-        if (dataChangedHandler != null) {
-            dataChangedHandler.run();
+        } catch (Exception exception) {
+            showErrorFeedback(localizationService.get("editor.save.failed", messageOrFallback(exception)));
         }
+    }
+
+    private void showSuccessFeedback(String message) {
+        actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
+        actionFeedbackLabel.getStyleClass().add(FEEDBACK_SUCCESS_STYLE);
+        actionFeedbackLabel.setText(message);
+    }
+
+    private void showErrorFeedback(String message) {
+        actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
+        actionFeedbackLabel.getStyleClass().add(FEEDBACK_ERROR_STYLE);
+        actionFeedbackLabel.setText(message);
+    }
+
+    private void clearFeedback() {
+        actionFeedbackLabel.setText("");
+        actionFeedbackLabel.getStyleClass().removeAll(FEEDBACK_SUCCESS_STYLE, FEEDBACK_ERROR_STYLE);
+    }
+
+    private String messageOrFallback(Exception exception) {
+        String message = exception.getMessage();
+        return message == null || message.isBlank()
+                ? localizationService.get("editor.error.unknown")
+                : message;
     }
 }
