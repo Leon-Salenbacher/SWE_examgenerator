@@ -1,6 +1,6 @@
 package repository.detailed;
 
-import objects.Variant;
+import models.Variant;
 import repository.ChildRepository;
 
 /**

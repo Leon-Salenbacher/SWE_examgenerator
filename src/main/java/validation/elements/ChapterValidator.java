@@ -1,6 +1,6 @@
-package validation;
+package validation.elements;
 
-import objects.Chapter;
+import models.Chapter;
 
 public class ChapterValidator extends AbstractTitleValidator<Chapter> {
     @Override

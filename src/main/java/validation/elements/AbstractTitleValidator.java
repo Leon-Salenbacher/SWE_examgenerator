@@ -1,6 +1,6 @@
-package validation;
+package validation.elements;
 
-import objects.ChildObject;
+import models.ChildObject;
 import service.impl.LocalizationService;
 
 public abstract class AbstractTitleValidator<T extends ChildObject> {

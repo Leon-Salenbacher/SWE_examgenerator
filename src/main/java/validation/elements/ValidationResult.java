@@ -1,4 +1,4 @@
-package validation;
+package validation.elements;
 
 public record ValidationResult(boolean isValid, String message) {
     public static ValidationResult ok() {

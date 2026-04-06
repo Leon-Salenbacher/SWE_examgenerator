@@ -1,7 +1,7 @@
 package service.impl.elements;
 
-import objects.Subtask;
-import objects.Variant;
+import models.Subtask;
+import models.Variant;
 import repository.ParentRepository;
 
 import java.util.ArrayList;

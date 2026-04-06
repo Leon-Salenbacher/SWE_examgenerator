@@ -1,6 +1,6 @@
 package service.impl;
 
-import objects.DataObject;
+import models.DataObject;
 import repository.Repository;
 import service.elements.DataObjectService;
 

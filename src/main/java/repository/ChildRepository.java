@@ -1,6 +1,6 @@
 package repository;
 
-import objects.ChildObject;
+import models.ChildObject;
 
 /**
  * Marker contract for repositories that persist simple {@link ChildObject} instances.

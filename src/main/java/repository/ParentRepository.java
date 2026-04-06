@@ -1,7 +1,7 @@
 package repository;
 
-import objects.ChildObject;
-import objects.ParentObject;
+import models.ChildObject;
+import models.ParentObject;
 
 import java.util.List;
 import java.util.NoSuchElementException;

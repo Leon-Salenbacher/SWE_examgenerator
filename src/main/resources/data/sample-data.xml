@@ -1,178 +1,45 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ExamGenerator>
-                            
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  <Chapter id="1" title="Chapter 1">
-                                                
-    
-  
-    
-    
-    
-    
-  
-    
-    
-    
-    
-    
-  
-    
-    
-    
-    
-    
-                    
-    
-    
-    
-    
-                    
-    
-    
-    
-    
-                    
-    
-    
-    
-    
-                    
-    
-    
-    
-    
-                    
-    
-    
-    
-    
-                  
-  
-  
-  
-  
-    
-    
-    
-    <Subtask chapterId="1" id="1" labels="Exam" points="54534" title="subtask 1542rdfwererkkljf">
-                        
-      
-      
-    
-      
-      
-            
-      
-            
-      
-          
-    
-      <Variant id="1" question="Question 1314" solution="Solution 1314" title="Question 1314erer"/>
-      <Variant id="2" question="Question 2" solution="Solution 2" title="Question 2erer"/>
-      <Variant id="5" question="wgwrg" solution="wrg" title="wgwg"/>
+  <Chapter id="1" title="Requirements Engineering">
+    <Subtask chapterId="1" id="1" labels="Exam,Analysis" points="5" title="Stakeholderanalyse">
+      <Variant id="1" question="Nenne drei typische Stakeholder in einem Softwareprojekt und beschreibe ihre Erwartungen kurz." solution="Beispiel: Kunde mit Fokus auf Nutzen und Budget, Endnutzer mit Fokus auf Bedienbarkeit, Entwicklungsteam mit Fokus auf Umsetzbarkeit und Wartbarkeit." title="Stakeholder identifizieren"/>
+      <Variant id="2" question="Erklaere den Unterschied zwischen funktionalen und nicht-funktionalen Anforderungen anhand eines kurzen Beispiels." solution="Funktionale Anforderungen beschreiben was das System tun soll, nicht-funktionale wie gut oder unter welchen Randbedingungen es das tun muss. Beispiel: Login anbieten versus Antwortzeit unter zwei Sekunden." title="Anforderungsarten"/>
     </Subtask>
-                
-    
-    
-    <Subtask chapterId="1" id="2" labels="Practicee" points="7" title="subtask 2sdewf">
-            
-      <Variant id="6" question="sdf" solution="sdf" title="sdf"/>
-          
+    <Subtask chapterId="1" id="2" labels="Exam,Modeling" points="8" title="Use-Case-Modellierung">
+      <Variant id="3" question="Beschreibe die wichtigsten Bestandteile eines Use Cases und erklaere kurz ihren Zweck." solution="Typische Bestandteile sind Name, Ziel, Akteure, Vorbedingungen, Hauptablauf, Alternativablauf und Nachbedingungen. Sie strukturieren das fachliche Verhalten eines Systems." title="Use Case aufbauen"/>
+      <Variant id="4" question="Wann ist ein Aktivitaetsdiagramm fuer einen Anwendungsfall hilfreicher als ein reiner Fliesstext? Begruende kurz." solution="Wenn Ablauflogik mit Entscheidungen, Parallelitaet oder Schleifen verstaendlich dargestellt werden soll. Das Diagramm macht Verzweigungen und Prozesslogik sichtbar." title="Use Cases visualisieren"/>
     </Subtask>
-                
-    
-    
-    <Subtask chapterId="1" id="3" labels="" points="0" title="er"/>
-                
-    
-    
-    <Subtask chapterId="1" id="4" labels="fdaf" points="2" title="df">
-                        
-      
-      
-      <Variant id="4" question="efwfe" solution="grw" title="32455"/>
-                      
-    
-    
+    <Subtask chapterId="1" id="3" labels="Practice" points="4" title="Lasten- und Pflichtenheft">
+      <Variant id="5" question="Unterscheide Lastenheft und Pflichtenheft in zwei bis drei Saetzen." solution="Das Lastenheft beschreibt die Anforderungen aus Sicht des Auftraggebers. Das Pflichtenheft beschreibt, wie der Auftragnehmer diese Anforderungen konkret umsetzen will." title="Dokumente unterscheiden"/>
+      <Variant id="6" question="Welche Rolle spielt ein Pflichtenheft fuer die Projektkommunikation?" solution="Es schafft ein gemeinsames Verstaendnis ueber Umfang, Umsetzung und Abnahmekriterien und reduziert Missverstaendnisse zwischen Auftraggeber und Umsetzungsteam." title="Kommunikationsmittel Pflichtenheft"/>
     </Subtask>
-                
-    
-    
-    <Subtask chapterId="1" id="5" labels="wrewr" points="2" title="ewr">
-                        
-      
-      
-      <Variant id="3" question="wre" solution="werwer" title="wer"/>
-                      
-    
-    
-    </Subtask>
-                
-    
-    
-    <Subtask chapterId="1" id="7" labels="" points="0" title=""/>
-                
-    
-    
-    <Subtask chapterId="1" id="8" labels="fwf" points="3" title="wf"/>
-              
-  
-  
   </Chapter>
-                            
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  <Chapter id="2" title="Chapter 2">
-                                        
-    
-    
-    
-    
-    
-    
-    
-    
-    <Subtask chapterId="2" id="6" labels="ef" points="4" title="sdf"/>
-                                      
-  
-  
-  
-  
-  
-  
-  
-  
+  <Chapter id="2" title="Software Design">
+    <Subtask chapterId="2" id="4" labels="Exam,UML" points="6" title="Klassendiagramme lesen">
+      <Variant id="7" question="Erklaere den Unterschied zwischen Assoziation, Aggregation und Komposition in UML." solution="Assoziation ist eine allgemeine Beziehung. Aggregation beschreibt ein loses Teil-Ganzes-Verhaeltnis. Komposition beschreibt ein starkes Teil-Ganzes-Verhaeltnis mit gemeinsamem Lebenszyklus." title="Beziehungen in UML"/>
+      <Variant id="8" question="Wie lassen sich Sichtbarkeiten in einem UML-Klassendiagramm darstellen und was bedeuten sie?" solution="Zum Beispiel + fuer public, - fuer private, # fuer protected. Sie geben an, von wo aus Attribute und Methoden zugreifbar sind." title="Sichtbarkeiten"/>
+    </Subtask>
+    <Subtask chapterId="2" id="5" labels="Exam,Patterns" points="7" title="Entwurfsmuster anwenden">
+      <Variant id="9" question="Beschreibe das Ziel des Strategy-Patterns und nenne einen passenden Anwendungsfall." solution="Es kapselt austauschbare Algorithmen hinter einer gemeinsamen Schnittstelle. Beispiel: verschiedene Berechnungsstrategien fuer Rabatte oder Sortierung." title="Strategy Pattern"/>
+      <Variant id="10" question="Warum kann das Observer-Pattern in GUI-Anwendungen nuetzlich sein?" solution="Weil Zustandsaenderungen eines Objekts automatisch an interessierte Beobachter weitergegeben werden, etwa zur Aktualisierung von UI-Komponenten." title="Observer Pattern"/>
+    </Subtask>
+    <Subtask chapterId="2" id="6" labels="Practice,Quality" points="5" title="SOLID-Prinzipien">
+      <Variant id="11" question="Erklaere das Single-Responsibility-Prinzip kurz und nenne einen Vorteil." solution="Eine Klasse soll nur einen klaren Verantwortungsbereich haben. Das vereinfacht Verstaendlichkeit, Tests und Aenderungen." title="Single Responsibility"/>
+      <Variant id="12" question="Was fordert das Open-Closed-Prinzip?" solution="Softwareeinheiten sollen fuer Erweiterungen offen, aber fuer Aenderungen am bestehenden Code moeglichst geschlossen sein." title="Open Closed"/>
+    </Subtask>
   </Chapter>
-                        
-
-
-
-
-
-
-
-
-
-
-
+  <Chapter id="3" title="Testing and Quality Assurance">
+    <Subtask chapterId="3" id="7" labels="Exam,Testing" points="5" title="Testarten einordnen">
+      <Variant id="13" question="Grenze Unit-, Integrations- und Systemtests voneinander ab." solution="Unit-Tests pruefen kleine isolierte Einheiten, Integrationstests das Zusammenspiel mehrerer Komponenten und Systemtests das Verhalten des Gesamtsystems." title="Teststufen"/>
+      <Variant id="14" question="Warum sind automatisierte Regressionstests fuer agile Projekte wichtig?" solution="Sie pruefen nach Aenderungen schnell, ob bestehende Funktionalitaet weiterhin korrekt arbeitet, und reduzieren das Risiko unbemerkter Seiteneffekte." title="Regressionstests"/>
+    </Subtask>
+    <Subtask chapterId="3" id="8" labels="Exam,Metrics" points="4" title="Qualitaetsmetriken">
+      <Variant id="15" question="Nenne zwei sinnvolle Qualitaetsmetriken fuer Software und erklaere kurz ihren Nutzen." solution="Beispiel: Testabdeckung zeigt, welche Teile des Codes durch Tests erfasst sind. Fehlerrate zeigt die Stabilitaet oder Problemhaeufigkeit eines Systems." title="Metriken nutzen"/>
+      <Variant id="16" question="Warum sollte man Metriken nie isoliert interpretieren?" solution="Einzelne Metriken bilden Qualitaet nur teilweise ab und koennen Fehlanreize erzeugen. Aussagekraeftig werden sie erst im Kontext mehrerer Indikatoren." title="Metriken einordnen"/>
+    </Subtask>
+    <Subtask chapterId="3" id="9" labels="Practice,Reviews" points="6" title="Code Reviews">
+      <Variant id="17" question="Nenne drei Ziele eines Code Reviews." solution="Fehler finden, Wissen im Team teilen und Wartbarkeit bzw. Konsistenz des Codes verbessern." title="Ziele von Reviews"/>
+      <Variant id="18" question="Welche Eigenschaften machen Review-Kommentare besonders hilfreich?" solution="Sie sind konkret, nachvollziehbar, respektvoll formuliert und enthalten idealerweise eine Begruendung oder einen Verbesserungsvorschlag." title="Gute Review-Kommentare"/>
+    </Subtask>
+  </Chapter>
 </ExamGenerator>

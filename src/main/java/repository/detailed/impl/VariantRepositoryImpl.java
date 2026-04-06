@@ -1,7 +1,6 @@
 package repository.detailed.impl;
 
-import objects.Variant;
-import org.w3c.dom.Element;
+import models.Variant;
 import repository.XMLStorageConnector;
 import repository.detailed.VariantRepository;
 import repository.impl.ChildRepositoryImpl;

@@ -1,6 +1,6 @@
-package validation;
+package validation.elements;
 
-import objects.Subtask;
+import models.Subtask;
 
 public class SubtaskValidator extends AbstractTitleValidator<Subtask> {
     @Override

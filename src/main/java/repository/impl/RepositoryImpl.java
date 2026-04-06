@@ -1,9 +1,8 @@
 package repository.impl;
 
 import exceptions.XmlStorageException;
-import lombok.*;
-import objects.DataObject;
-import objects.DataObjectReflectionSupport;
+import models.DataObject;
+import models.DataObjectReflectionSupport;
 import org.w3c.dom.*;
 import repository.Repository;
 import repository.XMLStorageConnector;

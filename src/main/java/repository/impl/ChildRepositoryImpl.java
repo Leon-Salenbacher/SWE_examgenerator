@@ -1,6 +1,6 @@
 package repository.impl;
 
-import objects.ChildObject;
+import models.ChildObject;
 import repository.ChildRepository;
 import repository.XMLStorageConnector;
 

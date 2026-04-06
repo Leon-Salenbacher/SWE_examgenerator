@@ -2,8 +2,8 @@ package controller.sidebar;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import objects.ChildObject;
-import objects.ParentObject;
+import models.ChildObject;
+import models.ParentObject;
 
 import java.io.IOException;
 

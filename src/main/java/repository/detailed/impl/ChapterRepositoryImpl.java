@@ -1,7 +1,7 @@
 package repository.detailed.impl;
 
-import objects.Chapter;
-import objects.Subtask;
+import models.Chapter;
+import models.Subtask;
 import repository.detailed.ChapterRepository;
 import repository.XMLStorageConnector;
 import repository.impl.ParentRepositoryImpl;

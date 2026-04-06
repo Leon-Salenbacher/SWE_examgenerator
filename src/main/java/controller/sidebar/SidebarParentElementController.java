@@ -3,19 +3,14 @@ package controller.sidebar;
 
 import javafx.animation.RotateTransition;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import objects.Chapter;
-import objects.ChildObject;
-import objects.DataObject;
-import objects.ParentObject;
+import models.ChildObject;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 

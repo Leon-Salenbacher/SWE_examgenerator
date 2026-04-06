@@ -1,11 +1,8 @@
 package service.impl.elements;
 
-import objects.Chapter;
-import objects.Subtask;
+import models.Chapter;
+import models.Subtask;
 import repository.ParentRepository;
-import service.elements.ParentService;
-
-import java.util.NoSuchElementException;
 
 public class ChapterServiceImpl
         extends ParentServiceImpl<

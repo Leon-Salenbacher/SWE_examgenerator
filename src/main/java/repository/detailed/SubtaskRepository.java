@@ -1,7 +1,7 @@
 package repository.detailed;
 
-import objects.Subtask;
-import objects.Variant;
+import models.Subtask;
+import models.Variant;
 import repository.ParentRepository;
 
 /**

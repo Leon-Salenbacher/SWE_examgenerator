@@ -1,6 +1,6 @@
 package service.impl.elements;
 
-import objects.Variant;
+import models.Variant;
 import repository.ChildRepository;
 import service.elements.ChildService;
 import service.impl.DataObjectServiceImpl;

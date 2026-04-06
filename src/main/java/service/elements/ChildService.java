@@ -1,6 +1,6 @@
 package service.elements;
 
-import objects.ChildObject;
+import models.ChildObject;
 
 public interface ChildService<
             T extends ChildObject,

@@ -5,8 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
-import objects.ChildObject;
-import objects.ParentObject;
+import models.ChildObject;
+import models.ParentObject;
 import service.impl.LocalizationService;
 
 import java.io.IOException;

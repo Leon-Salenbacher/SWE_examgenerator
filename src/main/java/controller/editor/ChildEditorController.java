@@ -9,12 +9,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import objects.ChildObject;
-import objects.Variant;
+import models.ChildObject;
+import models.Variant;
 import service.impl.LocalizationService;
 import service.impl.elements.VariantServiceImpl;
-import validation.ValidationResult;
-import validation.VariantValidator;
+import validation.elements.ValidationResult;
+import validation.elements.VariantValidator;
 import javafx.util.Duration;
 
 public class ChildEditorController {

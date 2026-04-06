@@ -1,6 +1,6 @@
-package validation;
+package validation.elements;
 
-import objects.Variant;
+import models.Variant;
 
 public class VariantValidator extends AbstractTitleValidator<Variant> {
     @Override

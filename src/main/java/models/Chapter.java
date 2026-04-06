@@ -1,12 +1,7 @@
-package objects;
+package models;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter

@@ -1,6 +1,6 @@
 package service.elements;
 
-import objects.DataObject;
+import models.DataObject;
 
 import java.util.List;
 import java.util.NoSuchElementException;

@@ -1,9 +1,10 @@
 package controller;
 
+import controller.exam.ExamGenerationDialog;
 import controller.editor.EditorHostController;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import objects.ChildObject;
+import models.ChildObject;
 import service.impl.LocalizationService;
 
 import java.util.LinkedHashMap;
@@ -28,6 +29,7 @@ public class MainController {
     private EditorHostController editorHostController;
 
     private final LocalizationService localizationService = LocalizationService.getInstance();
+    private final ExamGenerationDialog examGenerationDialog = new ExamGenerationDialog();
 
     @FXML
     private void initialize(){
@@ -76,7 +78,7 @@ public class MainController {
 
     @FXML
     private void handleGenerateExam() {
-        showInfo(localizationService.get("generate.dialog.title"), localizationService.get("generate.dialog.message"));
+        examGenerationDialog.show(generateButton.getScene().getWindow());
     }
 
     @FXML

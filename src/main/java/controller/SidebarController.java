@@ -9,8 +9,8 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import controller.sidebar.SidebarChildElementController;
 import controller.sidebar.SidebarParentElementController;
-import objects.Chapter;
-import objects.ChildObject;
+import models.Chapter;
+import models.ChildObject;
 import service.impl.LocalizationService;
 import service.impl.elements.ChapterServiceImpl;
 

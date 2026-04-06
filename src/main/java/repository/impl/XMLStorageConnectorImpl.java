@@ -3,9 +3,10 @@ package repository.impl;
 import exceptions.XmlStorageException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import repository.XMLStorageConnector;
 
-import javax.print.Doc;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,7 +21,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 
 public class XMLStorageConnectorImpl implements XMLStorageConnector {
 
@@ -37,8 +37,8 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
     }
 
     @Override
-    public Document getDocument(){
-        if(document == null){
+    public Document getDocument() {
+        if (document == null) {
             document = loadDocument();
         }
         return document;
@@ -51,6 +51,8 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
         if (rootElement == null) {
             throw new XmlStorageException("Cannot save XML document because no root element exists.");
         }
+
+        removeWhitespaceOnlyTextNodes(currentDocument);
 
         try (OutputStream outputStream = Files.newOutputStream(xmlPath)) {
             Transformer transformer = transformerFactory.newTransformer();
@@ -74,6 +76,7 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
         try (InputStream inputStream = Files.newInputStream(xmlPath)) {
             DocumentBuilder builder = newDocumentBuilder();
             Document loadedDocument = builder.parse(inputStream);
+            removeWhitespaceOnlyTextNodes(loadedDocument);
             loadedDocument.getDocumentElement().normalize();
             return loadedDocument;
         } catch (Exception e) {
@@ -89,27 +92,31 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
         }
     }
 
-    /**
-     * Makes sure an XML file exist, if not it will create one.
-     *
-     * @throws XmlStorageException if failed to initialize a new XML document.
-     */
-    private void ensureFileExists() throws XmlStorageException{
+    private void ensureFileExists() throws XmlStorageException {
         if (Files.exists(xmlPath)) {
             return;
         }
 
         try {
             Path parent = xmlPath.getParent();
-            //TODO move create out or change method name!
             if (parent != null) {
                 Files.createDirectories(parent);
             }
             Files.writeString(xmlPath, "<ExamGenerator/>");
-            //TODO magic string remove!
-
         } catch (IOException e) {
             throw new XmlStorageException("Failed to initialize XML document at " + xmlPath + '.', e);
+        }
+    }
+
+    private void removeWhitespaceOnlyTextNodes(Node node) {
+        NodeList childNodes = node.getChildNodes();
+        for (int index = childNodes.getLength() - 1; index >= 0; index--) {
+            Node child = childNodes.item(index);
+            if (child.getNodeType() == Node.TEXT_NODE && child.getTextContent().trim().isEmpty()) {
+                node.removeChild(child);
+            } else if (child.hasChildNodes()) {
+                removeWhitespaceOnlyTextNodes(child);
+            }
         }
     }
 }
