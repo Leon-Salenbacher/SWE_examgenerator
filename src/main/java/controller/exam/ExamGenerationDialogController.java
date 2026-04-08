@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -21,7 +22,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import models.Chapter;
 import service.exam.ExamGenerationService;
-import service.exam.PdfExamWriter;
+import service.pdf.PdfExamWriter;
 import service.exam.dto.GenerateExamValues;
 import service.exam.dto.GeneratedExam;
 import service.exam.dto.PdfLayoutSettings;
@@ -64,6 +65,8 @@ public class ExamGenerationDialogController {
     private Button layoutButton;
     @FXML
     private Label layoutSummaryLabel;
+    @FXML
+    private CheckBox includeSolutionsCheckBox;
     @FXML
     private Label statusLabel;
     @FXML
@@ -200,7 +203,7 @@ public class ExamGenerationDialogController {
                 return;
             }
             setStatus(localizationService.get("generate.dialog.status.saving"), false);
-            saveGeneratedExam(generatedExam, layoutSettings, selectedFile.toPath());
+            saveGeneratedExam(generatedExam, layoutSettings, selectedFile.toPath(), includeSolutionsCheckBox.isSelected());
         });
 
         generationTask.setOnFailed(event -> {
@@ -213,11 +216,16 @@ public class ExamGenerationDialogController {
         generationThread.start();
     }
 
-    private void saveGeneratedExam(GeneratedExam generatedExam, PdfLayoutSettings layoutSettings, Path outputPath) {
+    private void saveGeneratedExam(
+            GeneratedExam generatedExam,
+            PdfLayoutSettings layoutSettings,
+            Path outputPath,
+            boolean includeSolutions
+    ) {
         Task<Void> saveTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                pdfExamWriter.write(outputPath, generatedExam, layoutSettings);
+                pdfExamWriter.write(outputPath, generatedExam, layoutSettings, includeSolutions);
                 return null;
             }
         };
@@ -282,6 +290,7 @@ public class ExamGenerationDialogController {
         generateButton.setDisable(busy);
         cancelButton.setDisable(busy);
         layoutButton.setDisable(busy);
+        includeSolutionsCheckBox.setDisable(busy);
     }
 
     private void setStatus(String message, boolean error) {
@@ -333,6 +342,7 @@ public class ExamGenerationDialogController {
         pointsField.setPromptText(localizationService.get("generate.dialog.points.prompt"));
         layoutLabel.setText(localizationService.get("generate.dialog.layout"));
         layoutButton.setText(localizationService.get("generate.dialog.layoutButton"));
+        includeSolutionsCheckBox.setText(localizationService.get("generate.dialog.includeSolutions"));
         cancelButton.setText(localizationService.get("generate.dialog.cancel"));
         generateButton.setText(localizationService.get("generate.dialog.generate"));
         if (titleField.getText() == null || titleField.getText().isBlank()) {

@@ -1,5 +1,6 @@
-package service.exam;
+package service.pdf;
 
+import lombok.Getter;
 import models.Chapter;
 import models.Subtask;
 import models.Variant;
@@ -7,6 +8,8 @@ import service.exam.dto.GeneratedChapter;
 import service.exam.dto.GeneratedExam;
 import service.exam.dto.GeneratedSubtask;
 import service.exam.dto.PdfLayoutSettings;
+import service.pdf.dto.PageContent;
+import service.pdf.dto.PdfElement;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class PdfExamWriter {
 
@@ -28,14 +32,31 @@ public class PdfExamWriter {
     private static final int PAGE_NUMBER_Y = 28;
     private static final int COVER_TITLE_Y = 470;
     private static final int COVER_SUBTITLE_Y = 430;
+    @Getter
     private static final int LINE_HEIGHT = 14;
+    private static final int BODY_X = 50;
+    private static final int ANSWER_BOX_WIDTH = 495;
+    @Getter
+    private static final int ANSWER_BOX_MIN_HEIGHT = 86;
+    @Getter
+    private static final int ANSWER_BOX_PADDING = 8;
+    private static final int ANSWER_BOX_TEXT_MAX_CHARS = 78;
 
     public void write(Path outputPath, GeneratedExam exam, PdfLayoutSettings layoutSettings) throws IOException {
+        write(outputPath, exam, layoutSettings, false);
+    }
+
+    public void write(
+            Path outputPath,
+            GeneratedExam exam,
+            PdfLayoutSettings layoutSettings,
+            boolean includeSolutions
+    ) throws IOException {
         PdfLayoutSettings sanitizedSettings = (layoutSettings == null
                 ? PdfLayoutSettings.defaults(exam.title())
                 : layoutSettings).sanitize(exam.title());
-        List<String> lines = buildLines(exam);
-        List<PageContent> pages = paginate(lines, sanitizedSettings);
+        List<PdfElement> elements = buildElements(exam, includeSolutions);
+        List<PageContent> pages = paginate(elements, sanitizedSettings);
         byte[] pdfBytes = buildPdfDocument(pages);
 
         if (outputPath.getParent() != null) {
@@ -44,35 +65,51 @@ public class PdfExamWriter {
         Files.write(outputPath, pdfBytes);
     }
 
-    private List<String> buildLines(GeneratedExam exam) {
-        List<String> lines = new ArrayList<>();
-        lines.add(exam.title());
-        lines.add("Total points: " + exam.totalPoints());
-        lines.add("");
+    private List<PdfElement> buildElements(GeneratedExam exam, boolean includeSolutions) {
+        List<PdfElement> elements = new ArrayList<>();
+        elements.add(PdfElement.text(exam.title()));
+        elements.add(PdfElement.text("Total points: " + exam.totalPoints()));
+        elements.add(PdfElement.text(""));
 
         int questionNumber = 1;
         for (GeneratedChapter generatedChapter : exam.chapters()) {
             Chapter chapter = generatedChapter.chapter();
-            lines.add("Chapter: " + safeLabel(chapter.getTitle(), "Chapter " + chapter.getId()));
+            elements.add(PdfElement.text("Chapter: " + safeLabel(chapter.getTitle(), "Chapter " + chapter.getId())));
 
             for (GeneratedSubtask generatedSubtask : generatedChapter.subtasks()) {
                 Subtask subtask = generatedSubtask.subtask();
                 Variant variant = generatedSubtask.variant();
 
-                lines.add("");
-                lines.add(questionNumber + ". " + safeLabel(subtask.getTitle(), "Task " + subtask.getId())
-                        + " (" + subtask.getPoints() + " pts)");
-                lines.addAll(wrap("Question: " + safeLabel(variant.getQuestion(), "No question text available.")));
+                elements.add(PdfElement.text(""));
+                elements.add(PdfElement.text(questionNumber + ". " + safeLabel(subtask.getTitle(), "Task " + subtask.getId())
+                        + " (" + subtask.getPoints() + " pts)"));
+                wrap("Question: " + safeLabel(variant.getQuestion(), "No question text available."))
+                        .forEach(line -> elements.add(PdfElement.text(line)));
+                appendAnswerPlaceholder(elements, variant, includeSolutions);
                 questionNumber++;
             }
 
-            lines.add("");
+            elements.add(PdfElement.text(""));
         }
 
-        return lines;
+        return elements;
     }
 
-    private List<PageContent> paginate(List<String> lines, PdfLayoutSettings settings) {
+    private void appendAnswerPlaceholder(List<PdfElement> elements, Variant variant, boolean includeSolutions) {
+        elements.add(PdfElement.text(""));
+        elements.add(PdfElement.text("Answer:"));
+        if (includeSolutions) {
+            String solution = variant == null ? "" : variant.getSolution();
+            if (solution != null && !solution.isBlank()) {
+                elements.add(PdfElement.answerBox(wrap(solution.trim(), ANSWER_BOX_TEXT_MAX_CHARS)));
+                return;
+            }
+        }
+
+        elements.add(PdfElement.answerBox(List.of()));
+    }
+
+    private List<PageContent> paginate(List<PdfElement> elements, PdfLayoutSettings settings) {
         List<PageContent> pages = new ArrayList<>();
         if (settings.coverPageEnabled()) {
             pages.add(PageContent.cover(settings.coverTitle(), settings.coverSubtitle()));
@@ -80,21 +117,24 @@ public class PdfExamWriter {
 
         int startY = calculateBodyStartY(settings);
         int bottomY = calculateBodyBottomY(settings);
-        int maxLinesPerPage = Math.max(1, ((startY - bottomY) / LINE_HEIGHT) + 1);
+        int maxElementHeightPerPage = Math.max(1, startY - bottomY);
 
-        List<String> currentPage = new ArrayList<>();
+        List<PdfElement> currentPage = new ArrayList<>();
+        int currentPageHeight = 0;
         int logicalPageNumber = 1;
-        for (String line : lines) {
-            if (currentPage.size() >= maxLinesPerPage) {
+        for (PdfElement element : elements) {
+            if (!currentPage.isEmpty() && currentPageHeight + element.height() > maxElementHeightPerPage) {
                 pages.add(PageContent.body(new ArrayList<>(currentPage), settings, logicalPageNumber));
                 logicalPageNumber++;
                 currentPage = new ArrayList<>();
+                currentPageHeight = 0;
             }
-            currentPage.add(line);
+            currentPage.add(element);
+            currentPageHeight += element.height();
         }
 
         if (currentPage.isEmpty()) {
-            currentPage.add(" ");
+            currentPage.add(PdfElement.text(" "));
         }
         pages.add(PageContent.body(currentPage, settings, logicalPageNumber));
         return pages;
@@ -157,9 +197,6 @@ public class PdfExamWriter {
 
     private String buildContentStream(PageContent page) {
         StringBuilder builder = new StringBuilder();
-        builder.append("BT\n");
-        builder.append("/F1 12 Tf\n");
-        builder.append("14 TL\n");
 
         if (page.coverPage()) {
             appendText(builder, 120, COVER_TITLE_Y, 24, page.coverTitle());
@@ -172,7 +209,7 @@ public class PdfExamWriter {
                 appendText(builder, 50, 812, 10, settings.headerText());
             }
 
-            appendBodyLines(builder, page.bodyLines(), calculateBodyStartY(settings));
+            appendBodyElements(builder, page.bodyElements(), calculateBodyStartY(settings));
 
             if (settings.footerText() != null && !settings.footerText().isBlank()) {
                 appendText(builder, 50, FOOTER_Y, 10, settings.footerText());
@@ -183,20 +220,53 @@ public class PdfExamWriter {
             }
         }
 
-        builder.append("ET\n");
         return builder.toString();
     }
 
-    private void appendBodyLines(StringBuilder builder, List<String> lines, int startY) {
-        for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
-            appendText(builder, 50, startY - (lineIndex * LINE_HEIGHT), 12, lines.get(lineIndex));
+    private void appendBodyElements(StringBuilder builder, List<PdfElement> elements, int startY) {
+        int currentY = startY;
+        for (PdfElement element : elements) {
+            if (element.answerBox()) {
+                appendAnswerBox(builder, BODY_X, currentY - element.height(), ANSWER_BOX_WIDTH, element.height(), element.boxLines());
+            } else {
+                appendText(builder, BODY_X, currentY, 12, element.text());
+            }
+            currentY -= element.height();
         }
     }
 
     private void appendText(StringBuilder builder, int x, int y, int fontSize, String text) {
+        builder.append("BT\n");
         builder.append("1 0 0 1 ").append(x).append(" ").append(y).append(" Tm\n");
         builder.append("/F1 ").append(fontSize).append(" Tf\n");
         builder.append("(").append(escapePdfText(text)).append(") Tj\n");
+        builder.append("ET\n");
+    }
+
+    private void appendAnswerBox(
+            StringBuilder builder,
+            int x,
+            int y,
+            int width,
+            int height,
+            List<String> boxLines
+    ) {
+        builder.append("q\n");
+        builder.append("0.55 0.55 0.55 RG\n");
+        builder.append("0.8 w\n");
+        builder.append(x).append(" ").append(y).append(" ").append(width).append(" ").append(height).append(" re\n");
+        builder.append("S\n");
+        builder.append("Q\n");
+
+        int textY = y + height - ANSWER_BOX_PADDING - LINE_HEIGHT;
+        int textX = x + ANSWER_BOX_PADDING;
+        for (String boxLine : boxLines) {
+            if (textY <= y + ANSWER_BOX_PADDING) {
+                break;
+            }
+            appendText(builder, textX, textY, 11, boxLine);
+            textY -= LINE_HEIGHT;
+        }
     }
 
     private void writeObject(ByteArrayOutputStream document, List<Integer> offsets, int objectNumber, String objectBody) throws IOException {
@@ -221,13 +291,17 @@ public class PdfExamWriter {
     }
 
     private List<String> wrap(String text) {
+        return wrap(text, MAX_CHARS_PER_LINE);
+    }
+
+    private List<String> wrap(String text, int maxCharsPerLine) {
         List<String> lines = new ArrayList<>();
         String remaining = sanitize(text);
 
-        while (remaining.length() > MAX_CHARS_PER_LINE) {
-            int breakPosition = remaining.lastIndexOf(' ', MAX_CHARS_PER_LINE);
+        while (remaining.length() > maxCharsPerLine) {
+            int breakPosition = remaining.lastIndexOf(' ', maxCharsPerLine);
             if (breakPosition <= 0) {
-                breakPosition = MAX_CHARS_PER_LINE;
+                breakPosition = maxCharsPerLine;
             }
             lines.add(remaining.substring(0, breakPosition).trim());
             remaining = remaining.substring(breakPosition).trim();
@@ -275,21 +349,8 @@ public class PdfExamWriter {
         return 45;
     }
 
-    private record PageContent(
-            boolean coverPage,
-            String coverTitle,
-            String coverSubtitle,
-            List<String> bodyLines,
-            PdfLayoutSettings layoutSettings,
-            int logicalPageNumber
-    ) {
-        private static PageContent cover(String coverTitle, String coverSubtitle) {
-            return new PageContent(true, coverTitle, coverSubtitle, List.of(), null, 0);
-        }
 
-        private static PageContent body(List<String> bodyLines, PdfLayoutSettings layoutSettings, int logicalPageNumber) {
-            return new PageContent(false, "", "", bodyLines, layoutSettings, logicalPageNumber);
-        }
-    }
+
+
 }
 
