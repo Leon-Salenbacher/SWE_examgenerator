@@ -1,7 +1,7 @@
 package service.pdf.dto;
 
 import lombok.Builder;
-import service.pdf.PdfExamWriter;
+import service.pdf.PdfElementMetrics;
 
 import java.util.List;
 
@@ -12,13 +12,15 @@ public record PdfElement(
         int height,
         boolean answerBox) {
     public static PdfElement text(String text) {
-        return new PdfElement(text, List.of(), PdfExamWriter.getLINE_HEIGHT(), false);
+        return new PdfElement(text, List.of(), PdfElementMetrics.lineHeight(), false);
     }
 
     public static PdfElement answerBox(List<String> boxLines) {
         int height = Math.max(
-                PdfExamWriter.getANSWER_BOX_MIN_HEIGHT(),
-                (boxLines.size() * PdfExamWriter.getLINE_HEIGHT()) + (PdfExamWriter.getANSWER_BOX_PADDING() * 2) + PdfExamWriter.getLINE_HEIGHT()
+                PdfElementMetrics.answerBoxMinHeight(),
+                (boxLines.size() * PdfElementMetrics.lineHeight())
+                        + (PdfElementMetrics.answerBoxPadding() * 2)
+                        + PdfElementMetrics.lineHeight()
         );
         return new PdfElement("", boxLines, height, true);
     }

@@ -222,11 +222,10 @@ public class ExamGenerationDialogController {
             Path outputPath,
             boolean includeSolutions
     ) {
-        Task<Void> saveTask = new Task<>() {
+        Task<List<Path>> saveTask = new Task<>() {
             @Override
-            protected Void call() throws Exception {
-                pdfExamWriter.write(outputPath, generatedExam, layoutSettings, includeSolutions);
-                return null;
+            protected List<Path> call() throws Exception {
+                return pdfExamWriter.writeExamFiles(outputPath, generatedExam, layoutSettings, includeSolutions);
             }
         };
 
@@ -235,7 +234,7 @@ public class ExamGenerationDialogController {
             dialogStage.close();
             showAlert(Alert.AlertType.INFORMATION,
                     localizationService.get("generate.dialog.title"),
-                    localizationService.get("generate.dialog.success", outputPath.toAbsolutePath()));
+                    localizationService.get("generate.dialog.success", formatSavedPaths(saveTask.getValue())));
         });
 
         saveTask.setOnFailed(event -> {
@@ -320,6 +319,16 @@ public class ExamGenerationDialogController {
     private String sanitizeFileName(String value) {
         String sanitized = value == null ? "exam" : value.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
         return sanitized.isBlank() ? "exam" : sanitized;
+    }
+
+    private String formatSavedPaths(List<Path> savedPaths) {
+        if (savedPaths == null || savedPaths.isEmpty()) {
+            return "";
+        }
+        return savedPaths.stream()
+                .map(path -> path.toAbsolutePath().toString())
+                .reduce((first, second) -> first + System.lineSeparator() + second)
+                .orElse("");
     }
 
     private UnaryOperator<TextFormatter.Change> buildNumericFilter() {
