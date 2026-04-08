@@ -15,11 +15,16 @@ final class PdfLayoutMetrics {
     static final int COVER_TITLE_Y = 470;
     static final int COVER_SUBTITLE_Y = 430;
     static final int LINE_HEIGHT = 14;
+    static final int CHAPTER_HEADING_HEIGHT = 36;
+    static final int TASK_HEADING_HEIGHT = 22;
     static final int BODY_X = 50;
     static final int ANSWER_BOX_WIDTH = 495;
     static final int ANSWER_BOX_MIN_HEIGHT = 86;
     static final int ANSWER_BOX_PADDING = 8;
     static final int ANSWER_BOX_TEXT_MAX_CHARS = 78;
+    static final int TOC_TITLE_Y = 770;
+    static final int TOC_TABLE_TOP_Y = 720;
+    static final int TOC_ROW_HEIGHT = 24;
 
     private PdfLayoutMetrics() {
     }

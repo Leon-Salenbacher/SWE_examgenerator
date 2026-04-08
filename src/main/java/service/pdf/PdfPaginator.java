@@ -14,6 +14,12 @@ final class PdfPaginator {
         if (settings.coverPageEnabled()) {
             pages.add(PageContent.cover(settings.coverTitle(), settings.coverSubtitle()));
         }
+        pages.addAll(paginateBody(elements, settings, 1));
+        return pages;
+    }
+
+    List<PageContent> paginateBody(List<PdfElement> elements, PdfLayoutSettings settings, int firstLogicalPageNumber) {
+        List<PageContent> pages = new ArrayList<>();
 
         int startY = PdfLayoutMetrics.calculateBodyStartY(settings.headerText());
         int bottomY = PdfLayoutMetrics.calculateBodyBottomY(settings.footerText(), settings.pageNumbersEnabled());
@@ -21,9 +27,10 @@ final class PdfPaginator {
 
         List<PdfElement> currentPage = new ArrayList<>();
         int currentPageHeight = 0;
-        int logicalPageNumber = 1;
+        int logicalPageNumber = firstLogicalPageNumber;
         for (PdfElement element : elements) {
-            if (!currentPage.isEmpty() && currentPageHeight + element.height() > maxElementHeightPerPage) {
+            if (!currentPage.isEmpty()
+                    && (element.pageBreakBefore() || currentPageHeight + element.height() > maxElementHeightPerPage)) {
                 pages.add(PageContent.body(new ArrayList<>(currentPage), settings, logicalPageNumber));
                 logicalPageNumber++;
                 currentPage = new ArrayList<>();

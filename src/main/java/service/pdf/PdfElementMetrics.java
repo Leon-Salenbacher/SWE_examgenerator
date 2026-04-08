@@ -9,6 +9,14 @@ public final class PdfElementMetrics {
         return PdfLayoutMetrics.LINE_HEIGHT;
     }
 
+    public static int chapterHeadingHeight() {
+        return PdfLayoutMetrics.CHAPTER_HEADING_HEIGHT;
+    }
+
+    public static int taskHeadingHeight() {
+        return PdfLayoutMetrics.TASK_HEADING_HEIGHT;
+    }
+
     public static int answerBoxMinHeight() {
         return PdfLayoutMetrics.ANSWER_BOX_MIN_HEIGHT;
     }
