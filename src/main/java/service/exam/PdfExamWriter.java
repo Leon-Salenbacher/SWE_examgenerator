@@ -14,6 +14,15 @@ public class PdfExamWriter {
 
     private final service.pdf.PdfExamWriter delegate = new service.pdf.PdfExamWriter();
 
+    /**
+     * Writes one PDF through the current PDF writer implementation.
+     *
+     * @param outputPath target PDF path
+     * @param exam generated exam content
+     * @param layoutSettings user-selected layout settings
+     * @param includeSolutions whether solutions should be embedded in the PDF
+     * @throws IOException if writing the PDF fails
+     */
     public void write(
             Path outputPath,
             GeneratedExam exam,
@@ -23,6 +32,16 @@ public class PdfExamWriter {
         delegate.write(outputPath, exam, layoutSettings, includeSolutions);
     }
 
+    /**
+     * Writes the exam PDF and, optionally, a separate solution PDF through the current writer.
+     *
+     * @param examOutputPath target path for the exam PDF
+     * @param exam generated exam content
+     * @param layoutSettings user-selected layout settings
+     * @param includeSolutionFile whether to create a separate solution PDF
+     * @return paths of all generated files
+     * @throws IOException if writing either PDF fails
+     */
     public List<Path> writeExamFiles(
             Path examOutputPath,
             GeneratedExam exam,

@@ -3,12 +3,23 @@ package service.pdf;
 import service.exam.dto.PdfLayoutSettings;
 import service.pdf.dto.PageContent;
 import service.pdf.dto.PdfElement;
+import service.pdf.metrics.PdfLayoutMetrics;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Splits PDF body elements into pages according to layout boundaries and forced breaks.
+ */
 final class PdfPaginator {
 
+    /**
+     * Paginates elements and optionally prepends a cover page.
+     *
+     * @param elements body elements to paginate
+     * @param settings layout settings that define body boundaries
+     * @return generated pages
+     */
     List<PageContent> paginate(List<PdfElement> elements, PdfLayoutSettings settings) {
         List<PageContent> pages = new ArrayList<>();
         if (settings.coverPageEnabled()) {
@@ -18,6 +29,14 @@ final class PdfPaginator {
         return pages;
     }
 
+    /**
+     * Paginates body elements starting at the provided logical page number.
+     *
+     * @param elements body elements to paginate
+     * @param settings layout settings that define body boundaries
+     * @param firstLogicalPageNumber logical page number of the first body page
+     * @return generated body pages
+     */
     List<PageContent> paginateBody(List<PdfElement> elements, PdfLayoutSettings settings, int firstLogicalPageNumber) {
         List<PageContent> pages = new ArrayList<>();
 

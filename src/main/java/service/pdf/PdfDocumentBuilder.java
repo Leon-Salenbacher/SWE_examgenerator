@@ -3,12 +3,18 @@ package service.pdf;
 import service.exam.dto.PdfLayoutSettings;
 import service.pdf.dto.PageContent;
 import service.pdf.dto.PdfElement;
+import service.pdf.dto.PdfElementType;
+import service.pdf.metrics.PdfElementMetrics;
+import service.pdf.metrics.PdfLayoutMetrics;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Builds the raw PDF document bytes from paginated page content.
+ */
 final class PdfDocumentBuilder {
 
     private final PdfTextFormatter textFormatter;
@@ -17,6 +23,13 @@ final class PdfDocumentBuilder {
         this.textFormatter = textFormatter;
     }
 
+    /**
+     * Serializes all pages into a complete PDF file.
+     *
+     * @param pages pages to write
+     * @return binary PDF content
+     * @throws IOException if the PDF byte stream cannot be written
+     */
     byte[] buildPdfDocument(List<PageContent> pages) throws IOException {
         int pageCount = pages.size();
         int regularFontObjectNumber = 3;
@@ -75,6 +88,12 @@ final class PdfDocumentBuilder {
         return document.toByteArray();
     }
 
+    /**
+     * Builds the content stream for one page.
+     *
+     * @param page page content to render
+     * @return raw PDF content stream text
+     */
     private String buildContentStream(PageContent page) {
         StringBuilder builder = new StringBuilder();
 
@@ -105,35 +124,36 @@ final class PdfDocumentBuilder {
         return builder.toString();
     }
 
+    /**
+     * Appends all body elements to the current page stream.
+     *
+     * @param builder target PDF stream
+     * @param elements elements to render
+     * @param startY first body y-position
+     */
     private void appendBodyElements(StringBuilder builder, List<PdfElement> elements, int startY) {
         int currentY = startY;
         for (PdfElement element : elements) {
             if (element.answerBox()) {
                 appendAnswerBox(builder, PdfLayoutMetrics.BODY_X, currentY - element.height(),
                         PdfLayoutMetrics.ANSWER_BOX_WIDTH, element.height(), element.boxLines());
-            } else {
-                appendText(builder, PdfLayoutMetrics.BODY_X, currentY, fontSizeFor(element), boldFor(element), element.text());
+            } else if (element.type() != PdfElementType.SPACER) {
+                appendText(builder, PdfLayoutMetrics.BODY_X, currentY,
+                        PdfElementMetrics.fontSizeFor(element.type()),
+                        PdfElementMetrics.boldFor(element.type()),
+                        element.text());
             }
             currentY -= element.height();
         }
     }
 
-    private int fontSizeFor(PdfElement element) {
-        return switch (element.type()) {
-            case CHAPTER_HEADING -> 20;
-            case TASK_HEADING -> 13;
-            case ANSWER_LABEL -> 12;
-            default -> 12;
-        };
-    }
 
-    private boolean boldFor(PdfElement element) {
-        return switch (element.type()) {
-            case CHAPTER_HEADING, TASK_HEADING, ANSWER_LABEL -> true;
-            default -> false;
-        };
-    }
-
+    /**
+     * Appends the table of contents page.
+     *
+     * @param builder target PDF stream
+     * @param page table-of-contents page content
+     */
     private void appendTableOfContents(StringBuilder builder, PageContent page) {
         appendPageFrame(builder, page.layoutSettings(), page.logicalPageNumber());
         appendText(builder, PdfLayoutMetrics.BODY_X, PdfLayoutMetrics.TOC_TITLE_Y, 20, true, "Inhaltsverzeichnis");
@@ -151,6 +171,13 @@ final class PdfDocumentBuilder {
         }
     }
 
+    /**
+     * Appends header, footer, and page number text.
+     *
+     * @param builder target PDF stream
+     * @param settings layout settings for the page frame
+     * @param logicalPageNumber visible logical page number
+     */
     private void appendPageFrame(StringBuilder builder, PdfLayoutSettings settings, int logicalPageNumber) {
         if (settings.headerText() != null && !settings.headerText().isBlank()) {
             appendText(builder, 50, 812, 10, false, settings.headerText());
@@ -163,6 +190,17 @@ final class PdfDocumentBuilder {
         }
     }
 
+    /**
+     * Appends one table-of-contents row.
+     *
+     * @param builder target PDF stream
+     * @param y row baseline y-position
+     * @param header whether this row is a header row
+     * @param page page cell text
+     * @param chapter chapter cell text
+     * @param possiblePoints possible-points cell text
+     * @param achievedPoints achieved-points cell text
+     */
     private void appendTableRow(
             StringBuilder builder,
             int y,
@@ -183,11 +221,27 @@ final class PdfDocumentBuilder {
         appendCenteredText(builder, 445, 100, textY, 10, header, achievedPoints);
     }
 
+    /**
+     * Truncates long table text with an ellipsis.
+     *
+     * @param value text to truncate
+     * @param maxLength maximum allowed length
+     * @return truncated text
+     */
     private String truncate(String value, int maxLength) {
         String safeValue = value == null ? "" : value;
         return safeValue.length() <= maxLength ? safeValue : safeValue.substring(0, maxLength - 3) + "...";
     }
 
+    /**
+     * Appends a stroked rectangle.
+     *
+     * @param builder target PDF stream
+     * @param x left x-position
+     * @param y bottom y-position
+     * @param width rectangle width
+     * @param height rectangle height
+     */
     private void appendRectangle(StringBuilder builder, int x, int y, int width, int height) {
         builder.append("q\n");
         builder.append("0.65 0.65 0.65 RG\n");
@@ -197,6 +251,14 @@ final class PdfDocumentBuilder {
         builder.append("Q\n");
     }
 
+    /**
+     * Appends a vertical line.
+     *
+     * @param builder target PDF stream
+     * @param x x-position
+     * @param y bottom y-position
+     * @param height line height
+     */
     private void appendVerticalLine(StringBuilder builder, int x, int y, int height) {
         builder.append("q\n");
         builder.append("0.65 0.65 0.65 RG\n");
@@ -207,6 +269,17 @@ final class PdfDocumentBuilder {
         builder.append("Q\n");
     }
 
+    /**
+     * Appends text centered within a table cell.
+     *
+     * @param builder target PDF stream
+     * @param cellX left cell x-position
+     * @param cellWidth table cell width
+     * @param y text y-position
+     * @param fontSize font size
+     * @param bold whether to use the bold font
+     * @param text text to render
+     */
     private void appendCenteredText(
             StringBuilder builder,
             int cellX,
@@ -222,6 +295,16 @@ final class PdfDocumentBuilder {
         appendText(builder, x, y, fontSize, bold, safeText);
     }
 
+    /**
+     * Appends one text draw operation.
+     *
+     * @param builder target PDF stream
+     * @param x text x-position
+     * @param y text y-position
+     * @param fontSize font size
+     * @param bold whether to use the bold font
+     * @param text text to render
+     */
     private void appendText(StringBuilder builder, int x, int y, int fontSize, boolean bold, String text) {
         builder.append("BT\n");
         builder.append("1 0 0 1 ").append(x).append(" ").append(y).append(" Tm\n");
@@ -230,6 +313,16 @@ final class PdfDocumentBuilder {
         builder.append("ET\n");
     }
 
+    /**
+     * Appends an answer box rectangle and optional solution text.
+     *
+     * @param builder target PDF stream
+     * @param x left x-position
+     * @param y bottom y-position
+     * @param width box width
+     * @param height box height
+     * @param boxLines lines to render inside the box
+     */
     private void appendAnswerBox(
             StringBuilder builder,
             int x,
@@ -256,6 +349,15 @@ final class PdfDocumentBuilder {
         }
     }
 
+    /**
+     * Writes one plain PDF object and stores its byte offset.
+     *
+     * @param document target PDF document stream
+     * @param offsets collected PDF object offsets
+     * @param objectNumber PDF object number
+     * @param objectBody object body content
+     * @throws IOException if writing fails
+     */
     private void writeObject(ByteArrayOutputStream document, List<Integer> offsets, int objectNumber, String objectBody) throws IOException {
         offsets.add(document.size());
         write(document, objectNumber + " 0 obj\n");
@@ -263,6 +365,15 @@ final class PdfDocumentBuilder {
         write(document, "\nendobj\n");
     }
 
+    /**
+     * Writes one PDF stream object and stores its byte offset.
+     *
+     * @param document target PDF document stream
+     * @param offsets collected PDF object offsets
+     * @param objectNumber PDF object number
+     * @param streamBytes stream bytes to embed
+     * @throws IOException if writing fails
+     */
     private void writeStreamObject(ByteArrayOutputStream document, List<Integer> offsets, int objectNumber, byte[] streamBytes) throws IOException {
         offsets.add(document.size());
         write(document, objectNumber + " 0 obj\n");
@@ -273,6 +384,13 @@ final class PdfDocumentBuilder {
         write(document, "endobj\n");
     }
 
+    /**
+     * Writes text using the configured PDF charset.
+     *
+     * @param document target PDF document stream
+     * @param content text to write
+     * @throws IOException if writing fails
+     */
     private void write(ByteArrayOutputStream document, String content) throws IOException {
         document.write(content.getBytes(PdfLayoutMetrics.PDF_CHARSET));
     }

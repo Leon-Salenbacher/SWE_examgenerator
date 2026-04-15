@@ -1,0 +1,36 @@
+pdf:
+  charset: windows-1252
+
+layout:
+  maxCharsPerLine: 90
+  defaultStartY: 790
+  headerStartY: 760
+  bodyBottomY: 45
+  bodyBottomWithFooterY: 70
+  footerY: 45
+  pageNumberY: 28
+  coverTitleY: 470
+  coverSubtitleY: 430
+  lineHeight: 14
+  chapterHeadingHeight: 36
+  taskHeadingHeight: 22
+  bodyX: 50
+  answerBoxWidth: 495
+  answerBoxMinHeight: 86
+  answerBoxPadding: 8
+  answerBlockBottomSpacing: 18
+  answerBoxTextMaxChars: 78
+  tocTitleY: 770
+  tocTableTopY: 720
+  tocRowHeight: 24
+
+fontSizes:
+  default: 12
+  chapterHeading: 20
+  taskHeading: 13
+  answerLabel: 12
+
+boldStyles:
+  chapterHeading: true
+  taskHeading: true
+  answerLabel: true
