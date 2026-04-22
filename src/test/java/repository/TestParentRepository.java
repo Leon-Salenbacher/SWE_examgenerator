@@ -15,7 +15,7 @@ import javax.xml.transform.TransformerFactory;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestParentRepository {
 
