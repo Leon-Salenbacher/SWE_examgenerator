@@ -57,7 +57,12 @@ public class TestRepository {
     @Test
     public void test_save_goodcase01_persistVariant(){
         Repository<Variant> repository = createVariantRepository();
-        Variant variant = createVariant(1, "Variante A", "Frage A", "Loesung A");
+        Variant variant = Variant.builder()
+                .id(1)
+                .title("Variante A")
+                .question("Frage A")
+                .solution("Loesung A")
+                .build();
 
         Variant savedVariant = repository.save(variant);
 
@@ -76,14 +81,29 @@ public class TestRepository {
         Repository<Variant> brokenRepository = new VariantRepositoryImpl(connector);
 
         assertThrows(XmlStorageException.class,
-                () -> brokenRepository.save(createVariant(1, "Titel", "Frage", "Loesung")));
+                () -> brokenRepository.save(Variant.builder()
+                        .id(1)
+                        .title("Titel")
+                        .question("Frage")
+                        .solution("Loesung")
+                        .build()));
     }
 
     @Test
     public void test_update_goodcase01_replaceVariantAttributes(){
         Repository<Variant> repository = createVariantRepository();
-        repository.save(createVariant(1, "Alt", "Alte Frage", "Alte Loesung"));
-        Variant updatedVariant = createVariant(1, "Neu", "Neue Frage", "Neue Loesung");
+        repository.save(Variant.builder()
+                .id(1)
+                .title("Alt")
+                .question("Alte Frage")
+                .solution("Alte Loesung")
+                .build());
+        Variant updatedVariant = Variant.builder()
+                .id(1)
+                .title("Neu")
+                .question("Neue Frage")
+                .solution("Neue Loesung")
+                .build();
 
         Variant actualVariant = repository.update(updatedVariant);
 
@@ -99,13 +119,23 @@ public class TestRepository {
         Repository<Variant> repository = createVariantRepository();
 
         assertThrows(XmlStorageException.class,
-                () -> repository.update(createVariant(99, "Fehlt", "Frage", "Loesung")));
+                () -> repository.update(Variant.builder()
+                        .id(99)
+                        .title("Fehlt")
+                        .question("Frage")
+                        .solution("Loesung")
+                        .build()));
     }
 
     @Test
     public void test_deleteById_goodcase01_removeVariant(){
         Repository<Variant> repository = createVariantRepository();
-        repository.save(createVariant(1, "Variante A", "Frage A", "Loesung A"));
+        repository.save(Variant.builder()
+                .id(1)
+                .title("Variante A")
+                .question("Frage A")
+                .solution("Loesung A")
+                .build());
 
         repository.deleteById(1);
 
@@ -144,12 +174,4 @@ public class TestRepository {
         );
     }
 
-    private Variant createVariant(int id, String title, String question, String solution){
-        Variant variant = new Variant();
-        variant.setId(id);
-        variant.setTitle(title);
-        variant.setQuestion(question);
-        variant.setSolution(solution);
-        return variant;
-    }
 }

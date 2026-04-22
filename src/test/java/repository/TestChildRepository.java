@@ -20,7 +20,12 @@ public class TestChildRepository {
     @Test
     public void test_childRepository_goodcase01_useVariantRepositoryAsChildRepository(){
         ChildRepository<Variant> repository = new VariantRepositoryImpl(createConnector());
-        Variant variant = createVariant(1, "Variante", "Was ist ein Test?", "Ein Sicherheitsnetz");
+        Variant variant = Variant.builder()
+                .id(1)
+                .title("Variante")
+                .question("Was ist ein Test?")
+                .solution("Ein Sicherheitsnetz")
+                .build();
 
         repository.save(variant);
 
@@ -33,7 +38,12 @@ public class TestChildRepository {
     @Test
     public void test_getTitle_goodcase01_useQuestionAsFallback(){
         ChildRepository<Variant> repository = new VariantRepositoryImpl(createConnector());
-        Variant variant = createVariant(2, "", "Fallback Frage", "Fallback Loesung");
+        Variant variant = Variant.builder()
+                .id(2)
+                .title("")
+                .question("Fallback Frage")
+                .solution("Fallback Loesung")
+                .build();
 
         repository.save(variant);
 
@@ -48,12 +58,4 @@ public class TestChildRepository {
         );
     }
 
-    private Variant createVariant(int id, String title, String question, String solution){
-        Variant variant = new Variant();
-        variant.setId(id);
-        variant.setTitle(title);
-        variant.setQuestion(question);
-        variant.setSolution(solution);
-        return variant;
-    }
 }
