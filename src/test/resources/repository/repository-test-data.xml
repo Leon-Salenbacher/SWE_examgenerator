@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ExamGenerator>
+    <Chapter id="1" title="Fixture Kapitel">
+        <Subtask chapterId="1" id="10" labels="java,xml" points="5" title="Fixture Aufgabe">
+            <Variant id="100" question="Fixture Frage" solution="Fixture Loesung" title="Fixture Variante"/>
+        </Subtask>
+        <Subtask chapterId="1" id="11" labels="testing" points="7" title="Fixture Aufgabe 2"/>
+    </Chapter>
+    <Subtask chapterId="2" id="20" labels="standalone,xml" points="12" title="Standalone Aufgabe">
+        <Variant id="200" question="Standalone Frage" solution="Standalone Loesung" title="Standalone Variante"/>
+    </Subtask>
+    <Variant id="2" question="Frage B" solution="Loesung B" title="Variante B"/>
+    <Variant id="3" question="Frage C" solution="Loesung C" title="Variante C"/>
+</ExamGenerator>
