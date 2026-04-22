@@ -26,6 +26,7 @@ public class Subtask extends ParentObject<Variant> {
     @XmlField(DIFFICULTY_ATTRIBUTE_LABEL)
     private SubtaskDifficulty difficulty = SubtaskDifficulty.MEDIUM;
 
+    @Builder.Default
     @XmlField(LABELS_ATTRIBUTE_LABEL)
     private List<String> labels = new ArrayList<>();
 
