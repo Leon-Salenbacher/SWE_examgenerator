@@ -1,12 +1,19 @@
 package service.elements;
 
-import objects.ChildObject;
+import models.ChildObject;
 
-public interface ChildService<T extends ChildObject> extends DataObjectService<T> {
-    public T create();
+public interface ChildService<
+            T extends ChildObject,
+            C extends ChildService.ChildCommand
+        > extends DataObjectService<T, C> {
 
-    public T update();
+    interface ChildCommand{
+        String title();
 
-    public void delete();
-
+        /**
+         * Optional parent id for assigning this child to its parent aggregate during creation.
+         * For root objects this value can be {@code null}.
+         */
+        Integer parentId();
+    }
 }

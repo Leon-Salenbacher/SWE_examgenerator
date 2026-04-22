@@ -1,29 +1,22 @@
 package service.elements;
 
-import objects.Chapter;
-import objects.ParentObject;
+import models.ChildObject;
+import models.ParentObject;
+
+import java.util.List;
+import java.util.NoSuchElementException;
 
 public interface ParentService<
-            T extends ParentObject<?>,
-            C extends
-        >
-        extends DataObjectService<
-            T,
+            P extends ParentObject<?>,
+            CH extends ChildObject,
+            CMD extends ParentService.ParentCommand
+        > extends DataObjectService<P, CMD>{
 
-        > {
+    int countChildren(int id) throws NoSuchElementException;
 
-    public T create(ParentCreateDto newParent);
+    List<CH> getChildren(int parentId) throws NoSuchElementException;
 
-    public T update(ParentUpdateDto updateParent);
-
-    public void delete(String id);
-
-    public record ParentCreateDto extends CreateDto(
-            String title
-    ){}
-
-    public record ParentUpdateDto(
-            String id,
-            String title
-    ){}
+    interface ParentCommand extends ChildService.ChildCommand {
+        String title();
+    }
 }

@@ -1,29 +1,23 @@
 package service.elements;
 
-import objects.DataObject;
+import models.DataObject;
+
+import java.util.List;
+import java.util.NoSuchElementException;
+
 
 public interface DataObjectService<
         T extends DataObject,
-        C extends DataObjectService.CreateDto,
-        U extends DataObjectService.UpdateDto
+        CMD //command (parameter object for create and update)
         > {
 
-    /**
-     * Creates a new Element based on the information given with {@link C}
-     * @param newElement
-     * @return
-     */
-    public T create(C newElement) ;
+    T getById(int id) throws NoSuchElementException;
 
-    public T update(U updatedElement) throws ;
+    List<T> getAll();
 
-    public void delete(String id);
+    T create(CMD command);
 
+    T update(int id, CMD command);
 
-    public record CreateDto(){
-
-    }
-
-    public record UpdateDto(){}
-
+    void delete(int id) throws NoSuchElementException;
 }

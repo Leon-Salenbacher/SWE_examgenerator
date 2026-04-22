@@ -2,8 +2,8 @@ package controller.sidebar;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import objects.ChildObject;
-import objects.ParentObject;
+import models.ChildObject;
+import models.ParentObject;
 
 import java.io.IOException;
 
@@ -21,6 +21,7 @@ public interface SidebarElementController {
             controller.setSelectionCoordinator(selectionCoordinator);
             controller.setData(element);
             controller.loadChildElements(element.getChildElements());
+            node.setUserData(controller);
             return node;
         } catch (IOException e) {
             throw new IllegalStateException("Unable to load sidebar parent element", e);
@@ -42,6 +43,7 @@ public interface SidebarElementController {
             controller.setSelectionCoordinator(sidebarSelectionCoordinator);
             controller.setTitle(element.getTitle());
             controller.setData(element);
+            node.setUserData(controller);
             return node;
         }catch(IOException e){
             throw new IllegalStateException("Unable to load sidebar child element", e);

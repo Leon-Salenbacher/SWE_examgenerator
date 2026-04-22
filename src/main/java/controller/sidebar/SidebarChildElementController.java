@@ -5,7 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import objects.ChildObject;
+import models.ChildObject;
 
 public class SidebarChildElementController implements SidebarElementController{
     @FXML
@@ -45,6 +45,21 @@ public class SidebarChildElementController implements SidebarElementController{
         if(!styleClasses.contains("selected")){
             styleClasses.add("selected");
         }
+    }
+
+    public void selectNode() {
+        selectSelf();
+    }
+
+    public boolean matchesData(ChildObject target) {
+        if (data == null || target == null) {
+            return false;
+        }
+        return data.getClass().equals(target.getClass()) && data.getId() == target.getId();
+    }
+
+    public ChildObject getData() {
+        return data;
     }
 
 }

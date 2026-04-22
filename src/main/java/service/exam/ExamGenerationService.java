@@ -1,0 +1,313 @@
+package service.exam;
+
+import exceptions.ExamGenerationException;
+import models.Chapter;
+import models.Subtask;
+import models.Variant;
+import service.exam.dto.CandidateTask;
+import service.exam.dto.GenerateExamValues;
+import service.exam.dto.GeneratedChapter;
+import service.exam.dto.GeneratedExam;
+import service.exam.dto.GeneratedSubtask;
+import service.exam.dto.SelectionState;
+import validation.exam.ExamGenerationValidator;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+
+public class ExamGenerationService {
+
+    private final Random random = new Random();
+    private final ExamGenerationValidator examGenerationValidator = new ExamGenerationValidator();
+
+    /**
+     * Generates an exam for the provided input values.
+     *
+     * @param generateExamValues title, target points and selected chapters for the new exam
+     * @return generated exam containing the selected subtasks and one random variant per subtask
+     * @throws ExamGenerationException if the input is invalid or no valid exam can be composed
+     */
+    public GeneratedExam generateExam(GenerateExamValues generateExamValues) {
+        examGenerationValidator.validateGenerateExamValues(generateExamValues);
+
+        List<CandidateTask> selectedTasks = selectTasksForRequestedPoints(generateExamValues);
+        List<GeneratedChapter> generatedChapters = createGeneratedChapters(selectedTasks, generateExamValues.selectedChapters());
+        if (generatedChapters.isEmpty()) {
+            throw new ExamGenerationException(ExamGenerationException.Reason.NO_GENERATABLE_SUBTASKS);
+        }
+
+        return new GeneratedExam(
+                generateExamValues.examTitle().trim(),
+                generateExamValues.targetPoints(),
+                generatedChapters
+        );
+    }
+
+    /**
+     * Selects a valid set of subtasks whose total points match the requested target.
+     *
+     * @param generateExamValues validated generation input
+     * @return ordered list of selected candidate tasks
+     */
+    private List<CandidateTask> selectTasksForRequestedPoints(GenerateExamValues generateExamValues) {
+        List<CandidateTask> candidateTasks = collectCandidateTasks(generateExamValues.selectedChapters());
+        Map<Integer, SelectionState> reachableSelections = calculateReachableSelections(
+                candidateTasks,
+                generateExamValues.targetPoints()
+        );
+        List<CandidateTask> selectedTasks = reconstructSelectedTasks(
+                reachableSelections,
+                generateExamValues.targetPoints()
+        );
+
+        sortTasksByChapterAndSubtaskOrder(selectedTasks, generateExamValues.selectedChapters());
+        return selectedTasks;
+    }
+
+    /**
+     * Creates a lookup map for the order of chapters selected by the user.
+     *
+     * @param chapters selected chapters in UI order
+     * @return map of chapter id to chapter position
+     */
+    private Map<Integer, Integer> buildChapterOrder(List<Chapter> chapters) {
+        Map<Integer, Integer> chapterOrder = new HashMap<>();
+        for (int chapterIndex = 0; chapterIndex < chapters.size(); chapterIndex++) {
+            chapterOrder.put(chapters.get(chapterIndex).getId(), chapterIndex);
+        }
+        return chapterOrder;
+    }
+
+    /**
+     * Creates a lookup map for the order of subtasks inside the selected chapters.
+     *
+     * @param chapters selected chapters in UI order
+     * @return map of subtask id to subtask position within its chapter
+     */
+    private Map<Integer, Integer> buildSubtaskOrder(List<Chapter> chapters) {
+        Map<Integer, Integer> subtaskOrder = new HashMap<>();
+        for (Chapter chapter : chapters) {
+            List<Subtask> subtasks = chapter.getChildElements() == null ? List.of() : chapter.getChildElements();
+            for (int subtaskIndex = 0; subtaskIndex < subtasks.size(); subtaskIndex++) {
+                subtaskOrder.put(subtasks.get(subtaskIndex).getId(), subtaskIndex);
+            }
+        }
+        return subtaskOrder;
+    }
+
+    /**
+     * Collects all generatable subtasks from the selected chapters.
+     *
+     * @param chapters chapters selected by the user
+     * @return all candidate tasks that have points and at least one variant
+     * @throws ExamGenerationException if no generatable subtasks are available
+     */
+    private List<CandidateTask> collectCandidateTasks(List<Chapter> chapters) {
+        List<CandidateTask> candidateTasks = new ArrayList<>();
+        for (Chapter chapter : chapters) {
+            candidateTasks.addAll(collectCandidateTasksFromChapter(chapter));
+        }
+
+        examGenerationValidator.validateCandidates(candidateTasks);
+        return candidateTasks;
+    }
+
+    /**
+     * Extracts all generatable subtasks of a single chapter.
+     *
+     * @param chapter source chapter
+     * @return candidate tasks for the given chapter
+     */
+    private List<CandidateTask> collectCandidateTasksFromChapter(Chapter chapter) {
+        List<CandidateTask> candidateTasks = new ArrayList<>();
+        List<Subtask> subtasks = chapter.getChildElements() == null ? List.of() : chapter.getChildElements();
+
+        for (Subtask subtask : subtasks) {
+            List<Variant> variants = getValidVariants(subtask);
+            if (isGeneratableSubtask(subtask, variants)) {
+                candidateTasks.add(new CandidateTask(chapter, subtask, variants));
+            }
+        }
+        return candidateTasks;
+    }
+
+    /**
+     * Returns the non-null variants of the provided subtask.
+     *
+     * @param subtask subtask to inspect
+     * @return list of valid variants
+     */
+    private List<Variant> getValidVariants(Subtask subtask) {
+        if (subtask.getChildElements() == null) {
+            return List.of();
+        }
+
+        return subtask.getChildElements().stream()
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    /**
+     * Checks whether a subtask can be part of a generated exam.
+     *
+     * @param subtask subtask to validate
+     * @param variants variants available for the subtask
+     * @return {@code true} if the subtask has positive points and at least one variant
+     */
+    private boolean isGeneratableSubtask(Subtask subtask, List<Variant> variants) {
+        return subtask.getPoints() > 0 && !variants.isEmpty();
+    }
+
+    /**
+     * Calculates all reachable point totals up to the requested target.
+     *
+     * @param candidateTasks available tasks to choose from
+     * @param targetPoints requested total number of points
+     * @return reachable point totals with the information required to rebuild the selection
+     * @throws ExamGenerationException if the requested number of points cannot be reached
+     */
+    private Map<Integer, SelectionState> calculateReachableSelections(List<CandidateTask> candidateTasks, int targetPoints) {
+        List<CandidateTask> shuffledCandidates = new ArrayList<>(candidateTasks);
+        Collections.shuffle(shuffledCandidates, random);
+
+        Map<Integer, SelectionState> reachableSelections = new LinkedHashMap<>();
+        reachableSelections.put(0, new SelectionState(null, null));
+
+        for (CandidateTask candidate : shuffledCandidates) {
+            reachableSelections = extendReachableSelections(reachableSelections, candidate, targetPoints);
+            if (reachableSelections.containsKey(targetPoints)) {
+                break;
+            }
+        }
+
+        examGenerationValidator.validateReachableStates(reachableSelections, targetPoints);
+        return reachableSelections;
+    }
+
+    /**
+     * Extends the currently reachable point totals with one additional candidate task.
+     *
+     * @param currentSelections currently reachable selections
+     * @param candidate candidate task that may be added
+     * @param targetPoints requested total number of points
+     * @return updated selection map
+     */
+    private Map<Integer, SelectionState> extendReachableSelections(
+            Map<Integer, SelectionState> currentSelections,
+            CandidateTask candidate,
+            int targetPoints
+    ) {
+        Map<Integer, SelectionState> extendedSelections = new LinkedHashMap<>(currentSelections);
+
+        for (Map.Entry<Integer, SelectionState> entry : currentSelections.entrySet()) {
+            int nextPoints = entry.getKey() + candidate.subtask().getPoints();
+            if (nextPoints > targetPoints || extendedSelections.containsKey(nextPoints)) {
+                continue;
+            }
+            extendedSelections.put(nextPoints, new SelectionState(entry.getKey(), candidate));
+        }
+
+        return extendedSelections;
+    }
+
+    /**
+     * Rebuilds the selected tasks from the final reachable-selection state.
+     *
+     * @param reachableSelections reachable point totals and their predecessor information
+     * @param targetPoints requested total number of points
+     * @return selected tasks in reconstruction order
+     */
+    private List<CandidateTask> reconstructSelectedTasks(
+            Map<Integer, SelectionState> reachableSelections,
+            int targetPoints
+    ) {
+        List<CandidateTask> selectedTasks = new ArrayList<>();
+        Integer currentPoints = targetPoints;
+
+        while (currentPoints != null && currentPoints > 0) {
+            SelectionState state = reachableSelections.get(currentPoints);
+            if (state == null || state.candidateTask() == null) {
+                break;
+            }
+            selectedTasks.add(state.candidateTask());
+            currentPoints = state.previousPoints();
+        }
+
+        Collections.reverse(selectedTasks);
+        return selectedTasks;
+    }
+
+    /**
+     * Sorts selected tasks according to the user's chapter and subtask order.
+     *
+     * @param selectedTasks tasks chosen for the generated exam
+     * @param chapters chapters selected by the user
+     */
+    private void sortTasksByChapterAndSubtaskOrder(List<CandidateTask> selectedTasks, List<Chapter> chapters) {
+        Map<Integer, Integer> chapterOrder = buildChapterOrder(chapters);
+        Map<Integer, Integer> subtaskOrder = buildSubtaskOrder(chapters);
+
+        selectedTasks.sort(Comparator
+                .comparingInt((CandidateTask candidate) -> chapterOrder.getOrDefault(candidate.chapter().getId(), Integer.MAX_VALUE))
+                .thenComparingInt(candidate -> subtaskOrder.getOrDefault(candidate.subtask().getId(), Integer.MAX_VALUE)));
+    }
+
+    /**
+     * Creates the generated exam chapters in the order of the selected chapters.
+     *
+     * @param selectedTasks tasks chosen for the exam
+     * @param selectedChapters chapters selected by the user
+     * @return generated chapters containing the chosen subtasks
+     */
+    private List<GeneratedChapter> createGeneratedChapters(
+            List<CandidateTask> selectedTasks,
+            List<Chapter> selectedChapters
+    ) {
+        Map<Integer, List<GeneratedSubtask>> generatedSubtasksByChapter = groupGeneratedSubtasksByChapter(selectedTasks);
+        List<GeneratedChapter> generatedChapters = new ArrayList<>();
+
+        for (Chapter selectedChapter : selectedChapters) {
+            List<GeneratedSubtask> chapterSubtasks = generatedSubtasksByChapter.get(selectedChapter.getId());
+            if (chapterSubtasks != null && !chapterSubtasks.isEmpty()) {
+                generatedChapters.add(new GeneratedChapter(selectedChapter, chapterSubtasks));
+            }
+        }
+
+        return generatedChapters;
+    }
+
+    /**
+     * Groups selected tasks by chapter and assigns one random variant to each subtask.
+     *
+     * @param selectedTasks tasks chosen for the exam
+     * @return generated subtasks grouped by chapter id
+     */
+    private Map<Integer, List<GeneratedSubtask>> groupGeneratedSubtasksByChapter(List<CandidateTask> selectedTasks) {
+        Map<Integer, List<GeneratedSubtask>> subtasksByChapter = new LinkedHashMap<>();
+        for (CandidateTask selectedTask : selectedTasks) {
+            Variant chosenVariant = pickRandomVariant(selectedTask.variants());
+            subtasksByChapter
+                    .computeIfAbsent(selectedTask.chapter().getId(), ignored -> new ArrayList<>())
+                    .add(new GeneratedSubtask(selectedTask.subtask(), chosenVariant));
+        }
+
+        return subtasksByChapter;
+    }
+
+    /**
+     * Selects one random variant from the available variants of a subtask.
+     *
+     * @param variants available variants for a subtask
+     * @return randomly selected variant
+     */
+    private Variant pickRandomVariant(List<Variant> variants) {
+        return variants.get(random.nextInt(variants.size()));
+    }
+}

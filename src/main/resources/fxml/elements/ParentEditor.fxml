@@ -12,7 +12,9 @@
         <Insets top="16" right="16" bottom="16" left="16" />
     </padding>
 
-    <Label fx:id="headerLabel" text="Editor" styleClass="header-label" />
+    <HBox alignment="CENTER_LEFT">
+        <Label fx:id="typeLabel" text="Element" styleClass="editor-type-badge" />
+    </HBox>
 
     <VBox spacing="6.0">
         <Label fx:id="titleLabel" text="Title" styleClass="section-label" />
@@ -24,12 +26,20 @@
         <TextField fx:id="pointsField" promptText="Points" styleClass="dark-input"/>
     </VBox>
 
-
     <VBox fx:id="labelsBox" spacing="6.0" visible="false" managed="false">
         <Label fx:id="labelsLabel" text="Labels" styleClass="section-label" />
         <TextField fx:id="labelsField" promptText="Practice, Exam" styleClass="dark-input" />
     </VBox>
 
+    <VBox fx:id="questionBox" spacing="6.0" visible="false" managed="false">
+        <Label fx:id="questionLabel" text="Question" styleClass="section-label" />
+        <TextArea fx:id="questionField" promptText="Question" prefRowCount="4" styleClass="dark-input" />
+    </VBox>
+
+    <VBox fx:id="solutionBox" spacing="6.0" visible="false" managed="false">
+        <Label fx:id="solutionLabel" text="Solution" styleClass="section-label" />
+        <TextArea fx:id="solutionField" promptText="Solution" prefRowCount="4" styleClass="dark-input" />
+    </VBox>
 
     <VBox spacing="8.0">
         <Label fx:id="childSectionLabel" text="Unterelemente" styleClass="section-label" />
@@ -38,14 +48,15 @@
                 <Insets top="12" right="12" bottom="12" left="12" />
             </padding>
         </VBox>
-        <Button fx:id="addChild" text="Create" styleClass="secondary-button" onMouseClicked="#toggleAddNewChild"/>
+        <Button fx:id="addChild" text="Create" styleClass="editor-secondary-button" onAction="#toggleAddNewChild"/>
     </VBox>
 
     <Region VBox.vgrow="ALWAYS" />
 
     <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="action-bar">
-        <Button fx:id="deleteButton" text="Delete" styleClass="danger-button" />
-        <Button fx:id="saveButton" text="Save" styleClass="secondary-button" />
-        <Button fx:id="createButton" text="Create" styleClass="secondary-button" />
+        <Label fx:id="actionFeedbackLabel" text="" styleClass="action-feedback" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" visible="false" managed="false" />
+        <Button fx:id="deleteButton" text="Delete" styleClass="editor-danger-button" />
+        <Button fx:id="saveButton" text="Save" styleClass="editor-primary-button" onAction="#handleSave" />
+        <Button fx:id="createButton" text="Create" styleClass="editor-primary-button" onAction="#handleCreate" visible="false" managed="false" />
     </HBox>
 </VBox>

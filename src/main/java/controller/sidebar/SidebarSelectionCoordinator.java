@@ -1,7 +1,7 @@
 package controller.sidebar;
 
 import javafx.scene.Node;
-import objects.ChildObject;
+import models.ChildObject;
 
 @FunctionalInterface
 public interface SidebarSelectionCoordinator {

@@ -10,6 +10,10 @@
 -fx-background-color: #1C1C1C;
 }
 
+.button {
+    -fx-cursor: hand;
+}
+
 
 .dark-input {
     -fx-background-color: #2A2A2A;
@@ -61,6 +65,107 @@
 .action-bar {
     -fx-alignment: CENTER_RIGHT;
     -fx-spacing: 10;
+    -fx-padding: 6 0 0 0;
+}
+
+.editor-primary-button,
+.editor-secondary-button,
+.editor-danger-button {
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 11 20 11 20;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+    -fx-min-height: 40;
+    -fx-min-width: 118;
+    -fx-letter-spacing: 0.2px;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+}
+
+.editor-primary-button:focused,
+.editor-secondary-button:focused,
+.editor-danger-button:focused {
+    -fx-border-width: 1.2;
+}
+
+.editor-primary-button:disabled,
+.editor-secondary-button:disabled,
+.editor-danger-button:disabled {
+    -fx-opacity: 0.45;
+    -fx-effect: none;
+}
+
+.editor-primary-button {
+    -fx-background-color: linear-gradient(to right, #7a59ff, #5f8bff);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(167, 182, 255, 0.28);
+    -fx-effect: dropshadow(gaussian, rgba(102, 127, 255, 0.36), 14, 0.25, 0, 3);
+}
+
+.editor-primary-button:hover {
+    -fx-background-color: linear-gradient(to right, #8b6cff, #6b9cff);
+    -fx-effect: dropshadow(gaussian, rgba(113, 141, 255, 0.45), 16, 0.28, 0, 4);
+}
+
+.editor-primary-button:pressed {
+    -fx-background-color: linear-gradient(to right, #704ef0, #5780ee);
+    -fx-scale-x: 0.985;
+    -fx-scale-y: 0.985;
+}
+
+.editor-primary-button:focused {
+    -fx-border-color: rgba(177, 198, 255, 0.95);
+}
+
+.editor-secondary-button {
+    -fx-background-color: linear-gradient(to bottom, #353535, #2d2d2d);
+    -fx-text-fill: #f0f3ff;
+    -fx-border-color: rgba(123, 149, 255, 0.34);
+    -fx-effect: dropshadow(gaussian, rgba(26, 29, 39, 0.28), 10, 0.18, 0, 2);
+    -fx-min-width: 170;
+    -fx-padding: 11 22 11 22;
+}
+
+.editor-secondary-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #3d3d3d, #343434);
+    -fx-border-color: rgba(138, 170, 255, 0.55);
+    -fx-text-fill: #ffffff;
+}
+
+.editor-secondary-button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #2e2e2e, #292929);
+    -fx-scale-x: 0.985;
+    -fx-scale-y: 0.985;
+}
+
+.editor-secondary-button:focused {
+    -fx-border-color: rgba(150, 187, 255, 0.88);
+}
+
+.editor-danger-button {
+    -fx-background-color: linear-gradient(to bottom, rgba(229, 77, 77, 0.95), rgba(205, 57, 57, 0.95));
+    -fx-text-fill: #fff7f7;
+    -fx-border-color: rgba(255, 182, 182, 0.25);
+    -fx-effect: dropshadow(gaussian, rgba(201, 57, 57, 0.25), 12, 0.22, 0, 2);
+}
+
+.editor-danger-button:hover {
+    -fx-background-color: linear-gradient(to bottom, rgba(239, 93, 93, 0.98), rgba(214, 67, 67, 0.98));
+    -fx-border-color: rgba(255, 205, 205, 0.35);
+}
+
+.editor-danger-button:pressed {
+    -fx-background-color: linear-gradient(to bottom, rgba(208, 64, 64, 0.98), rgba(188, 48, 48, 0.98));
+    -fx-scale-x: 0.985;
+    -fx-scale-y: 0.985;
+}
+
+.editor-danger-button:focused {
+    -fx-border-color: rgba(255, 210, 210, 0.7);
 }
 
 .danger-button {
@@ -68,6 +173,7 @@
     -fx-text-fill: white;
     -fx-background-radius: 8;
     -fx-padding: 8 14 8 14;
+    -fx-font-weight: 700;
 }
 
 .secondary-button {
@@ -101,14 +207,126 @@
 }
 
 .primary-button {
-    -fx-background-color: linear-gradient(to right, #7C4DFF, #9B6DFF);
+    -fx-background-color: linear-gradient(to right, #7a59ff, #5f8bff);
     -fx-text-fill: #FFFFFF;
-    -fx-background-radius: 10;
-    -fx-padding: 8 16 8 16;
+    -fx-background-radius: 12;
+    -fx-padding: 10 18 10 18;
     -fx-font-weight: 700;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(102, 127, 255, 0.35), 12, 0.25, 0, 3);
 }
 
 .primary-button:hover {
-    -fx-background-color: linear-gradient(to right, #8A5EFF, #A47AFF);
+    -fx-background-color: linear-gradient(to right, #8b6cff, #6b9cff);
+}
+
+.primary-button:pressed {
+    -fx-scale-x: 0.985;
+    -fx-scale-y: 0.985;
+}
+
+.generate-dialog-content {
+    -fx-background-color: #1c1c1c;
+}
+
+.generate-dialog-list {
+    -fx-background-color: #2a2a2a;
+    -fx-control-inner-background: #2a2a2a;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #3b3b3b;
+}
+
+.generate-dialog-combo {
+    -fx-background-color: #2a2a2a;
+    -fx-background-radius: 8;
+    -fx-border-color: #3b3b3b;
+    -fx-border-radius: 8;
+    -fx-padding: 1 4 1 4;
+    -fx-prompt-text-fill: #8f8f8f;
+}
+
+.generate-dialog-combo:hover {
+    -fx-border-color: #5a6fca;
+}
+
+.generate-dialog-combo:focused {
+    -fx-border-color: #7f98ff;
+}
+
+.generate-dialog-combo .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ededed;
+    -fx-padding: 8 10 8 10;
+}
+
+.generate-dialog-combo .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.generate-dialog-combo .arrow {
+    -fx-background-color: #ededed;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #2a2a2a;
+    -fx-control-inner-background: #2a2a2a;
+    -fx-border-color: #3b3b3b;
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: #2a2a2a;
+    -fx-text-fill: #ededed;
+    -fx-padding: 9 12 9 12;
+}
+
+.combo-box-popup .list-cell:hover,
+.combo-box-popup .list-cell:selected {
+    -fx-background-color: #4057b6;
+    -fx-text-fill: #ffffff;
+}
+
+.generate-dialog-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ededed;
+    -fx-padding: 10 12 10 12;
+}
+
+.generate-dialog-list .list-cell:selected {
+    -fx-background-color: #4057b6;
+    -fx-text-fill: #ffffff;
+}
+
+.generate-dialog-status {
+    -fx-text-fill: #c7c7c7;
+    -fx-font-size: 12px;
+}
+
+.generate-dialog-status-success {
+    -fx-text-fill: #c7c7c7;
+}
+
+.generate-dialog-status-error {
+    -fx-text-fill: #ff9090;
+}
+
+.generate-dialog-checkbox {
+    -fx-text-fill: #ededed;
+    -fx-font-size: 13px;
+}
+
+.generate-dialog-checkbox .box {
+    -fx-background-color: #ececec;
+    -fx-background-radius: 5;
+    -fx-border-color: #4a4a4a;
+    -fx-border-radius: 5;
+}
+
+.generate-dialog-checkbox:selected .mark {
+    -fx-background-color: #ffffff;
+}
+
+.generate-dialog-checkbox:selected .box {
+    -fx-background-color: #4057b6;
+    -fx-border-color: #7f98ff;
 }

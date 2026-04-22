@@ -12,7 +12,14 @@
         <Insets top="16" right="16" bottom="16" left="16" />
     </padding>
 
-    <Label fx:id="headerLabel" text="Variant" styleClass="header-label" />
+    <HBox alignment="CENTER_LEFT">
+        <Label fx:id="typeLabel" text="Variant" styleClass="editor-type-badge" />
+    </HBox>
+
+    <VBox spacing="6.0">
+        <Label fx:id="titleLabel" text="Title" styleClass="section-label" />
+        <TextField fx:id="titleField" promptText="Title" styleClass="dark-input" />
+    </VBox>
 
     <VBox spacing="6.0">
         <Label fx:id="questionLabel" text="Question" styleClass="section-label" />
@@ -27,7 +34,8 @@
     <Region VBox.vgrow="ALWAYS" />
 
     <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="action-bar">
-        <Button fx:id="deleteButton" text="Delete" styleClass="danger-button" />
-        <Button fx:id="saveButton" text="Save" styleClass="secondary-button" />
+        <Label fx:id="actionFeedbackLabel" text="" styleClass="action-feedback" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" visible="false" managed="false" />
+        <Button fx:id="deleteButton" text="Delete" styleClass="editor-danger-button" />
+        <Button fx:id="saveButton" text="Save" styleClass="editor-primary-button" onAction="#handleSave" />
     </HBox>
 </VBox>

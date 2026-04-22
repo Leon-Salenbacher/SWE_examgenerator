@@ -1,10 +1,11 @@
 package controller;
 
+import controller.exam.ExamGenerationDialog;
 import controller.editor.EditorHostController;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import objects.ChildObject;
-import service.LocalizationService;
+import models.ChildObject;
+import service.impl.LocalizationService;
 
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -28,11 +29,14 @@ public class MainController {
     private EditorHostController editorHostController;
 
     private final LocalizationService localizationService = LocalizationService.getInstance();
+    private final ExamGenerationDialog examGenerationDialog = new ExamGenerationDialog();
 
     @FXML
     private void initialize(){
         if(sidebarController != null && editorHostController != null){
             sidebarController.setSelectionListener(this::handleSelection);
+            editorHostController.setDataChangedHandler(sidebarController::setChapters);
+            editorHostController.setNavigationHandler(sidebarController::refreshAndRevealSelection);
         }
 
         applyTranslations();
@@ -74,7 +78,7 @@ public class MainController {
 
     @FXML
     private void handleGenerateExam() {
-        showInfo(localizationService.get("generate.dialog.title"), localizationService.get("generate.dialog.message"));
+        examGenerationDialog.show(generateButton.getScene().getWindow());
     }
 
     @FXML

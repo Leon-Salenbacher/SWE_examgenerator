@@ -2,7 +2,7 @@ package controller.editor;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import objects.ChildObject;
+import models.ChildObject;
 
 import java.util.function.Consumer;
 
