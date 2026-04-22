@@ -1,8 +1,28 @@
-.sidebar-container{
-    -fx-padding: 14 12;
-    -fx-spacing: 14;
+.sidebar-scroll,
+.sidebar-scroll > .viewport {
+    -fx-background-color: linear-gradient(to bottom, #241f36, #1c192a);
+}
+
+.sidebar-scroll {
+    -fx-background: linear-gradient(to bottom, #241f36, #1c192a);
     -fx-background-color: linear-gradient(to bottom, #241f36, #1c192a);
     -fx-background-radius: 0 12 12 0;
+    -fx-padding: 0;
+    -fx-fit-to-width: true;
+}
+
+.sidebar-scroll .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-max-height: 0;
+    -fx-pref-height: 0;
+}
+
+.sidebar-container{
+    -fx-min-width: 220;
+    -fx-pref-width: 260;
+    -fx-padding: 14 12;
+    -fx-spacing: 14;
+    -fx-background-color: transparent;
 }
 
 .sidebar-heading {

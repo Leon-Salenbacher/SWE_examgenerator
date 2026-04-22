@@ -9,11 +9,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import models.Chapter;
 import models.ChildObject;
@@ -132,6 +135,7 @@ public class ParentEditorController {
     private void initialize(){
         pointsField.setTextFormatter(createNumericFormatter());
         difficultyBox.getItems().setAll(SubtaskDifficulty.values());
+        difficultyBox.getStyleClass().add("difficulty-combo");
         difficultyBox.setCellFactory(listView -> new DifficultyListCell());
         difficultyBox.setButtonCell(new DifficultyListCell());
 
@@ -724,7 +728,31 @@ public class ParentEditorController {
         @Override
         protected void updateItem(SubtaskDifficulty item, boolean empty) {
             super.updateItem(item, empty);
-            setText(empty || item == null ? null : localizationService.get("difficulty." + item.getXmlValue()));
+            getStyleClass().removeAll(
+                    "difficulty-cell-easy",
+                    "difficulty-cell-medium",
+                    "difficulty-cell-difficult"
+            );
+
+            if (empty || item == null) {
+                setText(null);
+                setGraphic(null);
+                return;
+            }
+
+            Region icon = new Region();
+            icon.getStyleClass().addAll("difficulty-icon", "difficulty-icon-" + item.getXmlValue());
+
+            Label text = new Label(localizationService.get("difficulty." + item.getXmlValue()));
+            text.getStyleClass().add("difficulty-text");
+
+            HBox content = new HBox(8, icon, text);
+            content.getStyleClass().add("difficulty-option");
+            getStyleClass().add("difficulty-cell-" + item.getXmlValue());
+
+            setText(null);
+            setGraphic(content);
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         }
     }
 }

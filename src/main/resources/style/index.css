@@ -10,6 +10,23 @@
 -fx-background-color: #1C1C1C;
 }
 
+.editor-scroll,
+.editor-scroll > .viewport {
+    -fx-background-color: #1C1C1C;
+}
+
+.editor-scroll {
+    -fx-background: #1C1C1C;
+    -fx-padding: 0;
+    -fx-fit-to-width: true;
+}
+
+.editor-scroll .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-max-height: 0;
+    -fx-pref-height: 0;
+}
+
 .button {
     -fx-cursor: hand;
 }
@@ -23,6 +40,98 @@
     -fx-background-radius: 8;
     -fx-padding: 10;
     -fx-border-color: transparent;
+}
+
+.dark-input .content {
+    -fx-background-color: #2A2A2A;
+}
+
+.difficulty-combo {
+    -fx-background-color: #25272d;
+    -fx-border-color: #565f78;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 2 6 2 6;
+}
+
+.difficulty-combo:hover {
+    -fx-background-color: #2b2e36;
+    -fx-border-color: #7b8fd6;
+}
+
+.difficulty-combo:focused {
+    -fx-border-color: #9db0ff;
+}
+
+.difficulty-combo .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f4f6ff;
+    -fx-padding: 8 8 8 8;
+}
+
+.difficulty-combo .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.difficulty-combo .arrow {
+    -fx-background-color: #f4f6ff;
+}
+
+.difficulty-option {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.difficulty-text {
+    -fx-text-fill: #f4f6ff;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.difficulty-icon {
+    -fx-min-width: 16;
+    -fx-min-height: 16;
+    -fx-pref-width: 16;
+    -fx-pref-height: 16;
+    -fx-max-width: 16;
+    -fx-max-height: 16;
+}
+
+.difficulty-icon-easy {
+    -fx-background-color: #62d38b;
+    -fx-shape: "M7.2 12.3 L2.7 7.8 L4.3 6.2 L7.2 9.1 L13.7 2.6 L15.3 4.2 Z";
+}
+
+.difficulty-icon-medium {
+    -fx-background-color: #f1c861;
+    -fx-shape: "M2 7 H14 V10 H2 Z";
+}
+
+.difficulty-icon-difficult {
+    -fx-background-color: #ff7676;
+    -fx-shape: "M8 1 L15 14 H1 Z";
+}
+
+.combo-box-popup .list-view .difficulty-cell-easy,
+.combo-box-popup .list-view .difficulty-cell-medium,
+.combo-box-popup .list-view .difficulty-cell-difficult {
+    -fx-background-color: #25272d;
+    -fx-padding: 10 12 10 12;
+}
+
+.combo-box-popup .list-view .difficulty-cell-easy:hover,
+.combo-box-popup .list-view .difficulty-cell-easy:selected {
+    -fx-background-color: rgba(71, 156, 101, 0.34);
+}
+
+.combo-box-popup .list-view .difficulty-cell-medium:hover,
+.combo-box-popup .list-view .difficulty-cell-medium:selected {
+    -fx-background-color: rgba(194, 148, 37, 0.34);
+}
+
+.combo-box-popup .list-view .difficulty-cell-difficult:hover,
+.combo-box-popup .list-view .difficulty-cell-difficult:selected {
+    -fx-background-color: rgba(210, 76, 76, 0.36);
 }
 
 

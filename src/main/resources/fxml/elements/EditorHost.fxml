@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.StackPane?>
 
-<StackPane xmlns="http://javafx.com/javafx"
-           xmlns:fx="http://javafx.com/fxml"
-           fx:controller="controller.editor.EditorHostController"
-           styleClass="chapterEditor-container">
-    <children>
-        <StackPane fx:id="contentHost" />
-    </children>
-</StackPane>
+<ScrollPane fx:id="editorScroll"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controller.editor.EditorHostController"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            styleClass="editor-scroll">
+    <content>
+        <StackPane fx:id="contentHost" minWidth="0.0" />
+    </content>
+</ScrollPane>

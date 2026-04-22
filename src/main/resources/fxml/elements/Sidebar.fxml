@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.Label?>
-<VBox xmlns:fx="http://javafx.com/fxml"
-      fx:controller="controller.SidebarController" styleClass="sidebar-container">
-    <Label fx:id="headingLabel" text="Outline" styleClass="sidebar-heading" />
-    <VBox fx:id="chapterBox" spacing="8" />
-</VBox>
+<ScrollPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controller.SidebarController"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            minWidth="220.0"
+            prefWidth="260.0"
+            styleClass="sidebar-scroll">
+    <content>
+        <VBox styleClass="sidebar-container">
+            <Label fx:id="headingLabel" text="Outline" styleClass="sidebar-heading" />
+            <VBox fx:id="chapterBox" spacing="8" />
+        </VBox>
+    </content>
+</ScrollPane>

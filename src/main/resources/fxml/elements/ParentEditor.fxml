@@ -36,14 +36,14 @@
         <TextField fx:id="labelsField" promptText="Practice, Exam" styleClass="dark-input" />
     </VBox>
 
-    <VBox fx:id="questionBox" spacing="6.0" visible="false" managed="false">
+    <VBox fx:id="questionBox" spacing="6.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
         <Label fx:id="questionLabel" text="Question" styleClass="section-label" />
-        <TextArea fx:id="questionField" promptText="Question" prefRowCount="4" styleClass="dark-input" />
+        <TextArea fx:id="questionField" promptText="Question" prefRowCount="6" wrapText="true" maxHeight="1.7976931348623157E308" styleClass="dark-input" VBox.vgrow="ALWAYS" />
     </VBox>
 
-    <VBox fx:id="solutionBox" spacing="6.0" visible="false" managed="false">
+    <VBox fx:id="solutionBox" spacing="6.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
         <Label fx:id="solutionLabel" text="Solution" styleClass="section-label" />
-        <TextArea fx:id="solutionField" promptText="Solution" prefRowCount="4" styleClass="dark-input" />
+        <TextArea fx:id="solutionField" promptText="Solution" prefRowCount="6" wrapText="true" maxHeight="1.7976931348623157E308" styleClass="dark-input" VBox.vgrow="ALWAYS" />
     </VBox>
 
     <VBox spacing="8.0">

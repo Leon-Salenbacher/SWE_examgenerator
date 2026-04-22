@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <ExamGenerator>
   <Chapter id="1" title="Requirements Engineering">
     <Subtask chapterId="1" difficulty="easy" id="1" labels="Exam,Analysis" points="5" title="Stakeholderanalyse">
       <Variant id="1" question="Nenne drei typische Stakeholder in einem Softwareprojekt und beschreibe ihre Erwartungen kurz." solution="Beispiel: Kunde mit Fokus auf Nutzen und Budget, Endnutzer mit Fokus auf Bedienbarkeit, Entwicklungsteam mit Fokus auf Umsetzbarkeit und Wartbarkeit." title="Stakeholder identifizieren"/>
       <Variant id="2" question="Erklaere den Unterschied zwischen funktionalen und nicht-funktionalen Anforderungen anhand eines kurzen Beispiels." solution="Funktionale Anforderungen beschreiben was das System tun soll, nicht-funktionale wie gut oder unter welchen Randbedingungen es das tun muss. Beispiel: Login anbieten versus Antwortzeit unter zwei Sekunden." title="Anforderungsarten"/>
     </Subtask>
-    <Subtask chapterId="1" difficulty="medium" id="2" labels="Exam,Modeling" points="8" title="Use-Case-Modellierung">
+    <Subtask chapterId="1" difficulty="difficult" id="2" labels="Exam,Modeling" points="8" title="Use-Case-Modellierung">
       <Variant id="3" question="Beschreibe die wichtigsten Bestandteile eines Use Cases und erklaere kurz ihren Zweck." solution="Typische Bestandteile sind Name, Ziel, Akteure, Vorbedingungen, Hauptablauf, Alternativablauf und Nachbedingungen. Sie strukturieren das fachliche Verhalten eines Systems." title="Use Case aufbauen"/>
       <Variant id="4" question="Wann ist ein Aktivitaetsdiagramm fuer einen Anwendungsfall hilfreicher als ein reiner Fliesstext? Begruende kurz." solution="Wenn Ablauflogik mit Entscheidungen, Parallelitaet oder Schleifen verstaendlich dargestellt werden soll. Das Diagramm macht Verzweigungen und Prozesslogik sichtbar." title="Use Cases visualisieren"/>
     </Subtask>
