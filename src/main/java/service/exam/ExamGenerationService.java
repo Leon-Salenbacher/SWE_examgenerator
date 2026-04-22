@@ -3,6 +3,7 @@ package service.exam;
 import exceptions.ExamGenerationException;
 import models.Chapter;
 import models.Subtask;
+import models.SubtaskDifficulty;
 import models.Variant;
 import service.exam.dto.CandidateTask;
 import service.exam.dto.GenerateExamValues;
@@ -15,12 +16,16 @@ import validation.exam.ExamGenerationValidator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class ExamGenerationService {
 
@@ -51,6 +56,42 @@ public class ExamGenerationService {
     }
 
     /**
+     * Calculates the total point values that can be generated with an exact third
+     * of the points from each difficulty.
+     *
+     * @param selectedChapters chapters selected by the user
+     * @return sorted reachable total point values
+     */
+    public List<Integer> calculateAvailableTotalPoints(List<Chapter> selectedChapters) {
+        if (selectedChapters == null || selectedChapters.isEmpty()) {
+            return List.of();
+        }
+
+        List<CandidateTask> candidateTasks = collectCandidateTasksWithoutValidation(selectedChapters);
+        Map<SubtaskDifficulty, List<CandidateTask>> tasksByDifficulty = groupTasksByDifficulty(candidateTasks);
+        Set<Integer> commonThirdValues = null;
+
+        for (SubtaskDifficulty difficulty : SubtaskDifficulty.values()) {
+            Set<Integer> reachablePoints = calculateReachablePointValues(tasksByDifficulty.getOrDefault(difficulty, List.of()));
+            reachablePoints.remove(0);
+            if (commonThirdValues == null) {
+                commonThirdValues = new HashSet<>(reachablePoints);
+            } else {
+                commonThirdValues.retainAll(reachablePoints);
+            }
+        }
+
+        if (commonThirdValues == null || commonThirdValues.isEmpty()) {
+            return List.of();
+        }
+
+        return commonThirdValues.stream()
+                .sorted()
+                .map(thirdValue -> thirdValue * SubtaskDifficulty.values().length)
+                .toList();
+    }
+
+    /**
      * Selects a valid set of subtasks whose total points match the requested target.
      *
      * @param generateExamValues validated generation input
@@ -58,16 +99,41 @@ public class ExamGenerationService {
      */
     private List<CandidateTask> selectTasksForRequestedPoints(GenerateExamValues generateExamValues) {
         List<CandidateTask> candidateTasks = collectCandidateTasks(generateExamValues.selectedChapters());
-        Map<Integer, SelectionState> reachableSelections = calculateReachableSelections(
-                candidateTasks,
-                generateExamValues.targetPoints()
-        );
-        List<CandidateTask> selectedTasks = reconstructSelectedTasks(
-                reachableSelections,
-                generateExamValues.targetPoints()
-        );
+        List<CandidateTask> selectedTasks = selectBalancedTasks(candidateTasks, generateExamValues.targetPoints());
 
         sortTasksByChapterAndSubtaskOrder(selectedTasks, generateExamValues.selectedChapters());
+        return selectedTasks;
+    }
+
+    /**
+     * Selects subtasks so each difficulty contributes exactly one third of the target points.
+     *
+     * @param candidateTasks available tasks
+     * @param targetPoints requested total points
+     * @return combined selected tasks for all difficulties
+     */
+    private List<CandidateTask> selectBalancedTasks(List<CandidateTask> candidateTasks, int targetPoints) {
+        if (targetPoints % SubtaskDifficulty.values().length != 0) {
+            throw new ExamGenerationException(
+                    ExamGenerationException.Reason.POINTS_NOT_REACHABLE,
+                    targetPoints,
+                    0,
+                    calculateMaxBalancedTotalPoints(candidateTasks)
+            );
+        }
+
+        int pointsPerDifficulty = targetPoints / SubtaskDifficulty.values().length;
+        Map<SubtaskDifficulty, List<CandidateTask>> tasksByDifficulty = groupTasksByDifficulty(candidateTasks);
+        List<CandidateTask> selectedTasks = new ArrayList<>();
+
+        for (SubtaskDifficulty difficulty : SubtaskDifficulty.values()) {
+            Map<Integer, SelectionState> reachableSelections = calculateReachableSelections(
+                    tasksByDifficulty.getOrDefault(difficulty, List.of()),
+                    pointsPerDifficulty
+            );
+            selectedTasks.addAll(reconstructSelectedTasks(reachableSelections, pointsPerDifficulty));
+        }
+
         return selectedTasks;
     }
 
@@ -110,13 +176,76 @@ public class ExamGenerationService {
      * @throws ExamGenerationException if no generatable subtasks are available
      */
     private List<CandidateTask> collectCandidateTasks(List<Chapter> chapters) {
+        List<CandidateTask> candidateTasks = collectCandidateTasksWithoutValidation(chapters);
+        examGenerationValidator.validateCandidates(candidateTasks);
+        return candidateTasks;
+    }
+
+    private List<CandidateTask> collectCandidateTasksWithoutValidation(List<Chapter> chapters) {
         List<CandidateTask> candidateTasks = new ArrayList<>();
         for (Chapter chapter : chapters) {
             candidateTasks.addAll(collectCandidateTasksFromChapter(chapter));
         }
-
-        examGenerationValidator.validateCandidates(candidateTasks);
         return candidateTasks;
+    }
+
+    private Map<SubtaskDifficulty, List<CandidateTask>> groupTasksByDifficulty(List<CandidateTask> candidateTasks) {
+        Map<SubtaskDifficulty, List<CandidateTask>> tasksByDifficulty = new EnumMap<>(SubtaskDifficulty.class);
+        for (CandidateTask candidateTask : candidateTasks) {
+            SubtaskDifficulty difficulty = candidateTask.subtask().getDifficulty() == null
+                    ? SubtaskDifficulty.MEDIUM
+                    : candidateTask.subtask().getDifficulty();
+            tasksByDifficulty
+                    .computeIfAbsent(difficulty, ignored -> new ArrayList<>())
+                    .add(candidateTask);
+        }
+        return tasksByDifficulty;
+    }
+
+    private Set<Integer> calculateReachablePointValues(List<CandidateTask> candidateTasks) {
+        Set<Integer> reachablePoints = new TreeSet<>();
+        reachablePoints.add(0);
+
+        for (CandidateTask candidateTask : candidateTasks) {
+            Set<Integer> extendedPoints = new TreeSet<>(reachablePoints);
+            for (Integer currentPoints : reachablePoints) {
+                extendedPoints.add(currentPoints + candidateTask.subtask().getPoints());
+            }
+            reachablePoints = extendedPoints;
+        }
+
+        return reachablePoints;
+    }
+
+    private int calculateMaxBalancedTotalPoints(List<CandidateTask> candidateTasks) {
+        return calculateAvailableTotalPointsFromCandidates(candidateTasks).stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+    }
+
+    private List<Integer> calculateAvailableTotalPointsFromCandidates(List<CandidateTask> candidateTasks) {
+        Map<SubtaskDifficulty, List<CandidateTask>> tasksByDifficulty = groupTasksByDifficulty(candidateTasks);
+        Set<Integer> commonThirdValues = null;
+
+        for (SubtaskDifficulty difficulty : SubtaskDifficulty.values()) {
+            Set<Integer> reachablePoints = calculateReachablePointValues(tasksByDifficulty.getOrDefault(difficulty, List.of()));
+            reachablePoints.remove(0);
+            if (commonThirdValues == null) {
+                commonThirdValues = new HashSet<>(reachablePoints);
+            } else {
+                commonThirdValues.retainAll(reachablePoints);
+            }
+        }
+
+        if (commonThirdValues == null || commonThirdValues.isEmpty()) {
+            return List.of();
+        }
+
+        return commonThirdValues.stream()
+                .sorted()
+                .map(thirdValue -> thirdValue * SubtaskDifficulty.values().length)
+                .toList();
     }
 
     /**

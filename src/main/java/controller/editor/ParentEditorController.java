@@ -8,7 +8,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
@@ -17,6 +19,7 @@ import models.Chapter;
 import models.ChildObject;
 import models.ParentObject;
 import models.Subtask;
+import models.SubtaskDifficulty;
 import models.Variant;
 import service.impl.LocalizationService;
 import service.impl.elements.ChapterServiceImpl;
@@ -44,6 +47,15 @@ public class ParentEditorController {
 
     @FXML
     private TextField pointsField;
+
+    @FXML
+    private VBox difficultyBoxContainer;
+
+    @FXML
+    private Label difficultyLabel;
+
+    @FXML
+    private ComboBox<SubtaskDifficulty> difficultyBox;
 
     @FXML
     private Label childSectionLabel;
@@ -119,6 +131,9 @@ public class ParentEditorController {
     @FXML
     private void initialize(){
         pointsField.setTextFormatter(createNumericFormatter());
+        difficultyBox.getItems().setAll(SubtaskDifficulty.values());
+        difficultyBox.setCellFactory(listView -> new DifficultyListCell());
+        difficultyBox.setButtonCell(new DifficultyListCell());
 
         titleField.textProperty().addListener((observable, oldValue, newValue) -> {
             clearFeedback();
@@ -158,6 +173,14 @@ public class ParentEditorController {
                 return;
             }
             ((Subtask) currentParent).setLabels(parseLabels(newValue));
+        });
+
+        difficultyBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            clearFeedback();
+            if (createMode || !(currentParent instanceof Subtask) || newValue == null) {
+                return;
+            }
+            ((Subtask) currentParent).setDifficulty(newValue);
         });
 
         displayPlaceholder();
@@ -239,6 +262,7 @@ public class ParentEditorController {
         pointsField.clear();
         pointsBox.setVisible(false);
         pointsBox.setManaged(false);
+        toggleDifficulty(false);
         toggleLabels(false);
         toggleVariantFields(false);
         labelsField.clear();
@@ -259,6 +283,7 @@ public class ParentEditorController {
         typeLabel.setText(localizationService.get("parentEditor.header.chapter"));
         titleField.setText(defaultText(chapter.getTitle(), ""));
         togglePoints(false);
+        toggleDifficulty(false);
         toggleLabels(false);
         toggleVariantFields(false);
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.subtasks"));
@@ -272,9 +297,11 @@ public class ParentEditorController {
         typeLabel.setText(localizationService.get("parentEditor.header.subtask"));
         titleField.setText(defaultText(subtask.getTitle(), ""));
         togglePoints(true);
+        toggleDifficulty(true);
         toggleLabels(true);
         toggleVariantFields(false);
         pointsField.setText(String.valueOf(subtask.getPoints()));
+        difficultyBox.setValue(defaultDifficulty(subtask.getDifficulty()));
         labelsField.setText(String.join(", ", defaultLabels(subtask.getLabels())));
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.variants"));
         renderChildren(subtask.getChildElements());
@@ -287,6 +314,7 @@ public class ParentEditorController {
         typeLabel.setText(localizationService.get("parentEditor.header.generic"));
         titleField.setText(defaultText(parent.getTitle(), ""));
         togglePoints(false);
+        toggleDifficulty(false);
         toggleLabels(false);
         toggleVariantFields(false);
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.generic"));
@@ -298,6 +326,11 @@ public class ParentEditorController {
     private void togglePoints(boolean visible){
         pointsBox.setVisible(visible);
         pointsBox.setManaged(visible);
+    }
+
+    private void toggleDifficulty(boolean visible){
+        difficultyBoxContainer.setVisible(visible);
+        difficultyBoxContainer.setManaged(visible);
     }
 
     private void toggleLabels(boolean visible){
@@ -328,11 +361,16 @@ public class ParentEditorController {
         return labels == null ? List.of() : labels;
     }
 
+    private SubtaskDifficulty defaultDifficulty(SubtaskDifficulty difficulty) {
+        return difficulty == null ? SubtaskDifficulty.MEDIUM : difficulty;
+    }
+
     private void applyTranslations() {
         titleLabel.setText(localizationService.get("parentEditor.title"));
         titleField.setPromptText(localizationService.get("parentEditor.title.prompt"));
         pointsLabel.setText(localizationService.get("parentEditor.points"));
         pointsField.setPromptText(localizationService.get("parentEditor.points.prompt"));
+        difficultyLabel.setText(localizationService.get("parentEditor.difficulty"));
         labelsLabel.setText(localizationService.get("parentEditor.labels"));
         labelsField.setPromptText(localizationService.get("parentEditor.labels.prompt"));
         questionLabel.setText(localizationService.get("childEditor.question"));
@@ -409,6 +447,7 @@ public class ParentEditorController {
         createMode = true;
         titleField.clear();
         pointsField.clear();
+        difficultyBox.setValue(SubtaskDifficulty.MEDIUM);
         labelsField.clear();
         questionField.clear();
         solutionField.clear();
@@ -417,16 +456,19 @@ public class ParentEditorController {
         if (currentParent instanceof Chapter) {
             typeLabel.setText(localizationService.get("parentEditor.header.createSubtask"));
             togglePoints(true);
+            toggleDifficulty(true);
             toggleLabels(true);
             toggleVariantFields(false);
         } else if (currentParent instanceof Subtask) {
             typeLabel.setText(localizationService.get("parentEditor.header.createVariant"));
             togglePoints(false);
+            toggleDifficulty(false);
             toggleLabels(false);
             toggleVariantFields(true);
         } else {
             typeLabel.setText(localizationService.get("parentEditor.header.generic"));
             togglePoints(false);
+            toggleDifficulty(false);
             toggleLabels(false);
             toggleVariantFields(false);
         }
@@ -494,6 +536,11 @@ public class ParentEditorController {
                     }
 
                     @Override
+                    public SubtaskDifficulty difficulty() {
+                        return defaultDifficulty(difficultyBox.getValue());
+                    }
+
+                    @Override
                     public List<String> labels() {
                         return parseLabels(labelsField.getText());
                     }
@@ -535,6 +582,7 @@ public class ParentEditorController {
                 createdSubtask.setChapterId(chapter.getId());
                 createdSubtask.setTitle(titleField.getText());
                 createdSubtask.setPoints(parsePointsInput());
+                createdSubtask.setDifficulty(defaultDifficulty(difficultyBox.getValue()));
                 createdSubtask.setLabels(new ArrayList<>(parseLabels(labelsField.getText())));
 
                 ValidationResult validationResult = subtaskValidator.validate(createdSubtask);
@@ -670,5 +718,13 @@ public class ParentEditorController {
         return message == null || message.isBlank()
                 ? localizationService.get("editor.error.unknown")
                 : message;
+    }
+
+    private final class DifficultyListCell extends ListCell<SubtaskDifficulty> {
+        @Override
+        protected void updateItem(SubtaskDifficulty item, boolean empty) {
+            super.updateItem(item, empty);
+            setText(empty || item == null ? null : localizationService.get("difficulty." + item.getXmlValue()));
+        }
     }
 }

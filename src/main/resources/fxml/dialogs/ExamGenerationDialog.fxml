@@ -46,7 +46,7 @@
             <TextField fx:id="titleField" styleClass="title-field"/>
 
             <Label fx:id="pointsLabel" styleClass="section-label"/>
-            <TextField fx:id="pointsField" styleClass="title-field"/>
+            <ComboBox fx:id="pointsBox" maxWidth="1.7976931348623157E308" styleClass="generate-dialog-combo"/>
 
             <Label fx:id="layoutLabel" styleClass="section-label"/>
             <Button fx:id="layoutButton" styleClass="editor-secondary-button" onAction="#handleOpenLayoutDialog"/>

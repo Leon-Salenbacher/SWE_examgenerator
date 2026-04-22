@@ -26,6 +26,11 @@
         <TextField fx:id="pointsField" promptText="Points" styleClass="dark-input"/>
     </VBox>
 
+    <VBox fx:id="difficultyBoxContainer" spacing="6.0" visible="false" managed="false">
+        <Label fx:id="difficultyLabel" text="Difficulty" styleClass="section-label" />
+        <ComboBox fx:id="difficultyBox" maxWidth="1.7976931348623157E308" styleClass="dark-input"/>
+    </VBox>
+
     <VBox fx:id="labelsBox" spacing="6.0" visible="false" managed="false">
         <Label fx:id="labelsLabel" text="Labels" styleClass="section-label" />
         <TextField fx:id="labelsField" promptText="Practice, Exam" styleClass="dark-input" />

@@ -16,11 +16,15 @@ public class Subtask extends ParentObject<Variant> {
     public static final String POINT_ATTRIBUTE_LABEL ="points";
     public static final String CHAPTER_ID_ATTRIBUTE_LABEL = "chapterId";
     public static final String LABELS_ATTRIBUTE_LABEL = "labels";
+    public static final String DIFFICULTY_ATTRIBUTE_LABEL = "difficulty";
 
     @XmlField(POINT_ATTRIBUTE_LABEL)
     private int points;
     @XmlField(CHAPTER_ID_ATTRIBUTE_LABEL)
     private int chapterId;
+    @Builder.Default
+    @XmlField(DIFFICULTY_ATTRIBUTE_LABEL)
+    private SubtaskDifficulty difficulty = SubtaskDifficulty.MEDIUM;
 
     @XmlField(LABELS_ATTRIBUTE_LABEL)
     private List<String> labels = new ArrayList<>();

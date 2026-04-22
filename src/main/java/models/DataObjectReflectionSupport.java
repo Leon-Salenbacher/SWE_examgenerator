@@ -100,6 +100,9 @@ public class DataObjectReflectionSupport {
                     .reduce((left, right) -> left + "," + right)
                     .orElse("");
         }
+        if (value instanceof SubtaskDifficulty difficulty) {
+            return difficulty.getXmlValue();
+        }
         return value.toString();
     }
 
@@ -122,6 +125,9 @@ public class DataObjectReflectionSupport {
                     .map(String::trim)
                     .filter(value -> !value.isBlank())
                     .toList();
+        }
+        if (type == SubtaskDifficulty.class) {
+            return SubtaskDifficulty.fromXmlValue(rawValue);
         }
         throw new IllegalStateException(
                 "Unsupported XML field type '%s' for field '%s'.".formatted(

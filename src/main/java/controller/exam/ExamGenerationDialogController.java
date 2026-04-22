@@ -17,7 +17,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import models.Chapter;
@@ -33,7 +32,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.UnaryOperator;
 
 public class ExamGenerationDialogController {
 
@@ -58,7 +56,7 @@ public class ExamGenerationDialogController {
     @FXML
     private Label pointsLabel;
     @FXML
-    private TextField pointsField;
+    private ComboBox<Integer> pointsBox;
     @FXML
     private Label layoutLabel;
     @FXML
@@ -83,9 +81,11 @@ public class ExamGenerationDialogController {
 
     private final ObservableList<Chapter> selectedChapters = FXCollections.observableArrayList();
     private final ObservableList<Chapter> availableChapters = FXCollections.observableArrayList();
+    private final ObservableList<Integer> availablePoints = FXCollections.observableArrayList();
     private List<Chapter> allChapters = List.of();
     private Stage dialogStage;
     private PdfLayoutSettings currentLayoutSettings;
+    private boolean busy;
 
     @FXML
     private void initialize() {
@@ -96,7 +96,9 @@ public class ExamGenerationDialogController {
         availableChapterBox.setCellFactory(listView -> new ChapterListCell());
         availableChapterBox.setButtonCell(new ChapterListCell());
 
-        pointsField.setTextFormatter(new TextFormatter<>(buildNumericFilter()));
+        pointsBox.setItems(availablePoints);
+        pointsBox.setCellFactory(listView -> new PointsListCell());
+        pointsBox.setButtonCell(new PointsListCell());
         selectedChapterList.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateSelectionButtons());
         localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
         applyTranslations();
@@ -111,6 +113,7 @@ public class ExamGenerationDialogController {
         titleField.setText(localizationService.get("generate.dialog.defaultTitle"));
         layoutSummaryLabel.setText(currentLayoutSettings.summary());
         statusLabel.setText(localizationService.get("generate.dialog.status.ready"));
+        updateAvailablePointOptions();
         updateSelectionButtons();
         applyTranslations();
     }
@@ -128,6 +131,7 @@ public class ExamGenerationDialogController {
         availableChapterBox.getSelectionModel().clearSelection();
         selectedChapterList.getSelectionModel().select(selectedChapter);
         setStatus(localizationService.get("generate.dialog.status.ready"), false);
+        updateAvailablePointOptions();
         updateSelectionButtons();
     }
 
@@ -143,6 +147,7 @@ public class ExamGenerationDialogController {
         availableChapters.add(selectedChapter);
         availableChapters.sort(Comparator.comparingInt(chapter -> allChapters.indexOf(chapter)));
         setStatus(localizationService.get("generate.dialog.status.ready"), false);
+        updateAvailablePointOptions();
         updateSelectionButtons();
     }
 
@@ -170,10 +175,8 @@ public class ExamGenerationDialogController {
     @FXML
     private void handleGenerate() {
         String title = titleField.getText() == null ? "" : titleField.getText().trim();
-        int targetPoints;
-        try {
-            targetPoints = Integer.parseInt(pointsField.getText());
-        } catch (Exception exception) {
+        Integer targetPoints = pointsBox.getSelectionModel().getSelectedItem();
+        if (targetPoints == null) {
             setStatus(localizationService.get("generate.dialog.error.invalidPoints"), true);
             return;
         }
@@ -284,12 +287,14 @@ public class ExamGenerationDialogController {
     }
 
     private void setBusy(boolean busy) {
+        this.busy = busy;
         progressIndicator.setVisible(busy);
         progressIndicator.setManaged(busy);
-        generateButton.setDisable(busy);
+        generateButton.setDisable(busy || pointsBox.getSelectionModel().getSelectedItem() == null);
         cancelButton.setDisable(busy);
         layoutButton.setDisable(busy);
         includeSolutionsCheckBox.setDisable(busy);
+        pointsBox.setDisable(busy || availablePoints.isEmpty());
     }
 
     private void setStatus(String message, boolean error) {
@@ -331,8 +336,23 @@ public class ExamGenerationDialogController {
                 .orElse("");
     }
 
-    private UnaryOperator<TextFormatter.Change> buildNumericFilter() {
-        return change -> change.getControlNewText().matches("\\d*") ? change : null;
+    private void updateAvailablePointOptions() {
+        Integer previousSelection = pointsBox.getSelectionModel().getSelectedItem();
+        availablePoints.setAll(examGenerationService.calculateAvailableTotalPoints(new ArrayList<>(selectedChapters)));
+
+        if (previousSelection != null && availablePoints.contains(previousSelection)) {
+            pointsBox.getSelectionModel().select(previousSelection);
+        } else if (!availablePoints.isEmpty()) {
+            pointsBox.getSelectionModel().selectFirst();
+        } else {
+            pointsBox.getSelectionModel().clearSelection();
+        }
+
+        pointsBox.setDisable(busy || availablePoints.isEmpty());
+        generateButton.setDisable(busy || pointsBox.getSelectionModel().getSelectedItem() == null);
+        if (availablePoints.isEmpty()) {
+            setStatus(localizationService.get("generate.dialog.error.noBalancedPointOptions"), true);
+        }
     }
 
     private void applyTranslations() {
@@ -348,7 +368,7 @@ public class ExamGenerationDialogController {
         titleLabel.setText(localizationService.get("generate.dialog.examTitle"));
         titleField.setPromptText(localizationService.get("generate.dialog.examTitle.prompt"));
         pointsLabel.setText(localizationService.get("generate.dialog.points"));
-        pointsField.setPromptText(localizationService.get("generate.dialog.points.prompt"));
+        pointsBox.setPromptText(localizationService.get("generate.dialog.points.prompt"));
         layoutLabel.setText(localizationService.get("generate.dialog.layout"));
         layoutButton.setText(localizationService.get("generate.dialog.layoutButton"));
         includeSolutionsCheckBox.setText(localizationService.get("generate.dialog.includeSolutions"));
@@ -386,6 +406,14 @@ public class ExamGenerationDialogController {
                         : item.getTitle().trim();
                 setText(title);
             }
+        }
+    }
+
+    private static final class PointsListCell extends ListCell<Integer> {
+        @Override
+        protected void updateItem(Integer item, boolean empty) {
+            super.updateItem(item, empty);
+            setText(empty || item == null ? null : String.valueOf(item));
         }
     }
 }
