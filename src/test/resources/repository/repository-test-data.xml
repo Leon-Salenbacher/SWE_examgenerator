@@ -6,7 +6,7 @@
         </Subtask>
         <Subtask chapterId="1" difficulty="medium" id="11" labels="testing" points="7" title="Fixture Aufgabe 2"/>
     </Chapter>
-    <Subtask chapterId="2" difficulty="difficult" id="20" labels="standalone,xml" points="12" title="Standalone Aufgabe">
+    <Subtask chapterId="2" difficulty="hard" id="20" labels="standalone,xml" points="12" title="Standalone Aufgabe">
         <Variant id="200" question="Standalone Frage" solution="Standalone Loesung" title="Standalone Variante"/>
     </Subtask>
     <Variant id="2" question="Frage B" solution="Loesung B" title="Variante B"/>

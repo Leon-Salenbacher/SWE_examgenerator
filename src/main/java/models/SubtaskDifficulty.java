@@ -3,7 +3,7 @@ package models;
 public enum SubtaskDifficulty {
     EASY("easy"),
     MEDIUM("medium"),
-    DIFFICULT("difficult");
+    HARD("hard");
 
     private final String xmlValue;
 
@@ -20,9 +20,14 @@ public enum SubtaskDifficulty {
             return MEDIUM;
         }
 
+        String normalizedValue = rawValue.trim();
+        if ("difficult".equalsIgnoreCase(normalizedValue)) {
+            return HARD;
+        }
+
         for (SubtaskDifficulty difficulty : values()) {
-            if (difficulty.xmlValue.equalsIgnoreCase(rawValue.trim())
-                    || difficulty.name().equalsIgnoreCase(rawValue.trim())) {
+            if (difficulty.xmlValue.equalsIgnoreCase(normalizedValue)
+                    || difficulty.name().equalsIgnoreCase(normalizedValue)) {
                 return difficulty;
             }
         }

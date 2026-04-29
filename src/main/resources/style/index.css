@@ -107,14 +107,14 @@
     -fx-shape: "M2 7 H14 V10 H2 Z";
 }
 
-.difficulty-icon-difficult {
+.difficulty-icon-hard {
     -fx-background-color: #ff7676;
     -fx-shape: "M8 1 L15 14 H1 Z";
 }
 
 .combo-box-popup .list-view .difficulty-cell-easy,
 .combo-box-popup .list-view .difficulty-cell-medium,
-.combo-box-popup .list-view .difficulty-cell-difficult {
+.combo-box-popup .list-view .difficulty-cell-hard {
     -fx-background-color: #25272d;
     -fx-padding: 10 12 10 12;
 }
@@ -129,8 +129,8 @@
     -fx-background-color: rgba(194, 148, 37, 0.34);
 }
 
-.combo-box-popup .list-view .difficulty-cell-difficult:hover,
-.combo-box-popup .list-view .difficulty-cell-difficult:selected {
+.combo-box-popup .list-view .difficulty-cell-hard:hover,
+.combo-box-popup .list-view .difficulty-cell-hard:selected {
     -fx-background-color: rgba(210, 76, 76, 0.36);
 }
 

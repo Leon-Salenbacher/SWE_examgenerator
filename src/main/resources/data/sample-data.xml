@@ -5,17 +5,13 @@
       <Variant id="1" question="Nenne drei typische Stakeholder in einem Softwareprojekt und beschreibe ihre Erwartungen kurz." solution="Beispiel: Kunde mit Fokus auf Nutzen und Budget, Endnutzer mit Fokus auf Bedienbarkeit, Entwicklungsteam mit Fokus auf Umsetzbarkeit und Wartbarkeit." title="Stakeholder identifizieren"/>
       <Variant id="2" question="Erklaere den Unterschied zwischen funktionalen und nicht-funktionalen Anforderungen anhand eines kurzen Beispiels." solution="Funktionale Anforderungen beschreiben was das System tun soll, nicht-funktionale wie gut oder unter welchen Randbedingungen es das tun muss. Beispiel: Login anbieten versus Antwortzeit unter zwei Sekunden." title="Anforderungsarten"/>
     </Subtask>
-    <Subtask chapterId="1" difficulty="difficult" id="2" labels="Exam,Modeling" points="8" title="Use-Case-Modellierung">
-      <Variant id="3" question="Beschreibe die wichtigsten Bestandteile eines Use Cases und erklaere kurz ihren Zweck." solution="Typische Bestandteile sind Name, Ziel, Akteure, Vorbedingungen, Hauptablauf, Alternativablauf und Nachbedingungen. Sie strukturieren das fachliche Verhalten eines Systems." title="Use Case aufbauen"/>
-      <Variant id="4" question="Wann ist ein Aktivitaetsdiagramm fuer einen Anwendungsfall hilfreicher als ein reiner Fliesstext? Begruende kurz." solution="Wenn Ablauflogik mit Entscheidungen, Parallelitaet oder Schleifen verstaendlich dargestellt werden soll. Das Diagramm macht Verzweigungen und Prozesslogik sichtbar." title="Use Cases visualisieren"/>
-    </Subtask>
     <Subtask chapterId="1" difficulty="easy" id="3" labels="Practice" points="4" title="Lasten- und Pflichtenheft">
       <Variant id="5" question="Unterscheide Lastenheft und Pflichtenheft in zwei bis drei Saetzen." solution="Das Lastenheft beschreibt die Anforderungen aus Sicht des Auftraggebers. Das Pflichtenheft beschreibt, wie der Auftragnehmer diese Anforderungen konkret umsetzen will." title="Dokumente unterscheiden"/>
       <Variant id="6" question="Welche Rolle spielt ein Pflichtenheft fuer die Projektkommunikation?" solution="Es schafft ein gemeinsames Verstaendnis ueber Umfang, Umsetzung und Abnahmekriterien und reduziert Missverstaendnisse zwischen Auftraggeber und Umsetzungsteam." title="Kommunikationsmittel Pflichtenheft"/>
     </Subtask>
   </Chapter>
   <Chapter id="2" title="Software Design">
-    <Subtask chapterId="2" difficulty="difficult" id="4" labels="Exam,UML" points="6" title="Klassendiagramme lesen">
+    <Subtask chapterId="2" difficulty="hard" id="4" labels="Exam,UML" points="6" title="Klassendiagramme lesen">
       <Variant id="7" question="Erklaere den Unterschied zwischen Assoziation, Aggregation und Komposition in UML." solution="Assoziation ist eine allgemeine Beziehung. Aggregation beschreibt ein loses Teil-Ganzes-Verhaeltnis. Komposition beschreibt ein starkes Teil-Ganzes-Verhaeltnis mit gemeinsamem Lebenszyklus." title="Beziehungen in UML"/>
       <Variant id="8" question="Wie lassen sich Sichtbarkeiten in einem UML-Klassendiagramm darstellen und was bedeuten sie?" solution="Zum Beispiel + fuer public, - fuer private, # fuer protected. Sie geben an, von wo aus Attribute und Methoden zugreifbar sind." title="Sichtbarkeiten"/>
     </Subtask>
@@ -29,11 +25,11 @@
     </Subtask>
   </Chapter>
   <Chapter id="3" title="Testing and Quality Assurance">
-    <Subtask chapterId="3" difficulty="difficult" id="7" labels="Exam,Testing" points="5" title="Testarten einordnen">
+    <Subtask chapterId="3" difficulty="hard" id="7" labels="Exam,Testing" points="5" title="Testarten einordnen">
       <Variant id="13" question="Grenze Unit-, Integrations- und Systemtests voneinander ab." solution="Unit-Tests pruefen kleine isolierte Einheiten, Integrationstests das Zusammenspiel mehrerer Komponenten und Systemtests das Verhalten des Gesamtsystems." title="Teststufen"/>
       <Variant id="14" question="Warum sind automatisierte Regressionstests fuer agile Projekte wichtig?" solution="Sie pruefen nach Aenderungen schnell, ob bestehende Funktionalitaet weiterhin korrekt arbeitet, und reduzieren das Risiko unbemerkter Seiteneffekte." title="Regressionstests"/>
     </Subtask>
-    <Subtask chapterId="3" difficulty="difficult" id="8" labels="Exam,Metrics" points="4" title="Qualitaetsmetriken">
+    <Subtask chapterId="3" difficulty="hard" id="8" labels="Exam,Metrics" points="4" title="Qualitaetsmetriken">
       <Variant id="15" question="Nenne zwei sinnvolle Qualitaetsmetriken fuer Software und erklaere kurz ihren Nutzen." solution="Beispiel: Testabdeckung zeigt, welche Teile des Codes durch Tests erfasst sind. Fehlerrate zeigt die Stabilitaet oder Problemhaeufigkeit eines Systems." title="Metriken nutzen"/>
       <Variant id="16" question="Warum sollte man Metriken nie isoliert interpretieren?" solution="Einzelne Metriken bilden Qualitaet nur teilweise ab und koennen Fehlanreize erzeugen. Aussagekraeftig werden sie erst im Kontext mehrerer Indikatoren." title="Metriken einordnen"/>
     </Subtask>

@@ -875,7 +875,7 @@ public class ParentEditorController {
             getStyleClass().removeAll(
                     "difficulty-cell-easy",
                     "difficulty-cell-medium",
-                    "difficulty-cell-difficult"
+                    "difficulty-cell-hard"
             );
 
             if (empty || item == null) {
