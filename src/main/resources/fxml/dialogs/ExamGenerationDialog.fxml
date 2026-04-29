@@ -45,6 +45,9 @@
             <Label fx:id="titleLabel" styleClass="section-label"/>
             <TextField fx:id="titleField" styleClass="title-field"/>
 
+            <Label fx:id="examTypeLabel" styleClass="section-label"/>
+            <ComboBox fx:id="examTypeBox" maxWidth="1.7976931348623157E308" styleClass="generate-dialog-combo"/>
+
             <Label fx:id="pointsLabel" styleClass="section-label"/>
             <ComboBox fx:id="pointsBox" maxWidth="1.7976931348623157E308" styleClass="generate-dialog-combo"/>
 

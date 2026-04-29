@@ -30,4 +30,39 @@ public class Subtask extends ParentObject<Variant> {
     @XmlField(LABELS_ATTRIBUTE_LABEL)
     private List<String> labels = new ArrayList<>();
 
+    public ExamType getExamType() {
+        if (hasExamTypeLabel(ExamType.PRACTICE) && !hasExamTypeLabel(ExamType.EXAM)) {
+            return ExamType.PRACTICE;
+        }
+        return ExamType.EXAM;
+    }
+
+    public void setExamType(ExamType examType) {
+        labels = ExamType.replaceExamTypeLabel(labels, examType);
+    }
+
+    public boolean isEligibleForExamType(ExamType examType) {
+        ExamType requestedType = examType == null ? ExamType.defaultType() : examType;
+        boolean hasExamLabel = hasExamTypeLabel(ExamType.EXAM);
+        boolean hasPracticeLabel = hasExamTypeLabel(ExamType.PRACTICE);
+
+        if (hasExamLabel && hasPracticeLabel) {
+            return false;
+        }
+        if (!hasExamLabel && !hasPracticeLabel) {
+            return requestedType == ExamType.EXAM;
+        }
+        return requestedType == ExamType.EXAM ? hasExamLabel : hasPracticeLabel;
+    }
+
+    private boolean hasExamTypeLabel(ExamType examType) {
+        if (labels == null) {
+            return false;
+        }
+        return labels.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .anyMatch(label -> examType.getLabel().equalsIgnoreCase(label));
+    }
+
 }

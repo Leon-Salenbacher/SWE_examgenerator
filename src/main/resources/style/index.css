@@ -46,6 +46,53 @@
     -fx-background-color: #2A2A2A;
 }
 
+.dark-input.combo-box-base {
+    -fx-background-color: #25272d;
+    -fx-control-inner-background: #25272d;
+    -fx-border-color: #4e5870;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 2 6 2 6;
+}
+
+.dark-input.combo-box-base:hover {
+    -fx-background-color: #2b2e36;
+    -fx-border-color: #7b8fd6;
+}
+
+.dark-input.combo-box-base:focused {
+    -fx-border-color: #9db0ff;
+}
+
+.dark-input.combo-box-base .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f4f6ff;
+    -fx-padding: 8 8 8 8;
+}
+
+.dark-input.combo-box-base .arrow-button,
+.generate-dialog-combo .arrow-button,
+.difficulty-combo .arrow-button,
+.exam-type-combo .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 10 0 8;
+}
+
+.dark-input.combo-box-base .arrow,
+.generate-dialog-combo .arrow,
+.difficulty-combo .arrow,
+.exam-type-combo .arrow {
+    -fx-background-color: #f4f6ff;
+    -fx-shape: "M2 4 L8 10 L14 4 L16 6 L8 14 L0 6 Z";
+    -fx-min-width: 10;
+    -fx-min-height: 7;
+    -fx-pref-width: 10;
+    -fx-pref-height: 7;
+    -fx-max-width: 10;
+    -fx-max-height: 7;
+}
+
 .difficulty-combo {
     -fx-background-color: #25272d;
     -fx-border-color: #565f78;
@@ -68,14 +115,6 @@
     -fx-background-color: transparent;
     -fx-text-fill: #f4f6ff;
     -fx-padding: 8 8 8 8;
-}
-
-.difficulty-combo .arrow-button {
-    -fx-background-color: transparent;
-}
-
-.difficulty-combo .arrow {
-    -fx-background-color: #f4f6ff;
 }
 
 .difficulty-option {
@@ -132,6 +171,75 @@
 .combo-box-popup .list-view .difficulty-cell-hard:hover,
 .combo-box-popup .list-view .difficulty-cell-hard:selected {
     -fx-background-color: rgba(210, 76, 76, 0.36);
+}
+
+.exam-type-combo {
+    -fx-background-color: #25272d;
+    -fx-border-color: #4e5870;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 2 6 2 6;
+}
+
+.exam-type-combo:hover {
+    -fx-background-color: #2b2e36;
+    -fx-border-color: #7b8fd6;
+}
+
+.exam-type-combo:focused {
+    -fx-border-color: #9db0ff;
+}
+
+.exam-type-combo .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f4f6ff;
+    -fx-padding: 8 8 8 8;
+}
+
+.exam-type-option {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.exam-type-text {
+    -fx-text-fill: #f4f6ff;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.exam-type-icon {
+    -fx-min-width: 16;
+    -fx-min-height: 16;
+    -fx-pref-width: 16;
+    -fx-pref-height: 16;
+    -fx-max-width: 16;
+    -fx-max-height: 16;
+}
+
+.exam-type-icon-exam {
+    -fx-background-color: #69a7ff;
+    -fx-shape: "M8 1 L14 3 V7 C14 11 11 14 8 15 C5 14 2 11 2 7 V3 Z";
+}
+
+.exam-type-icon-practice {
+    -fx-background-color: #62d38b;
+    -fx-shape: "M11.7 1.5 L14.5 4.3 L5.6 13.2 L1.5 14.5 L2.8 10.4 Z";
+}
+
+.combo-box-popup .list-view .exam-type-cell-exam,
+.combo-box-popup .list-view .exam-type-cell-practice {
+    -fx-background-color: #25272d;
+    -fx-padding: 10 12 10 12;
+}
+
+.combo-box-popup .list-view .exam-type-cell-exam:hover,
+.combo-box-popup .list-view .exam-type-cell-exam:selected {
+    -fx-background-color: rgba(86, 137, 225, 0.34);
+}
+
+.combo-box-popup .list-view .exam-type-cell-practice:hover,
+.combo-box-popup .list-view .exam-type-cell-practice:selected {
+    -fx-background-color: rgba(71, 156, 101, 0.34);
 }
 
 
@@ -347,9 +455,9 @@
 }
 
 .generate-dialog-combo {
-    -fx-background-color: #2a2a2a;
+    -fx-background-color: #25272d;
     -fx-background-radius: 8;
-    -fx-border-color: #3b3b3b;
+    -fx-border-color: #4e5870;
     -fx-border-radius: 8;
     -fx-padding: 1 4 1 4;
     -fx-prompt-text-fill: #8f8f8f;
@@ -365,16 +473,8 @@
 
 .generate-dialog-combo .list-cell {
     -fx-background-color: transparent;
-    -fx-text-fill: #ededed;
+    -fx-text-fill: #f4f6ff;
     -fx-padding: 8 10 8 10;
-}
-
-.generate-dialog-combo .arrow-button {
-    -fx-background-color: transparent;
-}
-
-.generate-dialog-combo .arrow {
-    -fx-background-color: #ededed;
 }
 
 .combo-box-popup .list-view {

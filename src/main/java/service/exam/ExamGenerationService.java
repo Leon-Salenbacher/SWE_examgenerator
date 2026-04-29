@@ -2,6 +2,7 @@ package service.exam;
 
 import exceptions.ExamGenerationException;
 import models.Chapter;
+import models.ExamType;
 import models.Points;
 import models.Subtask;
 import models.SubtaskDifficulty;
@@ -36,7 +37,7 @@ public class ExamGenerationService {
     /**
      * Generates an exam for the provided input values.
      *
-     * @param generateExamValues title, target points and selected chapters for the new exam
+     * @param generateExamValues title, type, target points and selected chapters for the new exam
      * @return generated exam containing the selected subtasks and one random variant per subtask
      * @throws ExamGenerationException if the input is invalid or no valid exam can be composed
      */
@@ -64,11 +65,22 @@ public class ExamGenerationService {
      * @return sorted reachable total point values
      */
     public List<Double> calculateAvailableTotalPoints(List<Chapter> selectedChapters) {
+        return calculateAvailableTotalPoints(selectedChapters, ExamType.defaultType());
+    }
+
+    /**
+     * Calculates the total point values that can be generated for the requested exam type.
+     *
+     * @param selectedChapters chapters selected by the user
+     * @param examType requested exam type
+     * @return sorted reachable total point values
+     */
+    public List<Double> calculateAvailableTotalPoints(List<Chapter> selectedChapters, ExamType examType) {
         if (selectedChapters == null || selectedChapters.isEmpty()) {
             return List.of();
         }
 
-        List<CandidateTask> candidateTasks = collectCandidateTasksWithoutValidation(selectedChapters);
+        List<CandidateTask> candidateTasks = collectCandidateTasksWithoutValidation(selectedChapters, examType);
         Map<SubtaskDifficulty, List<CandidateTask>> tasksByDifficulty = groupTasksByDifficulty(candidateTasks);
         Set<Integer> commonThirdValues = null;
 
@@ -99,7 +111,10 @@ public class ExamGenerationService {
      * @return ordered list of selected candidate tasks
      */
     private List<CandidateTask> selectTasksForRequestedPoints(GenerateExamValues generateExamValues) {
-        List<CandidateTask> candidateTasks = collectCandidateTasks(generateExamValues.selectedChapters());
+        List<CandidateTask> candidateTasks = collectCandidateTasks(
+                generateExamValues.selectedChapters(),
+                generateExamValues.examType()
+        );
         List<CandidateTask> selectedTasks = selectBalancedTasks(candidateTasks, generateExamValues.targetPoints());
 
         sortTasksByChapterAndSubtaskOrder(selectedTasks, generateExamValues.selectedChapters());
@@ -177,16 +192,16 @@ public class ExamGenerationService {
      * @return all candidate tasks that have points and at least one variant
      * @throws ExamGenerationException if no generatable subtasks are available
      */
-    private List<CandidateTask> collectCandidateTasks(List<Chapter> chapters) {
-        List<CandidateTask> candidateTasks = collectCandidateTasksWithoutValidation(chapters);
+    private List<CandidateTask> collectCandidateTasks(List<Chapter> chapters, ExamType examType) {
+        List<CandidateTask> candidateTasks = collectCandidateTasksWithoutValidation(chapters, examType);
         examGenerationValidator.validateCandidates(candidateTasks);
         return candidateTasks;
     }
 
-    private List<CandidateTask> collectCandidateTasksWithoutValidation(List<Chapter> chapters) {
+    private List<CandidateTask> collectCandidateTasksWithoutValidation(List<Chapter> chapters, ExamType examType) {
         List<CandidateTask> candidateTasks = new ArrayList<>();
         for (Chapter chapter : chapters) {
-            candidateTasks.addAll(collectCandidateTasksFromChapter(chapter));
+            candidateTasks.addAll(collectCandidateTasksFromChapter(chapter, examType));
         }
         return candidateTasks;
     }
@@ -256,13 +271,13 @@ public class ExamGenerationService {
      * @param chapter source chapter
      * @return candidate tasks for the given chapter
      */
-    private List<CandidateTask> collectCandidateTasksFromChapter(Chapter chapter) {
+    private List<CandidateTask> collectCandidateTasksFromChapter(Chapter chapter, ExamType examType) {
         List<CandidateTask> candidateTasks = new ArrayList<>();
         List<Subtask> subtasks = chapter.getChildElements() == null ? List.of() : chapter.getChildElements();
 
         for (Subtask subtask : subtasks) {
             List<Variant> variants = getValidVariants(subtask);
-            if (isGeneratableSubtask(subtask, variants)) {
+            if (isGeneratableSubtask(subtask, variants, examType)) {
                 candidateTasks.add(new CandidateTask(chapter, subtask, variants));
             }
         }
@@ -290,10 +305,13 @@ public class ExamGenerationService {
      *
      * @param subtask subtask to validate
      * @param variants variants available for the subtask
-     * @return {@code true} if the subtask has positive points and at least one variant
+     * @return {@code true} if the subtask has positive points, at least one variant and matches the exam type
      */
-    private boolean isGeneratableSubtask(Subtask subtask, List<Variant> variants) {
-        return subtask.getPoints() > 0 && Points.isHalfStep(subtask.getPoints()) && !variants.isEmpty();
+    private boolean isGeneratableSubtask(Subtask subtask, List<Variant> variants, ExamType examType) {
+        return subtask.getPoints() > 0
+                && Points.isHalfStep(subtask.getPoints())
+                && !variants.isEmpty()
+                && subtask.isEligibleForExamType(examType);
     }
 
     /**

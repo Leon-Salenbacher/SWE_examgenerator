@@ -5,7 +5,7 @@
       <Variant id="1" question="Nenne drei typische Stakeholder in einem Softwareprojekt und beschreibe ihre Erwartungen kurz." solution="Beispiel: Kunde mit Fokus auf Nutzen und Budget, Endnutzer mit Fokus auf Bedienbarkeit, Entwicklungsteam mit Fokus auf Umsetzbarkeit und Wartbarkeit." title="Stakeholder identifizieren"/>
       <Variant id="2" question="Erklaere den Unterschied zwischen funktionalen und nicht-funktionalen Anforderungen anhand eines kurzen Beispiels." solution="Funktionale Anforderungen beschreiben was das System tun soll, nicht-funktionale wie gut oder unter welchen Randbedingungen es das tun muss. Beispiel: Login anbieten versus Antwortzeit unter zwei Sekunden." title="Anforderungsarten"/>
     </Subtask>
-    <Subtask chapterId="1" difficulty="easy" id="3" labels="Practice" points="4" title="Lasten- und Pflichtenheft">
+    <Subtask chapterId="1" difficulty="easy" id="3" labels="Practice" points="5" title="Lasten- und Pflichtenheft">
       <Variant id="5" question="Unterscheide Lastenheft und Pflichtenheft in zwei bis drei Saetzen." solution="Das Lastenheft beschreibt die Anforderungen aus Sicht des Auftraggebers. Das Pflichtenheft beschreibt, wie der Auftragnehmer diese Anforderungen konkret umsetzen will." title="Dokumente unterscheiden"/>
       <Variant id="6" question="Welche Rolle spielt ein Pflichtenheft fuer die Projektkommunikation?" solution="Es schafft ein gemeinsames Verstaendnis ueber Umfang, Umsetzung und Abnahmekriterien und reduziert Missverstaendnisse zwischen Auftraggeber und Umsetzungsteam." title="Kommunikationsmittel Pflichtenheft"/>
     </Subtask>
@@ -15,7 +15,7 @@
       <Variant id="7" question="Erklaere den Unterschied zwischen Assoziation, Aggregation und Komposition in UML." solution="Assoziation ist eine allgemeine Beziehung. Aggregation beschreibt ein loses Teil-Ganzes-Verhaeltnis. Komposition beschreibt ein starkes Teil-Ganzes-Verhaeltnis mit gemeinsamem Lebenszyklus." title="Beziehungen in UML"/>
       <Variant id="8" question="Wie lassen sich Sichtbarkeiten in einem UML-Klassendiagramm darstellen und was bedeuten sie?" solution="Zum Beispiel + fuer public, - fuer private, # fuer protected. Sie geben an, von wo aus Attribute und Methoden zugreifbar sind." title="Sichtbarkeiten"/>
     </Subtask>
-    <Subtask chapterId="2" difficulty="medium" id="5" labels="Exam,Patterns" points="7" title="Entwurfsmuster anwenden">
+    <Subtask chapterId="2" difficulty="medium" id="5" labels="Practice,Patterns" points="5.5" title="Entwurfsmuster anwenden">
       <Variant id="9" question="Beschreibe das Ziel des Strategy-Patterns und nenne einen passenden Anwendungsfall." solution="Es kapselt austauschbare Algorithmen hinter einer gemeinsamen Schnittstelle. Beispiel: verschiedene Berechnungsstrategien fuer Rabatte oder Sortierung." title="Strategy Pattern"/>
       <Variant id="10" question="Warum kann das Observer-Pattern in GUI-Anwendungen nuetzlich sein?" solution="Weil Zustandsaenderungen eines Objekts automatisch an interessierte Beobachter weitergegeben werden, etwa zur Aktualisierung von UI-Komponenten." title="Observer Pattern"/>
     </Subtask>
@@ -25,7 +25,7 @@
     </Subtask>
   </Chapter>
   <Chapter id="3" title="Testing and Quality Assurance">
-    <Subtask chapterId="3" difficulty="hard" id="7" labels="Exam,Testing" points="5" title="Testarten einordnen">
+    <Subtask chapterId="3" difficulty="hard" id="7" labels="Exam,Testing" points="5.5" title="Testarten einordnen">
       <Variant id="13" question="Grenze Unit-, Integrations- und Systemtests voneinander ab." solution="Unit-Tests pruefen kleine isolierte Einheiten, Integrationstests das Zusammenspiel mehrerer Komponenten und Systemtests das Verhalten des Gesamtsystems." title="Teststufen"/>
       <Variant id="14" question="Warum sind automatisierte Regressionstests fuer agile Projekte wichtig?" solution="Sie pruefen nach Aenderungen schnell, ob bestehende Funktionalitaet weiterhin korrekt arbeitet, und reduzieren das Risiko unbemerkter Seiteneffekte." title="Regressionstests"/>
     </Subtask>
@@ -33,7 +33,7 @@
       <Variant id="15" question="Nenne zwei sinnvolle Qualitaetsmetriken fuer Software und erklaere kurz ihren Nutzen." solution="Beispiel: Testabdeckung zeigt, welche Teile des Codes durch Tests erfasst sind. Fehlerrate zeigt die Stabilitaet oder Problemhaeufigkeit eines Systems." title="Metriken nutzen"/>
       <Variant id="16" question="Warum sollte man Metriken nie isoliert interpretieren?" solution="Einzelne Metriken bilden Qualitaet nur teilweise ab und koennen Fehlanreize erzeugen. Aussagekraeftig werden sie erst im Kontext mehrerer Indikatoren." title="Metriken einordnen"/>
     </Subtask>
-    <Subtask chapterId="3" difficulty="easy" id="9" labels="Practice,Reviews" points="6" title="Code Reviews">
+    <Subtask chapterId="3" difficulty="hard" id="9" labels="Practice,Reviews" points="5" title="Code Reviews">
       <Variant id="17" question="Nenne drei Ziele eines Code Reviews." solution="Fehler finden, Wissen im Team teilen und Wartbarkeit bzw. Konsistenz des Codes verbessern." title="Ziele von Reviews"/>
       <Variant id="18" question="Welche Eigenschaften machen Review-Kommentare besonders hilfreich?" solution="Sie sind konkret, nachvollziehbar, respektvoll formuliert und enthalten idealerweise eine Begruendung oder einen Verbesserungsvorschlag." title="Gute Review-Kommentare"/>
     </Subtask>

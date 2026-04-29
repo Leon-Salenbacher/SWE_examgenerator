@@ -17,9 +17,13 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import models.Chapter;
+import models.ExamType;
 import models.Points;
 import service.exam.ExamGenerationService;
 import service.pdf.PdfExamWriter;
@@ -54,6 +58,10 @@ public class ExamGenerationDialogController {
     private Label titleLabel;
     @FXML
     private TextField titleField;
+    @FXML
+    private Label examTypeLabel;
+    @FXML
+    private ComboBox<ExamType> examTypeBox;
     @FXML
     private Label pointsLabel;
     @FXML
@@ -100,6 +108,12 @@ public class ExamGenerationDialogController {
         pointsBox.setItems(availablePoints);
         pointsBox.setCellFactory(listView -> new PointsListCell());
         pointsBox.setButtonCell(new PointsListCell());
+        examTypeBox.getItems().setAll(ExamType.values());
+        examTypeBox.getStyleClass().add("exam-type-combo");
+        examTypeBox.setCellFactory(listView -> new ExamTypeListCell());
+        examTypeBox.setButtonCell(new ExamTypeListCell());
+        examTypeBox.getSelectionModel().select(ExamType.defaultType());
+        examTypeBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateAvailablePointOptions());
         selectedChapterList.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateSelectionButtons());
         localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
         applyTranslations();
@@ -112,6 +126,7 @@ public class ExamGenerationDialogController {
         this.availableChapters.clear();
         this.currentLayoutSettings = PdfLayoutSettings.defaults(localizationService.get("generate.dialog.defaultTitle"));
         titleField.setText(localizationService.get("generate.dialog.defaultTitle"));
+        examTypeBox.getSelectionModel().select(ExamType.defaultType());
         layoutSummaryLabel.setText(currentLayoutSettings.summary());
         statusLabel.setText(localizationService.get("generate.dialog.status.ready"));
         updateAvailablePointOptions();
@@ -190,7 +205,12 @@ public class ExamGenerationDialogController {
         setBusy(true);
         setStatus(localizationService.get("generate.dialog.status.checking"), false);
 
-        GenerateExamValues generateExamValues = new GenerateExamValues(title, targetPoints, new ArrayList<>(selectedChapters));
+        GenerateExamValues generateExamValues = new GenerateExamValues(
+                title,
+                targetPoints,
+                new ArrayList<>(selectedChapters),
+                currentExamType()
+        );
         Task<GeneratedExam> generationTask = new Task<>() {
             @Override
             protected GeneratedExam call() {
@@ -295,6 +315,7 @@ public class ExamGenerationDialogController {
         cancelButton.setDisable(busy);
         layoutButton.setDisable(busy);
         includeSolutionsCheckBox.setDisable(busy);
+        examTypeBox.setDisable(busy);
         pointsBox.setDisable(busy || availablePoints.isEmpty());
     }
 
@@ -339,7 +360,10 @@ public class ExamGenerationDialogController {
 
     private void updateAvailablePointOptions() {
         Double previousSelection = pointsBox.getSelectionModel().getSelectedItem();
-        availablePoints.setAll(examGenerationService.calculateAvailableTotalPoints(new ArrayList<>(selectedChapters)));
+        availablePoints.setAll(examGenerationService.calculateAvailableTotalPoints(
+                new ArrayList<>(selectedChapters),
+                currentExamType()
+        ));
 
         if (previousSelection != null && availablePoints.contains(previousSelection)) {
             pointsBox.getSelectionModel().select(previousSelection);
@@ -353,7 +377,14 @@ public class ExamGenerationDialogController {
         generateButton.setDisable(busy || pointsBox.getSelectionModel().getSelectedItem() == null);
         if (availablePoints.isEmpty()) {
             setStatus(localizationService.get("generate.dialog.error.noBalancedPointOptions"), true);
+        } else {
+            setStatus(localizationService.get("generate.dialog.status.ready"), false);
         }
+    }
+
+    private ExamType currentExamType() {
+        ExamType selectedExamType = examTypeBox == null ? null : examTypeBox.getSelectionModel().getSelectedItem();
+        return selectedExamType == null ? ExamType.defaultType() : selectedExamType;
     }
 
     private void applyTranslations() {
@@ -368,6 +399,9 @@ public class ExamGenerationDialogController {
         moveDownButton.setText(localizationService.get("generate.dialog.moveDown"));
         titleLabel.setText(localizationService.get("generate.dialog.examTitle"));
         titleField.setPromptText(localizationService.get("generate.dialog.examTitle.prompt"));
+        examTypeLabel.setText(localizationService.get("generate.dialog.examType"));
+        examTypeBox.setPromptText(localizationService.get("generate.dialog.examType.prompt"));
+        examTypeBox.setButtonCell(new ExamTypeListCell());
         pointsLabel.setText(localizationService.get("generate.dialog.points"));
         pointsBox.setPromptText(localizationService.get("generate.dialog.points.prompt"));
         layoutLabel.setText(localizationService.get("generate.dialog.layout"));
@@ -415,6 +449,34 @@ public class ExamGenerationDialogController {
         protected void updateItem(Double item, boolean empty) {
             super.updateItem(item, empty);
             setText(empty || item == null ? null : Points.format(item));
+        }
+    }
+
+    private final class ExamTypeListCell extends ListCell<ExamType> {
+        @Override
+        protected void updateItem(ExamType item, boolean empty) {
+            super.updateItem(item, empty);
+            getStyleClass().removeAll("exam-type-cell-exam", "exam-type-cell-practice");
+
+            if (empty || item == null) {
+                setText(null);
+                setGraphic(null);
+                return;
+            }
+
+            Region icon = new Region();
+            icon.getStyleClass().addAll("exam-type-icon", "exam-type-icon-" + item.name().toLowerCase());
+
+            Label text = new Label(localizationService.get(item.getLocalizationKey()));
+            text.getStyleClass().add("exam-type-text");
+
+            HBox content = new HBox(8, icon, text);
+            content.getStyleClass().add("exam-type-option");
+            getStyleClass().add("exam-type-cell-" + item.name().toLowerCase());
+
+            setText(null);
+            setGraphic(content);
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         }
     }
 }

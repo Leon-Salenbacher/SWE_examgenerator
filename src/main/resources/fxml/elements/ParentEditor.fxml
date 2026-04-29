@@ -31,6 +31,11 @@
         <ComboBox fx:id="difficultyBox" maxWidth="1.7976931348623157E308" styleClass="dark-input"/>
     </VBox>
 
+    <VBox fx:id="usageBoxContainer" spacing="6.0" visible="false" managed="false">
+        <Label fx:id="usageLabel" text="Usage" styleClass="section-label" />
+        <ComboBox fx:id="usageBox" maxWidth="1.7976931348623157E308" styleClass="dark-input"/>
+    </VBox>
+
     <VBox fx:id="labelsBox" spacing="6.0" visible="false" managed="false">
         <Label fx:id="labelsLabel" text="Labels" styleClass="section-label" />
         <TextField fx:id="labelsField" promptText="Practice, Exam" styleClass="dark-input" />
