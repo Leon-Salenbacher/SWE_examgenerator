@@ -46,7 +46,7 @@ public class SubtaskServiceImpl
     }
 
     public interface SubtaskCommand extends ParentCommand{
-        int points();
+        double points();
         SubtaskDifficulty difficulty();
         List<String> labels();
     }

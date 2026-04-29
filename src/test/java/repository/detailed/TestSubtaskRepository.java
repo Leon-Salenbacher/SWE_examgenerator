@@ -70,7 +70,7 @@ public class TestSubtaskRepository {
         Subtask subtask = Subtask.builder()
                 .id(10)
                 .title("Aufgabe 1")
-                .points(5)
+                .points(5.5)
                 .chapterId(1)
                 .labels(List.of("swe", "test"))
                 .childElements(List.of(Variant.builder()
@@ -85,7 +85,7 @@ public class TestSubtaskRepository {
 
         Subtask actualSubtask = repository.findById(10).orElseThrow();
         assertEquals("Aufgabe 1", actualSubtask.getTitle());
-        assertEquals(5, actualSubtask.getPoints());
+        assertEquals(5.5, actualSubtask.getPoints());
         assertEquals(1, actualSubtask.getChapterId());
         assertEquals(List.of("swe", "test"), actualSubtask.getLabels());
         assertEquals(1, actualSubtask.getChildElements().size());

@@ -103,6 +103,9 @@ public class DataObjectReflectionSupport {
         if (value instanceof SubtaskDifficulty difficulty) {
             return difficulty.getXmlValue();
         }
+        if (value instanceof Double || value instanceof Float) {
+            return Points.format(((Number) value).doubleValue());
+        }
         return value.toString();
     }
 
@@ -116,6 +119,9 @@ public class DataObjectReflectionSupport {
                 return 0;
             }
             return Integer.parseInt(rawValue);
+        }
+        if (type == double.class || type == Double.class) {
+            return Points.parse(rawValue);
         }
         if (List.class.isAssignableFrom(type)) {
             if (rawValue == null || rawValue.isBlank()) {

@@ -9,7 +9,7 @@ import java.util.List;
 @Builder
 public record GenerateExamValues(
         String examTitle,
-        int targetPoints,
+        double targetPoints,
         List<Chapter> selectedChapters
 ) {
 }

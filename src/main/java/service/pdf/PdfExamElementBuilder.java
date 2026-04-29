@@ -1,6 +1,7 @@
 package service.pdf;
 
 import models.Chapter;
+import models.Points;
 import models.Subtask;
 import models.Variant;
 import service.exam.dto.GeneratedChapter;
@@ -47,7 +48,7 @@ final class PdfExamElementBuilder {
 
                 elements.add(PdfElement.text(""));
                 elements.add(PdfElement.taskHeading(subtaskLabel + ") " + textFormatter.safeLabel(subtask.getTitle(), "Task " + subtask.getId())
-                        + " (" + subtask.getPoints() + " pts)"));
+                        + " (" + Points.format(subtask.getPoints()) + " pts)"));
                 textFormatter.wrap("Question: " + textFormatter.safeLabel(variant.getQuestion(), "No question text available."))
                         .forEach(line -> elements.add(PdfElement.text(line)));
                 appendAnswerPlaceholder(elements, variant, includeSolutions);

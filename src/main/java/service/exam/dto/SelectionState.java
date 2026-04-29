@@ -1,7 +1,7 @@
 package service.exam.dto;
 
 public record SelectionState(
-        Integer previousPoints,
+        Integer previousHalfPoints,
         CandidateTask candidateTask
 ) {
 }

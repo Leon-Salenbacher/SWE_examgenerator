@@ -24,6 +24,7 @@ import javafx.scene.layout.VBox;
 import models.Chapter;
 import models.ChildObject;
 import models.ParentObject;
+import models.Points;
 import models.Subtask;
 import models.SubtaskDifficulty;
 import models.Variant;
@@ -137,7 +138,7 @@ public class ParentEditorController {
 
     @FXML
     private void initialize(){
-        pointsField.setTextFormatter(createNumericFormatter());
+        pointsField.setTextFormatter(createPointsFormatter());
         difficultyBox.getItems().setAll(SubtaskDifficulty.values());
         difficultyBox.getStyleClass().add("difficulty-combo");
         difficultyBox.setCellFactory(listView -> new DifficultyListCell());
@@ -157,6 +158,10 @@ public class ParentEditorController {
 
         pointsField.textProperty().addListener((observable, oldValue, newValue) -> {
             clearFeedback();
+            if (!isValidPointsInput(newValue)) {
+                showHalfStepPointsError();
+                return;
+            }
             if (createMode) {
                 return;
             }
@@ -164,12 +169,8 @@ public class ParentEditorController {
                 return;
             }
 
-            try{
-                int parsed = newValue == null || newValue.isBlank() ? 0 : Integer.parseInt(newValue);
-                ((Subtask) currentParent).setPoints(parsed);
-            }catch(NumberFormatException ignored){
-                pointsField.setText(oldValue);
-            }
+            double parsed = parsePointsInput(newValue);
+            ((Subtask) currentParent).setPoints(parsed);
         });
 
         labelsField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -332,7 +333,7 @@ public class ParentEditorController {
         toggleDifficulty(true);
         toggleLabels(true);
         toggleVariantFields(false);
-        pointsField.setText(String.valueOf(subtask.getPoints()));
+        pointsField.setText(Points.format(subtask.getPoints()));
         difficultyBox.setValue(defaultDifficulty(subtask.getDifficulty()));
         labelsField.setText(String.join(", ", defaultLabels(subtask.getLabels())));
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.variants"));
@@ -470,12 +471,40 @@ public class ParentEditorController {
                 .orElse(0) + 1;
     }
 
-    private int parsePointsInput() {
-        String value = pointsField.getText();
+    private double parsePointsInput() {
+        return parsePointsInput(pointsField.getText());
+    }
+
+    private double parsePointsInput(String value) {
         if (value == null || value.isBlank()) {
             return 0;
         }
-        return Integer.parseInt(value);
+        double points = Points.parse(value);
+        if (!Points.isHalfStep(points)) {
+            throw new NumberFormatException("Points must use 0.5 steps.");
+        }
+        return points;
+    }
+
+    private Double parsePointsInputOrShowError() {
+        if (isValidPointsInput(pointsField.getText())) {
+            return parsePointsInput();
+        }
+        showHalfStepPointsError();
+        return null;
+    }
+
+    private boolean isValidPointsInput(String value) {
+        try {
+            parsePointsInput(value);
+            return true;
+        } catch (NumberFormatException exception) {
+            return false;
+        }
+    }
+
+    private void showHalfStepPointsError() {
+        showErrorFeedback(localizationService.get("validation.points.halfStep"));
     }
 
     public void toggleAddNewChild(){
@@ -560,6 +589,12 @@ public class ParentEditorController {
             }
 
             if(currentParent instanceof Subtask subtask){
+                Double enteredPoints = parsePointsInputOrShowError();
+                if (enteredPoints == null) {
+                    return;
+                }
+                subtask.setPoints(enteredPoints);
+
                 ValidationResult validationResult = subtaskValidator.validate(subtask);
                 if (!validationResult.isValid()) {
                     showErrorFeedback(validationResult.message());
@@ -573,9 +608,8 @@ public class ParentEditorController {
                     }
 
                     @Override
-                    public int points() {
-                        String value = pointsField.getText();
-                        return value == null || value.isBlank() ? 0 : Integer.parseInt(value);
+                    public double points() {
+                        return enteredPoints;
                     }
 
                     @Override
@@ -704,11 +738,16 @@ public class ParentEditorController {
             }
 
             if (currentParent instanceof Chapter chapter) {
+                Double enteredPoints = parsePointsInputOrShowError();
+                if (enteredPoints == null) {
+                    return;
+                }
+
                 Subtask createdSubtask = new Subtask();
                 createdSubtask.setId(nextSubtaskId());
                 createdSubtask.setChapterId(chapter.getId());
                 createdSubtask.setTitle(titleField.getText());
-                createdSubtask.setPoints(parsePointsInput());
+                createdSubtask.setPoints(enteredPoints);
                 createdSubtask.setDifficulty(defaultDifficulty(difficultyBox.getValue()));
                 createdSubtask.setLabels(new ArrayList<>(parseLabels(labelsField.getText())));
 
@@ -782,8 +821,14 @@ public class ParentEditorController {
         }
     }
 
-    private TextFormatter<String> createNumericFormatter() {
-        return new TextFormatter<>(change -> change.getControlNewText().matches("\\d*") ? change : null);
+    private TextFormatter<String> createPointsFormatter() {
+        return new TextFormatter<>(change -> {
+            if (change.getControlNewText().matches("(|\\d+([\\.,]\\d*)?)")) {
+                return change;
+            }
+            showHalfStepPointsError();
+            return null;
+        });
     }
 
     private boolean confirmDelete() {

@@ -20,6 +20,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import models.Chapter;
+import models.Points;
 import service.exam.ExamGenerationService;
 import service.pdf.PdfExamWriter;
 import service.exam.dto.GenerateExamValues;
@@ -56,7 +57,7 @@ public class ExamGenerationDialogController {
     @FXML
     private Label pointsLabel;
     @FXML
-    private ComboBox<Integer> pointsBox;
+    private ComboBox<Double> pointsBox;
     @FXML
     private Label layoutLabel;
     @FXML
@@ -81,7 +82,7 @@ public class ExamGenerationDialogController {
 
     private final ObservableList<Chapter> selectedChapters = FXCollections.observableArrayList();
     private final ObservableList<Chapter> availableChapters = FXCollections.observableArrayList();
-    private final ObservableList<Integer> availablePoints = FXCollections.observableArrayList();
+    private final ObservableList<Double> availablePoints = FXCollections.observableArrayList();
     private List<Chapter> allChapters = List.of();
     private Stage dialogStage;
     private PdfLayoutSettings currentLayoutSettings;
@@ -175,7 +176,7 @@ public class ExamGenerationDialogController {
     @FXML
     private void handleGenerate() {
         String title = titleField.getText() == null ? "" : titleField.getText().trim();
-        Integer targetPoints = pointsBox.getSelectionModel().getSelectedItem();
+        Double targetPoints = pointsBox.getSelectionModel().getSelectedItem();
         if (targetPoints == null) {
             setStatus(localizationService.get("generate.dialog.error.invalidPoints"), true);
             return;
@@ -312,9 +313,9 @@ public class ExamGenerationDialogController {
                 case NO_GENERATABLE_SUBTASKS -> localizationService.get("generate.dialog.error.noGeneratableSubtasks");
                 case POINTS_NOT_REACHABLE -> localizationService.get(
                         "generate.dialog.error.pointsNotReachable",
-                        generationException.getRequestedPoints(),
-                        generationException.getClosestReachablePoints(),
-                        generationException.getMaxReachablePoints()
+                        Points.format(generationException.getRequestedPoints()),
+                        Points.format(generationException.getClosestReachablePoints()),
+                        Points.format(generationException.getMaxReachablePoints())
                 );
             };
         }
@@ -337,7 +338,7 @@ public class ExamGenerationDialogController {
     }
 
     private void updateAvailablePointOptions() {
-        Integer previousSelection = pointsBox.getSelectionModel().getSelectedItem();
+        Double previousSelection = pointsBox.getSelectionModel().getSelectedItem();
         availablePoints.setAll(examGenerationService.calculateAvailableTotalPoints(new ArrayList<>(selectedChapters)));
 
         if (previousSelection != null && availablePoints.contains(previousSelection)) {
@@ -409,11 +410,11 @@ public class ExamGenerationDialogController {
         }
     }
 
-    private static final class PointsListCell extends ListCell<Integer> {
+    private static final class PointsListCell extends ListCell<Double> {
         @Override
-        protected void updateItem(Integer item, boolean empty) {
+        protected void updateItem(Double item, boolean empty) {
             super.updateItem(item, empty);
-            setText(empty || item == null ? null : String.valueOf(item));
+            setText(empty || item == null ? null : Points.format(item));
         }
     }
 }

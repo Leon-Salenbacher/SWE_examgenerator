@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <ExamGenerator>
   <Chapter id="1" title="Requirements Engineering">
-    <Subtask chapterId="1" difficulty="easy" id="1" labels="Exam,Analysis" points="5" title="Stakeholderanalyse">
+    <Subtask chapterId="1" difficulty="easy" id="1" labels="Exam,Analysis" points="5.5" title="Stakeholderanalyse">
       <Variant id="1" question="Nenne drei typische Stakeholder in einem Softwareprojekt und beschreibe ihre Erwartungen kurz." solution="Beispiel: Kunde mit Fokus auf Nutzen und Budget, Endnutzer mit Fokus auf Bedienbarkeit, Entwicklungsteam mit Fokus auf Umsetzbarkeit und Wartbarkeit." title="Stakeholder identifizieren"/>
       <Variant id="2" question="Erklaere den Unterschied zwischen funktionalen und nicht-funktionalen Anforderungen anhand eines kurzen Beispiels." solution="Funktionale Anforderungen beschreiben was das System tun soll, nicht-funktionale wie gut oder unter welchen Randbedingungen es das tun muss. Beispiel: Login anbieten versus Antwortzeit unter zwei Sekunden." title="Anforderungsarten"/>
     </Subtask>
@@ -11,7 +11,7 @@
     </Subtask>
   </Chapter>
   <Chapter id="2" title="Software Design">
-    <Subtask chapterId="2" difficulty="hard" id="4" labels="Exam,UML" points="6" title="Klassendiagramme lesen">
+    <Subtask chapterId="2" difficulty="hard" id="4" labels="Exam,UML" points="7" title="Klassendiagramme lesen">
       <Variant id="7" question="Erklaere den Unterschied zwischen Assoziation, Aggregation und Komposition in UML." solution="Assoziation ist eine allgemeine Beziehung. Aggregation beschreibt ein loses Teil-Ganzes-Verhaeltnis. Komposition beschreibt ein starkes Teil-Ganzes-Verhaeltnis mit gemeinsamem Lebenszyklus." title="Beziehungen in UML"/>
       <Variant id="8" question="Wie lassen sich Sichtbarkeiten in einem UML-Klassendiagramm darstellen und was bedeuten sie?" solution="Zum Beispiel + fuer public, - fuer private, # fuer protected. Sie geben an, von wo aus Attribute und Methoden zugreifbar sind." title="Sichtbarkeiten"/>
     </Subtask>

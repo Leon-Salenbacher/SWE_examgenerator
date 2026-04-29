@@ -3,6 +3,7 @@ package service.pdf;
 import service.exam.dto.GeneratedExam;
 import service.exam.dto.GeneratedChapter;
 import service.exam.dto.PdfLayoutSettings;
+import models.Points;
 import service.pdf.dto.PageContent;
 import service.pdf.dto.PdfElement;
 import service.pdf.dto.PdfElementType;
@@ -171,9 +172,9 @@ public class PdfExamWriter {
      * @param chapter generated chapter content
      * @return total chapter points
      */
-    private int calculateChapterPoints(GeneratedChapter chapter) {
+    private double calculateChapterPoints(GeneratedChapter chapter) {
         return chapter.subtasks().stream()
-                .mapToInt(generatedSubtask -> generatedSubtask.subtask().getPoints())
+                .mapToDouble(generatedSubtask -> generatedSubtask.subtask().getPoints())
                 .sum();
     }
 

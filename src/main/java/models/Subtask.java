@@ -19,7 +19,7 @@ public class Subtask extends ParentObject<Variant> {
     public static final String DIFFICULTY_ATTRIBUTE_LABEL = "difficulty";
 
     @XmlField(POINT_ATTRIBUTE_LABEL)
-    private int points;
+    private double points;
     @XmlField(CHAPTER_ID_ATTRIBUTE_LABEL)
     private int chapterId;
     @Builder.Default

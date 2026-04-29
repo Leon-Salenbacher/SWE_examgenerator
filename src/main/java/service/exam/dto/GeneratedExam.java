@@ -4,7 +4,7 @@ import java.util.List;
 
 public record GeneratedExam(
         String title,
-        int totalPoints,
+        double totalPoints,
         List<GeneratedChapter> chapters
 ) {
 }
