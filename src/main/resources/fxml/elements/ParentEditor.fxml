@@ -60,7 +60,7 @@
 
     <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="action-bar">
         <Label fx:id="actionFeedbackLabel" text="" styleClass="action-feedback" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" visible="false" managed="false" />
-        <Button fx:id="deleteButton" text="Delete" styleClass="editor-danger-button" />
+        <Button fx:id="deleteButton" text="Delete" styleClass="editor-danger-button" onAction="#handleDelete" />
         <Button fx:id="saveButton" text="Save" styleClass="editor-primary-button" onAction="#handleSave" />
         <Button fx:id="createButton" text="Create" styleClass="editor-primary-button" onAction="#handleCreate" visible="false" managed="false" />
     </HBox>

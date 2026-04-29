@@ -35,6 +35,7 @@ public class MainController {
     private void initialize(){
         if(sidebarController != null && editorHostController != null){
             sidebarController.setSelectionListener(this::handleSelection);
+            sidebarController.setCreateChapterHandler(editorHostController::displayCreateChapter);
             editorHostController.setDataChangedHandler(sidebarController::setChapters);
             editorHostController.setNavigationHandler(sidebarController::refreshAndRevealSelection);
         }

@@ -82,6 +82,12 @@ public class EditorHostController {
         setContent(parentEditorRoot);
     }
 
+    public void displayCreateChapter() {
+        ensureParentEditor();
+        parentEditorController.displayCreateChapter();
+        setContent(parentEditorRoot);
+    }
+
     private void showChildEditor(ChildObject data){
         ensureChildEditor();
         childEditorController.displayChild(data);

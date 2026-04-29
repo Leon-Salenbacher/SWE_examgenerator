@@ -7,7 +7,10 @@ import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -121,6 +124,7 @@ public class ParentEditorController {
     private Consumer<ChildObject> navigationHandler;
     private Runnable dataChangedHandler;
     private boolean createMode;
+    private boolean createChapterMode;
     private final LocalizationService localizationService = LocalizationService.getInstance();
     private final ChapterServiceImpl chapterService = ApplicationContext.getInstance().getChapterService();
     private final SubtaskServiceImpl subtaskService = ApplicationContext.getInstance().getSubtaskService();
@@ -208,6 +212,27 @@ public class ParentEditorController {
         }
     }
 
+    public void displayCreateChapter() {
+        currentParent = null;
+        createMode = true;
+        createChapterMode = true;
+        typeLabel.setText(localizationService.get("parentEditor.header.createChapter"));
+        titleField.clear();
+        pointsField.clear();
+        difficultyBox.setValue(SubtaskDifficulty.MEDIUM);
+        labelsField.clear();
+        questionField.clear();
+        solutionField.clear();
+        togglePoints(false);
+        toggleDifficulty(false);
+        toggleLabels(false);
+        toggleVariantFields(false);
+        childSectionLabel.setText(localizationService.get("parentEditor.childSection.subtasks"));
+        childList.getChildren().clear();
+        clearFeedback();
+        updateActionButtons();
+    }
+
     public void setSelectionHandler(Consumer<ChildObject> selectionHandler){
         this.selectionHandler = selectionHandler;
     }
@@ -261,6 +286,7 @@ public class ParentEditorController {
 
     private void displayPlaceholder(){
         createMode = false;
+        createChapterMode = false;
         typeLabel.setText("Editor");
         titleField.clear();
         pointsField.clear();
@@ -284,6 +310,7 @@ public class ParentEditorController {
 
     private void displayChapter(Chapter chapter){
         createMode = false;
+        createChapterMode = false;
         typeLabel.setText(localizationService.get("parentEditor.header.chapter"));
         titleField.setText(defaultText(chapter.getTitle(), ""));
         togglePoints(false);
@@ -298,6 +325,7 @@ public class ParentEditorController {
 
     private void displaySubtask(Subtask subtask){
         createMode = false;
+        createChapterMode = false;
         typeLabel.setText(localizationService.get("parentEditor.header.subtask"));
         titleField.setText(defaultText(subtask.getTitle(), ""));
         togglePoints(true);
@@ -315,6 +343,7 @@ public class ParentEditorController {
 
     private void displayGeneric(ParentObject<? extends ChildObject> parent){
         createMode = false;
+        createChapterMode = false;
         typeLabel.setText(localizationService.get("parentEditor.header.generic"));
         titleField.setText(defaultText(parent.getTitle(), ""));
         togglePoints(false);
@@ -386,8 +415,14 @@ public class ParentEditorController {
         addChild.setText(localizationService.get("editor.createChild"));
         createButton.setText(localizationService.get("editor.create"));
 
-        if (currentParent == null) {
+        if (createChapterMode) {
+            typeLabel.setText(localizationService.get("parentEditor.header.createChapter"));
+            childSectionLabel.setText(localizationService.get("parentEditor.childSection.subtasks"));
+            updateActionButtons();
+        } else if (currentParent == null) {
             displayPlaceholder();
+        } else if (createMode) {
+            displayCreateChildForm();
         } else if (currentParent instanceof Chapter) {
             displayChapter((Chapter) currentParent);
         } else if (currentParent instanceof Subtask) {
@@ -409,10 +444,10 @@ public class ParentEditorController {
 
         createButton.setVisible(createMode);
         createButton.setManaged(createMode);
-        saveButton.setVisible(!createMode);
-        saveButton.setManaged(!createMode);
-        deleteButton.setVisible(!createMode);
-        deleteButton.setManaged(!createMode);
+        saveButton.setVisible(hasParent && !createMode);
+        saveButton.setManaged(hasParent && !createMode);
+        deleteButton.setVisible(hasParent && !createMode);
+        deleteButton.setManaged(hasParent && !createMode);
     }
 
     private void notifyDataChanged() {
@@ -449,6 +484,7 @@ public class ParentEditorController {
         }
 
         createMode = true;
+        createChapterMode = false;
         titleField.clear();
         pointsField.clear();
         difficultyBox.setValue(SubtaskDifficulty.MEDIUM);
@@ -456,7 +492,10 @@ public class ParentEditorController {
         questionField.clear();
         solutionField.clear();
         clearFeedback();
+        displayCreateChildForm();
+    }
 
+    private void displayCreateChildForm() {
         if (currentParent instanceof Chapter) {
             typeLabel.setText(localizationService.get("parentEditor.header.createSubtask"));
             togglePoints(true);
@@ -574,12 +613,96 @@ public class ParentEditorController {
     }
 
     @FXML
-    private void handleCreate() {
-        if (currentParent == null || !createMode) {
+    private void handleDelete() {
+        if (currentParent == null || createMode || !confirmDelete()) {
             return;
         }
 
         try {
+            if (currentParent instanceof Chapter chapter) {
+                chapterService.delete(chapter.getId());
+                notifyDataChanged();
+                displayPlaceholder();
+                showSuccessFeedback(localizationService.get("editor.delete.success"));
+                return;
+            }
+
+            if (currentParent instanceof Subtask subtask) {
+                int chapterId = subtask.getChapterId();
+                subtaskService.delete(subtask.getId());
+                notifyDataChanged();
+
+                Chapter parentChapter = chapterService.getById(chapterId);
+                currentParent = parentChapter;
+                if (navigationHandler != null) {
+                    navigationHandler.accept(parentChapter);
+                } else {
+                    displayParent(parentChapter);
+                }
+
+                if (feedbackHandler != null) {
+                    feedbackHandler.accept(new EditorFeedbackRequest(parentChapter, localizationService.get("editor.delete.success"), true));
+                } else {
+                    showSuccessFeedback(localizationService.get("editor.delete.success"));
+                }
+            }
+        } catch (Exception exception) {
+            showErrorFeedback(localizationService.get("editor.delete.failed", messageOrFallback(exception)));
+        }
+    }
+
+    @FXML
+    private void handleCreate() {
+        if (!createMode) {
+            return;
+        }
+
+        try {
+            if (createChapterMode) {
+                Chapter draftChapter = new Chapter();
+                draftChapter.setTitle(titleField.getText());
+
+                ValidationResult validationResult = chapterValidator.validate(draftChapter);
+                if (!validationResult.isValid()) {
+                    showErrorFeedback(validationResult.message());
+                    return;
+                }
+
+                ChapterServiceImpl.ChapterCommand command = new ChapterServiceImpl.ChapterCommand() {
+                    @Override
+                    public String title() {
+                        return titleField.getText();
+                    }
+
+                    @Override
+                    public Integer parentId() {
+                        return null;
+                    }
+                };
+
+                Chapter createdChapter = chapterService.create(command);
+                currentParent = createdChapter;
+                createMode = false;
+                createChapterMode = false;
+                displayParent(createdChapter);
+
+                if (navigationHandler != null) {
+                    navigationHandler.accept(createdChapter);
+                } else {
+                    notifyDataChanged();
+                }
+                if (feedbackHandler != null) {
+                    feedbackHandler.accept(new EditorFeedbackRequest(createdChapter, localizationService.get("editor.create.success"), true));
+                } else {
+                    showSuccessFeedback(localizationService.get("editor.create.success"));
+                }
+                return;
+            }
+
+            if (currentParent == null) {
+                return;
+            }
+
             if (currentParent instanceof Chapter chapter) {
                 Subtask createdSubtask = new Subtask();
                 createdSubtask.setId(nextSubtaskId());
@@ -661,6 +784,27 @@ public class ParentEditorController {
 
     private TextFormatter<String> createNumericFormatter() {
         return new TextFormatter<>(change -> change.getControlNewText().matches("\\d*") ? change : null);
+    }
+
+    private boolean confirmDelete() {
+        ButtonType deleteType = new ButtonType(
+                localizationService.get("editor.delete.confirm.action"),
+                ButtonBar.ButtonData.OK_DONE
+        );
+        ButtonType cancelType = new ButtonType(
+                localizationService.get("editor.delete.confirm.cancel"),
+                ButtonBar.ButtonData.CANCEL_CLOSE
+        );
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(localizationService.get("editor.delete.confirm.title"));
+        alert.setHeaderText(localizationService.get("editor.delete.confirm.header"));
+        alert.setContentText(localizationService.get("editor.delete.confirm.content"));
+        alert.getButtonTypes().setAll(deleteType, cancelType);
+
+        return alert.showAndWait()
+                .filter(deleteType::equals)
+                .isPresent();
     }
 
     private void showSuccessFeedback(String message) {
