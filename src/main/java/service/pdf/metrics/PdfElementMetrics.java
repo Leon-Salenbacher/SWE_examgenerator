@@ -82,6 +82,17 @@ public final class PdfElementMetrics {
     }
 
     /**
+     * Returns the proportional answer box height for a task's point value.
+     *
+     * @param points task points used to reserve writing space
+     * @return answer box height in PDF units
+     */
+    public static int answerBoxHeightForPoints(double points) {
+        int pointScaledHeight = (int) Math.ceil(Math.max(0, points) * PdfLayoutMetrics.ANSWER_BOX_HEIGHT_PER_POINT);
+        return Math.max(answerBoxMinHeight(), pointScaledHeight);
+    }
+
+    /**
      * Returns the inner answer box padding.
      *
      * @return padding in PDF units

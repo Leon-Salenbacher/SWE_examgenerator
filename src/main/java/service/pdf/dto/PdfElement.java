@@ -68,8 +68,19 @@ public record PdfElement(
      * @return answer box element
      */
     public static PdfElement answerBox(List<String> boxLines) {
+        return answerBox(boxLines, 0);
+    }
+
+    /**
+     * Creates an answer box sized proportionally to task points and large enough for the given lines.
+     *
+     * @param boxLines text lines to render inside the box
+     * @param points task points used to reserve writing space
+     * @return answer box element
+     */
+    public static PdfElement answerBox(List<String> boxLines, double points) {
         int height = Math.max(
-                PdfElementMetrics.answerBoxMinHeight(),
+                PdfElementMetrics.answerBoxHeightForPoints(points),
                 (boxLines.size() * PdfElementMetrics.lineHeight())
                         + (PdfElementMetrics.answerBoxPadding() * 2)
                         + PdfElementMetrics.lineHeight()

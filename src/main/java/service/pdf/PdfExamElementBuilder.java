@@ -51,7 +51,7 @@ final class PdfExamElementBuilder {
                         + " (" + Points.format(subtask.getPoints()) + " pts)"));
                 textFormatter.wrap("Question: " + textFormatter.safeLabel(variant.getQuestion(), "No question text available."))
                         .forEach(line -> elements.add(PdfElement.text(line)));
-                appendAnswerPlaceholder(elements, variant, includeSolutions);
+                appendAnswerPlaceholder(elements, subtask.getPoints(), variant, includeSolutions);
                 subtaskNumber++;
             }
 
@@ -82,22 +82,23 @@ final class PdfExamElementBuilder {
      * Appends an answer label, answer box, and bottom spacing for one task.
      *
      * @param elements target element list
+     * @param points task points used to size the answer box
      * @param variant selected variant that may contain a solution
      * @param includeSolutions whether to render the solution text
      */
-    private void appendAnswerPlaceholder(List<PdfElement> elements, Variant variant, boolean includeSolutions) {
+    private void appendAnswerPlaceholder(List<PdfElement> elements, double points, Variant variant, boolean includeSolutions) {
         elements.add(PdfElement.text(""));
         elements.add(PdfElement.answerLabel("Answer:"));
         if (includeSolutions) {
             String solution = variant == null ? "" : variant.getSolution();
             if (solution != null && !solution.isBlank()) {
-                elements.add(PdfElement.answerBox(textFormatter.wrap(solution.trim(), PdfLayoutMetrics.ANSWER_BOX_TEXT_MAX_CHARS)));
+                elements.add(PdfElement.answerBox(textFormatter.wrap(solution.trim(), PdfLayoutMetrics.ANSWER_BOX_TEXT_MAX_CHARS), points));
                 elements.add(PdfElement.answerBlockBottomSpacing());
                 return;
             }
         }
 
-        elements.add(PdfElement.answerBox(List.of()));
+        elements.add(PdfElement.answerBox(List.of(), points));
         elements.add(PdfElement.answerBlockBottomSpacing());
     }
 }

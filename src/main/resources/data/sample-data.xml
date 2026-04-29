@@ -38,4 +38,21 @@
       <Variant id="18" question="Welche Eigenschaften machen Review-Kommentare besonders hilfreich?" solution="Sie sind konkret, nachvollziehbar, respektvoll formuliert und enthalten idealerweise eine Begruendung oder einen Verbesserungsvorschlag." title="Gute Review-Kommentare"/>
     </Subtask>
   </Chapter>
+  <Chapter id="4" title="PDF Layout Vergleich">
+    <Subtask chapterId="4" difficulty="easy" id="10" labels="Exam,PDF" points="5" title="Kurzes Antwortfeld">
+      <Variant id="19" question="Beschreibe in wenigen Stichpunkten, wofuer ein kurzes Antwortfeld im PDF reichen sollte." solution="Ein kurzes Feld reicht fuer wenige Stichpunkte oder eine knappe Definition." title="5 Punkte"/>
+    </Subtask>
+    <Subtask chapterId="4" difficulty="easy" id="11" labels="Exam,PDF" points="10" title="Mittleres Antwortfeld">
+      <Variant id="20" question="Erklaere mit einem kurzen Beispiel, warum die Antwortflaeche zur Punktzahl passen sollte." solution="Mehr Punkte bedeuten meist mehr erwartete Begruendung, Schritte oder Beispiele. Deshalb braucht die Antwort mehr Platz." title="10 Punkte"/>
+    </Subtask>
+    <Subtask chapterId="4" difficulty="medium" id="12" labels="Exam,PDF" points="7" title="Vergleich Antwortfeld A">
+      <Variant id="21" question="Nenne zwei Kriterien, anhand derer du die Groesse eines Antwortfelds beurteilen wuerdest." solution="Sinnvolle Kriterien sind die erwartete Antwortlaenge und die Anzahl der Teilaspekte einer Aufgabe." title="7 Punkte"/>
+    </Subtask>
+    <Subtask chapterId="4" difficulty="medium" id="13" labels="Exam,PDF" points="8" title="Vergleich Antwortfeld B">
+      <Variant id="22" question="Beschreibe, welche Wirkung ein zu kleines Antwortfeld auf die Bearbeitung einer Klausur haben kann." solution="Ein zu kleines Feld kann Antworten zusammendraengen und erschwert Lesbarkeit, Korrektur und Strukturierung." title="8 Punkte"/>
+    </Subtask>
+    <Subtask chapterId="4" difficulty="hard" id="14" labels="Exam,PDF" points="15" title="Grosses Antwortfeld">
+      <Variant id="23" question="Entwirf eine kurze Regel, wie Antwortfelder anhand der Punktzahl im PDF skaliert werden sollten, und begruende sie." solution="Eine feste Hoehe pro Punkt macht den verfuegbaren Platz nachvollziehbar. Eine Mindesthoehe sorgt dafuer, dass auch kleine Aufgaben gut ausfuellbar bleiben." title="15 Punkte"/>
+    </Subtask>
+  </Chapter>
 </ExamGenerator>

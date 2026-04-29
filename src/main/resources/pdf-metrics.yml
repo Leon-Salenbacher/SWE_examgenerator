@@ -17,6 +17,7 @@ layout:
   bodyX: 50
   answerBoxWidth: 495
   answerBoxMinHeight: 86
+  answerBoxHeightPerPoint: 18
   answerBoxPadding: 8
   answerBlockBottomSpacing: 18
   answerBoxTextMaxChars: 78
