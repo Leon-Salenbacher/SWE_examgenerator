@@ -6,11 +6,15 @@ public record PdfLayoutSettings(
         String coverSubtitle,
         String headerText,
         String footerText,
-        boolean pageNumbersEnabled
+        boolean pageNumbersEnabled,
+        int answerBoxHeightPerPoint
 ) {
+    public static final int DEFAULT_ANSWER_BOX_HEIGHT_PER_POINT = 18;
+    public static final int MIN_ANSWER_BOX_HEIGHT_PER_POINT = 0;
+    public static final int MAX_ANSWER_BOX_HEIGHT_PER_POINT = 60;
 
     public static PdfLayoutSettings defaults(String examTitle) {
-        return new PdfLayoutSettings(false, examTitle, "", "", "", true);
+        return new PdfLayoutSettings(false, examTitle, "", "", "", true, DEFAULT_ANSWER_BOX_HEIGHT_PER_POINT);
     }
 
     public PdfLayoutSettings sanitize(String fallbackExamTitle) {
@@ -20,8 +24,16 @@ public record PdfLayoutSettings(
                 sanitizeText(coverSubtitle, ""),
                 sanitizeText(headerText, ""),
                 sanitizeText(footerText, ""),
-                pageNumbersEnabled
+                pageNumbersEnabled,
+                sanitizeAnswerBoxHeightPerPoint(answerBoxHeightPerPoint)
         );
+    }
+
+    public static int sanitizeAnswerBoxHeightPerPoint(int value) {
+        if (value < MIN_ANSWER_BOX_HEIGHT_PER_POINT) {
+            return MIN_ANSWER_BOX_HEIGHT_PER_POINT;
+        }
+        return Math.min(value, MAX_ANSWER_BOX_HEIGHT_PER_POINT);
     }
 
     public String summary() {
@@ -33,6 +45,9 @@ public record PdfLayoutSettings(
         builder.append(footerText == null || footerText.isBlank() ? "ohne Footer" : "Footer aktiv");
         builder.append(" | ");
         builder.append(pageNumbersEnabled ? "Seitenzahlen aktiv" : "ohne Seitenzahlen");
+        builder.append(" | Antwortfelder: ");
+        builder.append(sanitizeAnswerBoxHeightPerPoint(answerBoxHeightPerPoint));
+        builder.append("/Punkt");
         return builder.toString();
     }
 

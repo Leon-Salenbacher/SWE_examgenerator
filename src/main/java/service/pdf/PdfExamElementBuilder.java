@@ -7,6 +7,7 @@ import models.Variant;
 import service.exam.dto.GeneratedChapter;
 import service.exam.dto.GeneratedExam;
 import service.exam.dto.GeneratedSubtask;
+import service.exam.dto.PdfLayoutSettings;
 import service.pdf.dto.PdfElement;
 import service.pdf.metrics.PdfLayoutMetrics;
 
@@ -32,6 +33,21 @@ final class PdfExamElementBuilder {
      * @return renderable body elements
      */
     List<PdfElement> buildElements(GeneratedExam exam, boolean includeSolutions) {
+        return buildElements(exam, includeSolutions, PdfLayoutSettings.defaults(exam.title()));
+    }
+
+    /**
+     * Builds the ordered body elements using the selected PDF layout settings.
+     *
+     * @param exam generated exam data
+     * @param includeSolutions whether solution text should be rendered into the answer boxes
+     * @param layoutSettings user-selected PDF layout settings
+     * @return renderable body elements
+     */
+    List<PdfElement> buildElements(GeneratedExam exam, boolean includeSolutions, PdfLayoutSettings layoutSettings) {
+        PdfLayoutSettings settings = (layoutSettings == null
+                ? PdfLayoutSettings.defaults(exam.title())
+                : layoutSettings).sanitize(exam.title());
         List<PdfElement> elements = new ArrayList<>();
 
         int chapterNumber = 1;
@@ -53,7 +69,7 @@ final class PdfExamElementBuilder {
                         + " (" + Points.format(subtask.getPoints()) + " pts)"));
                 textFormatter.wrap("Question: " + textFormatter.safeLabel(variant.getQuestion(), "No question text available."))
                         .forEach(line -> elements.add(PdfElement.text(line)));
-                appendAnswerPlaceholder(elements, subtask.getPoints(), variant, includeSolutions);
+                appendAnswerPlaceholder(elements, subtask.getPoints(), variant, includeSolutions, settings.answerBoxHeightPerPoint());
                 subtaskNumber++;
             }
 
@@ -99,20 +115,31 @@ final class PdfExamElementBuilder {
      * @param points task points used to size the answer box
      * @param variant selected variant that may contain a solution
      * @param includeSolutions whether to render the solution text
+     * @param answerBoxHeightPerPoint reserved answer box height per task point
      */
-    private void appendAnswerPlaceholder(List<PdfElement> elements, double points, Variant variant, boolean includeSolutions) {
+    private void appendAnswerPlaceholder(
+            List<PdfElement> elements,
+            double points,
+            Variant variant,
+            boolean includeSolutions,
+            int answerBoxHeightPerPoint
+    ) {
         elements.add(PdfElement.text(""));
         elements.add(PdfElement.answerLabel("Answer:"));
         if (includeSolutions) {
             String solution = variant == null ? "" : variant.getSolution();
             if (solution != null && !solution.isBlank()) {
-                elements.add(PdfElement.answerBox(textFormatter.wrap(solution.trim(), PdfLayoutMetrics.ANSWER_BOX_TEXT_MAX_CHARS), points));
+                elements.add(PdfElement.answerBox(
+                        textFormatter.wrap(solution.trim(), PdfLayoutMetrics.ANSWER_BOX_TEXT_MAX_CHARS),
+                        points,
+                        answerBoxHeightPerPoint
+                ));
                 elements.add(PdfElement.answerBlockBottomSpacing());
                 return;
             }
         }
 
-        elements.add(PdfElement.answerBox(List.of(), points));
+        elements.add(PdfElement.answerBox(List.of(), points, answerBoxHeightPerPoint));
         elements.add(PdfElement.answerBlockBottomSpacing());
     }
 }

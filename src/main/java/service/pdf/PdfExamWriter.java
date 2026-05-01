@@ -54,7 +54,7 @@ public class PdfExamWriter {
             boolean includeSolutions
     ) throws IOException {
         PdfLayoutSettings sanitizedSettings = sanitizeSettings(exam, layoutSettings);
-        List<PdfElement> elements = elementBuilder.buildElements(exam, includeSolutions);
+        List<PdfElement> elements = elementBuilder.buildElements(exam, includeSolutions, sanitizedSettings);
         List<PageContent> pages = buildPagesWithTableOfContents(exam, elements, sanitizedSettings);
         byte[] pdfBytes = documentBuilder.buildPdfDocument(pages);
 

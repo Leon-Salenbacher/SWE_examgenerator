@@ -35,6 +35,10 @@ public class PdfLayoutDialogController {
     @FXML
     private CheckBox pageNumbersCheckBox;
     @FXML
+    private Label answerBoxHeightPerPointLabel;
+    @FXML
+    private TextField answerBoxHeightPerPointField;
+    @FXML
     private Label helperLabel;
     @FXML
     private Button cancelButton;
@@ -68,6 +72,7 @@ public class PdfLayoutDialogController {
         headerField.setText(baseSettings.headerText());
         footerField.setText(baseSettings.footerText());
         pageNumbersCheckBox.setSelected(baseSettings.pageNumbersEnabled());
+        answerBoxHeightPerPointField.setText(Integer.toString(baseSettings.answerBoxHeightPerPoint()));
         updateCoverState();
     }
 
@@ -88,9 +93,21 @@ public class PdfLayoutDialogController {
                 coverSubtitleField.getText(),
                 headerField.getText(),
                 footerField.getText(),
-                pageNumbersCheckBox.isSelected()
+                pageNumbersCheckBox.isSelected(),
+                readAnswerBoxHeightPerPoint()
         ).sanitize(examTitle);
         dialogStage.close();
+    }
+
+    private int readAnswerBoxHeightPerPoint() {
+        String value = answerBoxHeightPerPointField.getText();
+        try {
+            return PdfLayoutSettings.sanitizeAnswerBoxHeightPerPoint(Integer.parseInt(value.trim()));
+        } catch (NullPointerException | NumberFormatException exception) {
+            return result == null
+                    ? PdfLayoutSettings.DEFAULT_ANSWER_BOX_HEIGHT_PER_POINT
+                    : result.answerBoxHeightPerPoint();
+        }
     }
 
     private void updateCoverState() {
@@ -109,6 +126,8 @@ public class PdfLayoutDialogController {
         footerLabel.setText(localizationService.get("layout.dialog.footer"));
         footerField.setPromptText(localizationService.get("layout.dialog.footer.prompt"));
         pageNumbersCheckBox.setText(localizationService.get("layout.dialog.pageNumbers"));
+        answerBoxHeightPerPointLabel.setText(localizationService.get("layout.dialog.answerBoxHeightPerPoint"));
+        answerBoxHeightPerPointField.setPromptText(localizationService.get("layout.dialog.answerBoxHeightPerPoint.prompt"));
         helperLabel.setText(localizationService.get("layout.dialog.helper"));
         cancelButton.setText(localizationService.get("layout.dialog.cancel"));
         saveButton.setText(localizationService.get("layout.dialog.save"));

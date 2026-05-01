@@ -35,6 +35,10 @@
             <TextField fx:id="footerField" styleClass="title-field"/>
 
             <CheckBox fx:id="pageNumbersCheckBox"/>
+
+            <Label fx:id="answerBoxHeightPerPointLabel" styleClass="section-label"/>
+            <TextField fx:id="answerBoxHeightPerPointField" styleClass="title-field"/>
+
             <Label fx:id="helperLabel" styleClass="generate-dialog-status" wrapText="true"/>
 
             <HBox spacing="10.0" alignment="CENTER_RIGHT">

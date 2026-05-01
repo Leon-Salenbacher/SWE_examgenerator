@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test;
 import service.exam.dto.GeneratedChapter;
 import service.exam.dto.GeneratedExam;
 import service.exam.dto.GeneratedSubtask;
+import service.exam.dto.PdfLayoutSettings;
 import service.pdf.dto.PdfElement;
+import service.pdf.metrics.PdfLayoutMetrics;
 
 import java.util.List;
 
@@ -30,6 +32,25 @@ public class TestPdfExamElementBuilder {
         ), false);
 
         assertEquals("1. Requirements (9.5 pts)", elements.get(0).text());
+    }
+
+    @Test
+    public void test_buildElements_goodcase02_useLayoutAnswerBoxScale() {
+        PdfExamElementBuilder builder = new PdfExamElementBuilder(new PdfTextFormatter());
+        Chapter chapter = chapter(1, "Requirements");
+
+        List<PdfElement> elements = builder.buildElements(new GeneratedExam(
+                "Exam",
+                10,
+                List.of(new GeneratedChapter(chapter, List.of(generatedSubtask(1, "Task 1", 10))))
+        ), false, new PdfLayoutSettings(false, "Exam", "", "", "", true, 24));
+
+        PdfElement answerBox = elements.stream()
+                .filter(PdfElement::answerBox)
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(Math.max(PdfLayoutMetrics.ANSWER_BOX_MIN_HEIGHT, 240), answerBox.height());
     }
 
     private Chapter chapter(int id, String title) {
