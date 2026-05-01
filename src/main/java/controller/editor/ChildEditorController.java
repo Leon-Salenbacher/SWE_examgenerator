@@ -5,13 +5,18 @@ import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import models.ChildObject;
+import models.Subtask;
 import models.Variant;
 import service.impl.LocalizationService;
+import service.impl.elements.SubtaskServiceImpl;
 import service.impl.elements.VariantServiceImpl;
 import validation.elements.ValidationResult;
 import validation.elements.VariantValidator;
@@ -56,6 +61,7 @@ public class ChildEditorController {
     private java.util.function.Consumer<ChildObject> navigationHandler;
     private final LocalizationService localizationService = LocalizationService.getInstance();
     private final VariantServiceImpl variantService = ApplicationContext.getInstance().getVariantService();
+    private final SubtaskServiceImpl subtaskService = ApplicationContext.getInstance().getSubtaskService();
     private final VariantValidator variantValidator = new VariantValidator();
     private static final String FEEDBACK_SUCCESS_STYLE = "feedback-success";
     private static final String FEEDBACK_ERROR_STYLE = "feedback-error";
@@ -205,6 +211,85 @@ public class ChildEditorController {
         } catch (Exception exception) {
             showErrorFeedback(localizationService.get("editor.save.failed", messageOrFallback(exception)));
         }
+    }
+
+    @FXML
+    private void handleDelete() {
+        if (currentVariant == null || !confirmDelete()) {
+            return;
+        }
+
+        try {
+            Subtask parentSubtask = findParentSubtask(currentVariant);
+            variantService.delete(currentVariant.getId());
+            currentVariant = null;
+
+            if (parentSubtask == null) {
+                notifyDataChanged();
+                displayPlaceholder();
+                showSuccessFeedback(localizationService.get("editor.delete.success"));
+                return;
+            }
+
+            Subtask refreshedParent = subtaskService.getById(parentSubtask.getId());
+            if (navigationHandler != null) {
+                navigationHandler.accept(refreshedParent);
+            } else {
+                notifyDataChanged();
+                if (displayHandler != null) {
+                    displayHandler.accept(refreshedParent);
+                } else {
+                    displayPlaceholder();
+                }
+            }
+
+            if (feedbackHandler != null) {
+                feedbackHandler.accept(new EditorFeedbackRequest(refreshedParent, localizationService.get("editor.delete.success"), true));
+            } else {
+                showSuccessFeedback(localizationService.get("editor.delete.success"));
+            }
+        } catch (Exception exception) {
+            showErrorFeedback(localizationService.get("editor.delete.failed", messageOrFallback(exception)));
+        }
+    }
+
+    private void notifyDataChanged() {
+        if (dataChangedHandler != null) {
+            dataChangedHandler.run();
+        }
+    }
+
+    private Subtask findParentSubtask(Variant variant) {
+        if (variant == null) {
+            return null;
+        }
+
+        return subtaskService.getAll().stream()
+                .filter(subtask -> subtask.getChildElements().stream()
+                        .anyMatch(child -> child.getId() == variant.getId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private boolean confirmDelete() {
+        ButtonType deleteType = new ButtonType(
+                localizationService.get("editor.delete.confirm.action"),
+                ButtonBar.ButtonData.OK_DONE
+        );
+        ButtonType cancelType = new ButtonType(
+                localizationService.get("editor.delete.confirm.cancel"),
+                ButtonBar.ButtonData.CANCEL_CLOSE
+        );
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(localizationService.get("editor.delete.confirm.title"));
+        alert.setHeaderText(localizationService.get("editor.delete.confirm.header"));
+        alert.setContentText(localizationService.get("editor.delete.confirm.content"));
+        alert.getButtonTypes().setAll(deleteType, cancelType);
+
+        return alert.showAndWait()
+                .filter(deleteType::equals)
+                .isPresent();
     }
 
     private void showSuccessFeedback(String message) {
