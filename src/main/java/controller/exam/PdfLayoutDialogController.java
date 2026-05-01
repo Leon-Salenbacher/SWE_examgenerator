@@ -13,6 +13,18 @@ import service.impl.LocalizationService;
 public class PdfLayoutDialogController {
 
     @FXML
+    private Label coverSectionTitleLabel;
+    @FXML
+    private Label coverSectionFootnoteLabel;
+    @FXML
+    private Label frameSectionTitleLabel;
+    @FXML
+    private Label frameSectionFootnoteLabel;
+    @FXML
+    private Label answerBoxSectionTitleLabel;
+    @FXML
+    private Label answerBoxSectionFootnoteLabel;
+    @FXML
     private CheckBox coverPageCheckBox;
     @FXML
     private VBox coverFieldsBox;
@@ -34,6 +46,10 @@ public class PdfLayoutDialogController {
     private TextField footerField;
     @FXML
     private CheckBox pageNumbersCheckBox;
+    @FXML
+    private Label answerBoxHeightPerPointLabel;
+    @FXML
+    private TextField answerBoxHeightPerPointField;
     @FXML
     private Label helperLabel;
     @FXML
@@ -68,6 +84,7 @@ public class PdfLayoutDialogController {
         headerField.setText(baseSettings.headerText());
         footerField.setText(baseSettings.footerText());
         pageNumbersCheckBox.setSelected(baseSettings.pageNumbersEnabled());
+        answerBoxHeightPerPointField.setText(Integer.toString(baseSettings.answerBoxHeightPerPoint()));
         updateCoverState();
     }
 
@@ -88,9 +105,21 @@ public class PdfLayoutDialogController {
                 coverSubtitleField.getText(),
                 headerField.getText(),
                 footerField.getText(),
-                pageNumbersCheckBox.isSelected()
+                pageNumbersCheckBox.isSelected(),
+                readAnswerBoxHeightPerPoint()
         ).sanitize(examTitle);
         dialogStage.close();
+    }
+
+    private int readAnswerBoxHeightPerPoint() {
+        String value = answerBoxHeightPerPointField.getText();
+        try {
+            return PdfLayoutSettings.sanitizeAnswerBoxHeightPerPoint(Integer.parseInt(value.trim()));
+        } catch (NullPointerException | NumberFormatException exception) {
+            return result == null
+                    ? PdfLayoutSettings.DEFAULT_ANSWER_BOX_HEIGHT_PER_POINT
+                    : result.answerBoxHeightPerPoint();
+        }
     }
 
     private void updateCoverState() {
@@ -99,6 +128,12 @@ public class PdfLayoutDialogController {
     }
 
     private void applyTranslations() {
+        coverSectionTitleLabel.setText(localizationService.get("layout.dialog.section.cover.title"));
+        coverSectionFootnoteLabel.setText(localizationService.get("layout.dialog.section.cover.note"));
+        frameSectionTitleLabel.setText(localizationService.get("layout.dialog.section.frame.title"));
+        frameSectionFootnoteLabel.setText(localizationService.get("layout.dialog.section.frame.note"));
+        answerBoxSectionTitleLabel.setText(localizationService.get("layout.dialog.section.answerBoxes.title"));
+        answerBoxSectionFootnoteLabel.setText(localizationService.get("layout.dialog.section.answerBoxes.note"));
         coverPageCheckBox.setText(localizationService.get("layout.dialog.coverPage"));
         coverTitleLabel.setText(localizationService.get("layout.dialog.coverTitle"));
         coverTitleField.setPromptText(localizationService.get("layout.dialog.coverTitle.prompt"));
@@ -109,6 +144,8 @@ public class PdfLayoutDialogController {
         footerLabel.setText(localizationService.get("layout.dialog.footer"));
         footerField.setPromptText(localizationService.get("layout.dialog.footer.prompt"));
         pageNumbersCheckBox.setText(localizationService.get("layout.dialog.pageNumbers"));
+        answerBoxHeightPerPointLabel.setText(localizationService.get("layout.dialog.answerBoxHeightPerPoint"));
+        answerBoxHeightPerPointField.setPromptText(localizationService.get("layout.dialog.answerBoxHeightPerPoint.prompt"));
         helperLabel.setText(localizationService.get("layout.dialog.helper"));
         cancelButton.setText(localizationService.get("layout.dialog.cancel"));
         saveButton.setText(localizationService.get("layout.dialog.save"));

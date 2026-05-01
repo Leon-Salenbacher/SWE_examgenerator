@@ -5,6 +5,7 @@ import controller.sidebar.SidebarElementController;
 import controller.sidebar.SidebarSelectionCoordinator;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import controller.sidebar.SidebarChildElementController;
@@ -24,8 +25,11 @@ public class SidebarController implements SidebarSelectionCoordinator {
     @FXML private VBox chapterBox;
     @FXML
     private Label headingLabel;
+    @FXML
+    private Button addChapterButton;
     private Node selectedNode;
     private Consumer<ChildObject> selectionListener;
+    private Runnable createChapterHandler;
     private final LocalizationService localizationService = LocalizationService.getInstance();
     private final ChapterServiceImpl chapterService;
     private String selectedKey;
@@ -97,6 +101,18 @@ public class SidebarController implements SidebarSelectionCoordinator {
         this.selectionListener = selectionListener;
     }
 
+    public void setCreateChapterHandler(Runnable createChapterHandler) {
+        this.createChapterHandler = createChapterHandler;
+    }
+
+    @FXML
+    private void handleCreateChapter() {
+        clearSelection();
+        if (createChapterHandler != null) {
+            createChapterHandler.run();
+        }
+    }
+
     private SidebarChildElementController findController(ChildObject target) {
         for (Node chapterNode : chapterBox.getChildren()) {
             Object userData = chapterNode.getUserData();
@@ -160,6 +176,7 @@ public class SidebarController implements SidebarSelectionCoordinator {
             controller.selectNode();
         } else {
             selectedNode = null;
+            selectedKey = null;
         }
     }
 
@@ -200,9 +217,20 @@ public class SidebarController implements SidebarSelectionCoordinator {
         return data.getClass().getName() + "#" + data.getId();
     }
 
+    private void clearSelection() {
+        if (selectedNode != null) {
+            selectedNode.getStyleClass().remove("selected");
+        }
+        selectedNode = null;
+        selectedKey = null;
+    }
+
     private void applyTranslations() {
         if (headingLabel != null) {
             headingLabel.setText(localizationService.get("sidebar.heading"));
+        }
+        if (addChapterButton != null) {
+            addChapterButton.setText(localizationService.get("sidebar.createChapter"));
         }
     }
 

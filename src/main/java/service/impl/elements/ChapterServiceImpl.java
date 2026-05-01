@@ -10,9 +10,11 @@ public class ChapterServiceImpl
             Subtask,
             ChapterServiceImpl.ChapterCommand
         > {
+    private final ParentRepository<Chapter, Subtask> repository;
 
     public ChapterServiceImpl(ParentRepository<Chapter, Subtask> repository) {
         super(repository);
+        this.repository = repository;
     }
 
 
@@ -21,6 +23,7 @@ public class ChapterServiceImpl
     @Override
     protected Chapter mapCreateCommand(ChapterCommand command){
         Chapter chapter = new Chapter();
+        chapter.setId(nextId());
         chapter.setTitle(command.title());
         return chapter;
     }
@@ -33,6 +36,13 @@ public class ChapterServiceImpl
 
 
     public interface ChapterCommand extends ParentCommand {
+    }
+
+    private int nextId() {
+        return repository.findAll().stream()
+                .mapToInt(Chapter::getId)
+                .max()
+                .orElse(0) + 1;
     }
 
 

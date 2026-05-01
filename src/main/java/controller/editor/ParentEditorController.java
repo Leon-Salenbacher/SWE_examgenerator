@@ -7,16 +7,27 @@ import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import models.Chapter;
 import models.ChildObject;
+import models.ExamType;
 import models.ParentObject;
+import models.Points;
 import models.Subtask;
+import models.SubtaskDifficulty;
 import models.Variant;
 import service.impl.LocalizationService;
 import service.impl.elements.ChapterServiceImpl;
@@ -44,6 +55,24 @@ public class ParentEditorController {
 
     @FXML
     private TextField pointsField;
+
+    @FXML
+    private VBox difficultyBoxContainer;
+
+    @FXML
+    private Label difficultyLabel;
+
+    @FXML
+    private ComboBox<SubtaskDifficulty> difficultyBox;
+
+    @FXML
+    private VBox usageBoxContainer;
+
+    @FXML
+    private Label usageLabel;
+
+    @FXML
+    private ComboBox<ExamType> usageBox;
 
     @FXML
     private Label childSectionLabel;
@@ -106,6 +135,8 @@ public class ParentEditorController {
     private Consumer<ChildObject> navigationHandler;
     private Runnable dataChangedHandler;
     private boolean createMode;
+    private boolean createChapterMode;
+    private boolean updatingFields;
     private final LocalizationService localizationService = LocalizationService.getInstance();
     private final ChapterServiceImpl chapterService = ApplicationContext.getInstance().getChapterService();
     private final SubtaskServiceImpl subtaskService = ApplicationContext.getInstance().getSubtaskService();
@@ -118,10 +149,22 @@ public class ParentEditorController {
 
     @FXML
     private void initialize(){
-        pointsField.setTextFormatter(createNumericFormatter());
+        pointsField.setTextFormatter(createPointsFormatter());
+        difficultyBox.getItems().setAll(SubtaskDifficulty.values());
+        difficultyBox.getStyleClass().add("difficulty-combo");
+        difficultyBox.setCellFactory(listView -> new DifficultyListCell());
+        difficultyBox.setButtonCell(new DifficultyListCell());
+        usageBox.getItems().setAll(ExamType.values());
+        usageBox.getStyleClass().add("exam-type-combo");
+        usageBox.setCellFactory(listView -> new ExamTypeListCell());
+        usageBox.setButtonCell(new ExamTypeListCell());
+        usageBox.getSelectionModel().select(ExamType.defaultType());
 
         titleField.textProperty().addListener((observable, oldValue, newValue) -> {
             clearFeedback();
+            if (updatingFields) {
+                return;
+            }
             if (createMode) {
                 return;
             }
@@ -134,6 +177,13 @@ public class ParentEditorController {
 
         pointsField.textProperty().addListener((observable, oldValue, newValue) -> {
             clearFeedback();
+            if (updatingFields) {
+                return;
+            }
+            if (!isValidPointsInput(newValue)) {
+                showHalfStepPointsError();
+                return;
+            }
             if (createMode) {
                 return;
             }
@@ -141,23 +191,48 @@ public class ParentEditorController {
                 return;
             }
 
-            try{
-                int parsed = newValue == null || newValue.isBlank() ? 0 : Integer.parseInt(newValue);
-                ((Subtask) currentParent).setPoints(parsed);
-            }catch(NumberFormatException ignored){
-                pointsField.setText(oldValue);
-            }
+            double parsed = parsePointsInput(newValue);
+            ((Subtask) currentParent).setPoints(parsed);
         });
 
         labelsField.textProperty().addListener((observable, oldValue, newValue) -> {
             clearFeedback();
+            if (updatingFields) {
+                return;
+            }
             if (createMode) {
                 return;
             }
             if (!(currentParent instanceof Subtask)) {
                 return;
             }
-            ((Subtask) currentParent).setLabels(parseLabels(newValue));
+            Subtask subtask = (Subtask) currentParent;
+            subtask.setLabels(parseLabels(newValue));
+            setFieldValues(() -> usageBox.setValue(subtask.getExamType()));
+        });
+
+        difficultyBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            clearFeedback();
+            if (updatingFields) {
+                return;
+            }
+            if (createMode || !(currentParent instanceof Subtask) || newValue == null) {
+                return;
+            }
+            ((Subtask) currentParent).setDifficulty(newValue);
+        });
+
+        usageBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            clearFeedback();
+            if (updatingFields) {
+                return;
+            }
+            if (createMode || !(currentParent instanceof Subtask) || newValue == null) {
+                return;
+            }
+            Subtask subtask = (Subtask) currentParent;
+            subtask.setExamType(newValue);
+            setFieldValues(() -> labelsField.setText(String.join(", ", defaultLabels(subtask.getLabels()))));
         });
 
         displayPlaceholder();
@@ -179,6 +254,31 @@ public class ParentEditorController {
         }else{
             displayGeneric(parent);
         }
+    }
+
+    public void displayCreateChapter() {
+        currentParent = null;
+        createMode = true;
+        createChapterMode = true;
+        setFieldValues(() -> {
+            typeLabel.setText(localizationService.get("parentEditor.header.createChapter"));
+            titleField.clear();
+            pointsField.clear();
+            difficultyBox.setValue(SubtaskDifficulty.MEDIUM);
+            usageBox.setValue(ExamType.defaultType());
+            labelsField.clear();
+            questionField.clear();
+            solutionField.clear();
+        });
+        togglePoints(false);
+        toggleDifficulty(false);
+        toggleUsage(false);
+        toggleLabels(false);
+        toggleVariantFields(false);
+        childSectionLabel.setText(localizationService.get("parentEditor.childSection.subtasks"));
+        childList.getChildren().clear();
+        clearFeedback();
+        updateActionButtons();
     }
 
     public void setSelectionHandler(Consumer<ChildObject> selectionHandler){
@@ -234,16 +334,22 @@ public class ParentEditorController {
 
     private void displayPlaceholder(){
         createMode = false;
-        typeLabel.setText("Editor");
-        titleField.clear();
-        pointsField.clear();
+        createChapterMode = false;
+        setFieldValues(() -> {
+            typeLabel.setText("Editor");
+            titleField.clear();
+            pointsField.clear();
+            usageBox.setValue(ExamType.defaultType());
+            labelsField.clear();
+            questionField.clear();
+            solutionField.clear();
+        });
         pointsBox.setVisible(false);
         pointsBox.setManaged(false);
+        toggleDifficulty(false);
+        toggleUsage(false);
         toggleLabels(false);
         toggleVariantFields(false);
-        labelsField.clear();
-        questionField.clear();
-        solutionField.clear();
         childList.getChildren().setAll(createEmptyRow());
         currentParent = null;
         clearFeedback();
@@ -256,9 +362,14 @@ public class ParentEditorController {
 
     private void displayChapter(Chapter chapter){
         createMode = false;
-        typeLabel.setText(localizationService.get("parentEditor.header.chapter"));
-        titleField.setText(defaultText(chapter.getTitle(), ""));
+        createChapterMode = false;
+        setFieldValues(() -> {
+            typeLabel.setText(localizationService.get("parentEditor.header.chapter"));
+            titleField.setText(defaultText(chapter.getTitle(), ""));
+        });
         togglePoints(false);
+        toggleDifficulty(false);
+        toggleUsage(false);
         toggleLabels(false);
         toggleVariantFields(false);
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.subtasks"));
@@ -269,13 +380,20 @@ public class ParentEditorController {
 
     private void displaySubtask(Subtask subtask){
         createMode = false;
-        typeLabel.setText(localizationService.get("parentEditor.header.subtask"));
-        titleField.setText(defaultText(subtask.getTitle(), ""));
+        createChapterMode = false;
+        setFieldValues(() -> {
+            typeLabel.setText(localizationService.get("parentEditor.header.subtask"));
+            titleField.setText(defaultText(subtask.getTitle(), ""));
+            pointsField.setText(Points.format(subtask.getPoints()));
+            difficultyBox.setValue(defaultDifficulty(subtask.getDifficulty()));
+            usageBox.setValue(subtask.getExamType());
+            labelsField.setText(String.join(", ", defaultLabels(subtask.getLabels())));
+        });
         togglePoints(true);
+        toggleDifficulty(true);
+        toggleUsage(true);
         toggleLabels(true);
         toggleVariantFields(false);
-        pointsField.setText(String.valueOf(subtask.getPoints()));
-        labelsField.setText(String.join(", ", defaultLabels(subtask.getLabels())));
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.variants"));
         renderChildren(subtask.getChildElements());
         clearFeedback();
@@ -284,9 +402,14 @@ public class ParentEditorController {
 
     private void displayGeneric(ParentObject<? extends ChildObject> parent){
         createMode = false;
-        typeLabel.setText(localizationService.get("parentEditor.header.generic"));
-        titleField.setText(defaultText(parent.getTitle(), ""));
+        createChapterMode = false;
+        setFieldValues(() -> {
+            typeLabel.setText(localizationService.get("parentEditor.header.generic"));
+            titleField.setText(defaultText(parent.getTitle(), ""));
+        });
         togglePoints(false);
+        toggleDifficulty(false);
+        toggleUsage(false);
         toggleLabels(false);
         toggleVariantFields(false);
         childSectionLabel.setText(localizationService.get("parentEditor.childSection.generic"));
@@ -298,6 +421,16 @@ public class ParentEditorController {
     private void togglePoints(boolean visible){
         pointsBox.setVisible(visible);
         pointsBox.setManaged(visible);
+    }
+
+    private void toggleDifficulty(boolean visible){
+        difficultyBoxContainer.setVisible(visible);
+        difficultyBoxContainer.setManaged(visible);
+    }
+
+    private void toggleUsage(boolean visible){
+        usageBoxContainer.setVisible(visible);
+        usageBoxContainer.setManaged(visible);
     }
 
     private void toggleLabels(boolean visible){
@@ -324,8 +457,29 @@ public class ParentEditorController {
                 .toList();
     }
 
+    private List<String> labelsWithSelectedExamType() {
+        return ExamType.replaceExamTypeLabel(parseLabels(labelsField.getText()), defaultExamType(usageBox.getValue()));
+    }
+
     private List<String> defaultLabels(List<String> labels){
         return labels == null ? List.of() : labels;
+    }
+
+    private SubtaskDifficulty defaultDifficulty(SubtaskDifficulty difficulty) {
+        return difficulty == null ? SubtaskDifficulty.MEDIUM : difficulty;
+    }
+
+    private ExamType defaultExamType(ExamType examType) {
+        return examType == null ? ExamType.defaultType() : examType;
+    }
+
+    private void setFieldValues(Runnable update) {
+        updatingFields = true;
+        try {
+            update.run();
+        } finally {
+            updatingFields = false;
+        }
     }
 
     private void applyTranslations() {
@@ -333,6 +487,9 @@ public class ParentEditorController {
         titleField.setPromptText(localizationService.get("parentEditor.title.prompt"));
         pointsLabel.setText(localizationService.get("parentEditor.points"));
         pointsField.setPromptText(localizationService.get("parentEditor.points.prompt"));
+        difficultyLabel.setText(localizationService.get("parentEditor.difficulty"));
+        usageLabel.setText(localizationService.get("parentEditor.usage"));
+        usageBox.setButtonCell(new ExamTypeListCell());
         labelsLabel.setText(localizationService.get("parentEditor.labels"));
         labelsField.setPromptText(localizationService.get("parentEditor.labels.prompt"));
         questionLabel.setText(localizationService.get("childEditor.question"));
@@ -344,8 +501,14 @@ public class ParentEditorController {
         addChild.setText(localizationService.get("editor.createChild"));
         createButton.setText(localizationService.get("editor.create"));
 
-        if (currentParent == null) {
+        if (createChapterMode) {
+            typeLabel.setText(localizationService.get("parentEditor.header.createChapter"));
+            childSectionLabel.setText(localizationService.get("parentEditor.childSection.subtasks"));
+            updateActionButtons();
+        } else if (currentParent == null) {
             displayPlaceholder();
+        } else if (createMode) {
+            displayCreateChildForm();
         } else if (currentParent instanceof Chapter) {
             displayChapter((Chapter) currentParent);
         } else if (currentParent instanceof Subtask) {
@@ -367,10 +530,10 @@ public class ParentEditorController {
 
         createButton.setVisible(createMode);
         createButton.setManaged(createMode);
-        saveButton.setVisible(!createMode);
-        saveButton.setManaged(!createMode);
-        deleteButton.setVisible(!createMode);
-        deleteButton.setManaged(!createMode);
+        saveButton.setVisible(hasParent && !createMode);
+        saveButton.setManaged(hasParent && !createMode);
+        deleteButton.setVisible(hasParent && !createMode);
+        deleteButton.setManaged(hasParent && !createMode);
     }
 
     private void notifyDataChanged() {
@@ -393,12 +556,40 @@ public class ParentEditorController {
                 .orElse(0) + 1;
     }
 
-    private int parsePointsInput() {
-        String value = pointsField.getText();
+    private double parsePointsInput() {
+        return parsePointsInput(pointsField.getText());
+    }
+
+    private double parsePointsInput(String value) {
         if (value == null || value.isBlank()) {
             return 0;
         }
-        return Integer.parseInt(value);
+        double points = Points.parse(value);
+        if (!Points.isHalfStep(points)) {
+            throw new NumberFormatException("Points must use 0.5 steps.");
+        }
+        return points;
+    }
+
+    private Double parsePointsInputOrShowError() {
+        if (isValidPointsInput(pointsField.getText())) {
+            return parsePointsInput();
+        }
+        showHalfStepPointsError();
+        return null;
+    }
+
+    private boolean isValidPointsInput(String value) {
+        try {
+            parsePointsInput(value);
+            return true;
+        } catch (NumberFormatException exception) {
+            return false;
+        }
+    }
+
+    private void showHalfStepPointsError() {
+        showErrorFeedback(localizationService.get("validation.points.halfStep"));
     }
 
     public void toggleAddNewChild(){
@@ -407,26 +598,40 @@ public class ParentEditorController {
         }
 
         createMode = true;
-        titleField.clear();
-        pointsField.clear();
-        labelsField.clear();
-        questionField.clear();
-        solutionField.clear();
+        createChapterMode = false;
+        setFieldValues(() -> {
+            titleField.clear();
+            pointsField.clear();
+            difficultyBox.setValue(SubtaskDifficulty.MEDIUM);
+            usageBox.setValue(ExamType.defaultType());
+            labelsField.clear();
+            questionField.clear();
+            solutionField.clear();
+        });
         clearFeedback();
+        displayCreateChildForm();
+    }
 
+    private void displayCreateChildForm() {
         if (currentParent instanceof Chapter) {
             typeLabel.setText(localizationService.get("parentEditor.header.createSubtask"));
             togglePoints(true);
+            toggleDifficulty(true);
+            toggleUsage(true);
             toggleLabels(true);
             toggleVariantFields(false);
         } else if (currentParent instanceof Subtask) {
             typeLabel.setText(localizationService.get("parentEditor.header.createVariant"));
             togglePoints(false);
+            toggleDifficulty(false);
+            toggleUsage(false);
             toggleLabels(false);
             toggleVariantFields(true);
         } else {
             typeLabel.setText(localizationService.get("parentEditor.header.generic"));
             togglePoints(false);
+            toggleDifficulty(false);
+            toggleUsage(false);
             toggleLabels(false);
             toggleVariantFields(false);
         }
@@ -475,6 +680,12 @@ public class ParentEditorController {
             }
 
             if(currentParent instanceof Subtask subtask){
+                Double enteredPoints = parsePointsInputOrShowError();
+                if (enteredPoints == null) {
+                    return;
+                }
+                subtask.setPoints(enteredPoints);
+
                 ValidationResult validationResult = subtaskValidator.validate(subtask);
                 if (!validationResult.isValid()) {
                     showErrorFeedback(validationResult.message());
@@ -488,14 +699,18 @@ public class ParentEditorController {
                     }
 
                     @Override
-                    public int points() {
-                        String value = pointsField.getText();
-                        return value == null || value.isBlank() ? 0 : Integer.parseInt(value);
+                    public double points() {
+                        return enteredPoints;
+                    }
+
+                    @Override
+                    public SubtaskDifficulty difficulty() {
+                        return defaultDifficulty(difficultyBox.getValue());
                     }
 
                     @Override
                     public List<String> labels() {
-                        return parseLabels(labelsField.getText());
+                        return labelsWithSelectedExamType();
                     }
 
                     @Override
@@ -523,19 +738,109 @@ public class ParentEditorController {
     }
 
     @FXML
-    private void handleCreate() {
-        if (currentParent == null || !createMode) {
+    private void handleDelete() {
+        if (currentParent == null || createMode || !confirmDelete()) {
             return;
         }
 
         try {
             if (currentParent instanceof Chapter chapter) {
+                chapterService.delete(chapter.getId());
+                notifyDataChanged();
+                displayPlaceholder();
+                showSuccessFeedback(localizationService.get("editor.delete.success"));
+                return;
+            }
+
+            if (currentParent instanceof Subtask subtask) {
+                int chapterId = subtask.getChapterId();
+                subtaskService.delete(subtask.getId());
+                notifyDataChanged();
+
+                Chapter parentChapter = chapterService.getById(chapterId);
+                currentParent = parentChapter;
+                if (navigationHandler != null) {
+                    navigationHandler.accept(parentChapter);
+                } else {
+                    displayParent(parentChapter);
+                }
+
+                if (feedbackHandler != null) {
+                    feedbackHandler.accept(new EditorFeedbackRequest(parentChapter, localizationService.get("editor.delete.success"), true));
+                } else {
+                    showSuccessFeedback(localizationService.get("editor.delete.success"));
+                }
+            }
+        } catch (Exception exception) {
+            showErrorFeedback(localizationService.get("editor.delete.failed", messageOrFallback(exception)));
+        }
+    }
+
+    @FXML
+    private void handleCreate() {
+        if (!createMode) {
+            return;
+        }
+
+        try {
+            if (createChapterMode) {
+                Chapter draftChapter = new Chapter();
+                draftChapter.setTitle(titleField.getText());
+
+                ValidationResult validationResult = chapterValidator.validate(draftChapter);
+                if (!validationResult.isValid()) {
+                    showErrorFeedback(validationResult.message());
+                    return;
+                }
+
+                ChapterServiceImpl.ChapterCommand command = new ChapterServiceImpl.ChapterCommand() {
+                    @Override
+                    public String title() {
+                        return titleField.getText();
+                    }
+
+                    @Override
+                    public Integer parentId() {
+                        return null;
+                    }
+                };
+
+                Chapter createdChapter = chapterService.create(command);
+                currentParent = createdChapter;
+                createMode = false;
+                createChapterMode = false;
+                displayParent(createdChapter);
+
+                if (navigationHandler != null) {
+                    navigationHandler.accept(createdChapter);
+                } else {
+                    notifyDataChanged();
+                }
+                if (feedbackHandler != null) {
+                    feedbackHandler.accept(new EditorFeedbackRequest(createdChapter, localizationService.get("editor.create.success"), true));
+                } else {
+                    showSuccessFeedback(localizationService.get("editor.create.success"));
+                }
+                return;
+            }
+
+            if (currentParent == null) {
+                return;
+            }
+
+            if (currentParent instanceof Chapter chapter) {
+                Double enteredPoints = parsePointsInputOrShowError();
+                if (enteredPoints == null) {
+                    return;
+                }
+
                 Subtask createdSubtask = new Subtask();
                 createdSubtask.setId(nextSubtaskId());
                 createdSubtask.setChapterId(chapter.getId());
                 createdSubtask.setTitle(titleField.getText());
-                createdSubtask.setPoints(parsePointsInput());
-                createdSubtask.setLabels(new ArrayList<>(parseLabels(labelsField.getText())));
+                createdSubtask.setPoints(enteredPoints);
+                createdSubtask.setDifficulty(defaultDifficulty(difficultyBox.getValue()));
+                createdSubtask.setLabels(new ArrayList<>(labelsWithSelectedExamType()));
 
                 ValidationResult validationResult = subtaskValidator.validate(createdSubtask);
                 if (!validationResult.isValid()) {
@@ -607,8 +912,35 @@ public class ParentEditorController {
         }
     }
 
-    private TextFormatter<String> createNumericFormatter() {
-        return new TextFormatter<>(change -> change.getControlNewText().matches("\\d*") ? change : null);
+    private TextFormatter<String> createPointsFormatter() {
+        return new TextFormatter<>(change -> {
+            if (change.getControlNewText().matches("(|\\d+([\\.,]\\d*)?)")) {
+                return change;
+            }
+            showHalfStepPointsError();
+            return null;
+        });
+    }
+
+    private boolean confirmDelete() {
+        ButtonType deleteType = new ButtonType(
+                localizationService.get("editor.delete.confirm.action"),
+                ButtonBar.ButtonData.OK_DONE
+        );
+        ButtonType cancelType = new ButtonType(
+                localizationService.get("editor.delete.confirm.cancel"),
+                ButtonBar.ButtonData.CANCEL_CLOSE
+        );
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(localizationService.get("editor.delete.confirm.title"));
+        alert.setHeaderText(localizationService.get("editor.delete.confirm.header"));
+        alert.setContentText(localizationService.get("editor.delete.confirm.content"));
+        alert.getButtonTypes().setAll(deleteType, cancelType);
+
+        return alert.showAndWait()
+                .filter(deleteType::equals)
+                .isPresent();
     }
 
     private void showSuccessFeedback(String message) {
@@ -670,5 +1002,65 @@ public class ParentEditorController {
         return message == null || message.isBlank()
                 ? localizationService.get("editor.error.unknown")
                 : message;
+    }
+
+    private final class DifficultyListCell extends ListCell<SubtaskDifficulty> {
+        @Override
+        protected void updateItem(SubtaskDifficulty item, boolean empty) {
+            super.updateItem(item, empty);
+            getStyleClass().removeAll(
+                    "difficulty-cell-easy",
+                    "difficulty-cell-medium",
+                    "difficulty-cell-hard"
+            );
+
+            if (empty || item == null) {
+                setText(null);
+                setGraphic(null);
+                return;
+            }
+
+            Region icon = new Region();
+            icon.getStyleClass().addAll("difficulty-icon", "difficulty-icon-" + item.getXmlValue());
+
+            Label text = new Label(localizationService.get("difficulty." + item.getXmlValue()));
+            text.getStyleClass().add("difficulty-text");
+
+            HBox content = new HBox(8, icon, text);
+            content.getStyleClass().add("difficulty-option");
+            getStyleClass().add("difficulty-cell-" + item.getXmlValue());
+
+            setText(null);
+            setGraphic(content);
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        }
+    }
+
+    private final class ExamTypeListCell extends ListCell<ExamType> {
+        @Override
+        protected void updateItem(ExamType item, boolean empty) {
+            super.updateItem(item, empty);
+            getStyleClass().removeAll("exam-type-cell-exam", "exam-type-cell-practice");
+
+            if (empty || item == null) {
+                setText(null);
+                setGraphic(null);
+                return;
+            }
+
+            Region icon = new Region();
+            icon.getStyleClass().addAll("exam-type-icon", "exam-type-icon-" + item.name().toLowerCase());
+
+            Label text = new Label(localizationService.get(item.getLocalizationKey()));
+            text.getStyleClass().add("exam-type-text");
+
+            HBox content = new HBox(8, icon, text);
+            content.getStyleClass().add("exam-type-option");
+            getStyleClass().add("exam-type-cell-" + item.name().toLowerCase());
+
+            setText(null);
+            setGraphic(content);
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        }
     }
 }

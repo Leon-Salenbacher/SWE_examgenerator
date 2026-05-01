@@ -17,10 +17,14 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import models.Chapter;
+import models.ExamType;
+import models.Points;
 import service.exam.ExamGenerationService;
 import service.pdf.PdfExamWriter;
 import service.exam.dto.GenerateExamValues;
@@ -33,10 +37,21 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.UnaryOperator;
 
 public class ExamGenerationDialogController {
 
+    @FXML
+    private Label contentSectionTitleLabel;
+    @FXML
+    private Label contentSectionFootnoteLabel;
+    @FXML
+    private Label requirementsSectionTitleLabel;
+    @FXML
+    private Label requirementsSectionFootnoteLabel;
+    @FXML
+    private Label outputSectionTitleLabel;
+    @FXML
+    private Label outputSectionFootnoteLabel;
     @FXML
     private Label chapterLabel;
     @FXML
@@ -56,9 +71,17 @@ public class ExamGenerationDialogController {
     @FXML
     private TextField titleField;
     @FXML
+    private Label examTypeLabel;
+    @FXML
+    private ComboBox<ExamType> examTypeBox;
+    @FXML
     private Label pointsLabel;
     @FXML
-    private TextField pointsField;
+    private ComboBox<Double> pointsBox;
+    @FXML
+    private Label difficultyLabel;
+    @FXML
+    private Label difficultySummaryLabel;
     @FXML
     private Label layoutLabel;
     @FXML
@@ -83,9 +106,11 @@ public class ExamGenerationDialogController {
 
     private final ObservableList<Chapter> selectedChapters = FXCollections.observableArrayList();
     private final ObservableList<Chapter> availableChapters = FXCollections.observableArrayList();
+    private final ObservableList<Double> availablePoints = FXCollections.observableArrayList();
     private List<Chapter> allChapters = List.of();
     private Stage dialogStage;
     private PdfLayoutSettings currentLayoutSettings;
+    private boolean busy;
 
     @FXML
     private void initialize() {
@@ -96,7 +121,15 @@ public class ExamGenerationDialogController {
         availableChapterBox.setCellFactory(listView -> new ChapterListCell());
         availableChapterBox.setButtonCell(new ChapterListCell());
 
-        pointsField.setTextFormatter(new TextFormatter<>(buildNumericFilter()));
+        pointsBox.setItems(availablePoints);
+        pointsBox.setCellFactory(listView -> new PointsListCell());
+        pointsBox.setButtonCell(new PointsListCell());
+        examTypeBox.getItems().setAll(ExamType.values());
+        examTypeBox.getStyleClass().add("exam-type-combo");
+        examTypeBox.setCellFactory(listView -> new ExamTypeListCell());
+        examTypeBox.setButtonCell(new ExamTypeListCell());
+        examTypeBox.getSelectionModel().select(ExamType.defaultType());
+        examTypeBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateAvailablePointOptions());
         selectedChapterList.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateSelectionButtons());
         localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
         applyTranslations();
@@ -109,8 +142,10 @@ public class ExamGenerationDialogController {
         this.availableChapters.clear();
         this.currentLayoutSettings = PdfLayoutSettings.defaults(localizationService.get("generate.dialog.defaultTitle"));
         titleField.setText(localizationService.get("generate.dialog.defaultTitle"));
+        examTypeBox.getSelectionModel().select(ExamType.defaultType());
         layoutSummaryLabel.setText(currentLayoutSettings.summary());
         statusLabel.setText(localizationService.get("generate.dialog.status.ready"));
+        updateAvailablePointOptions();
         updateSelectionButtons();
         applyTranslations();
     }
@@ -128,6 +163,7 @@ public class ExamGenerationDialogController {
         availableChapterBox.getSelectionModel().clearSelection();
         selectedChapterList.getSelectionModel().select(selectedChapter);
         setStatus(localizationService.get("generate.dialog.status.ready"), false);
+        updateAvailablePointOptions();
         updateSelectionButtons();
     }
 
@@ -143,6 +179,7 @@ public class ExamGenerationDialogController {
         availableChapters.add(selectedChapter);
         availableChapters.sort(Comparator.comparingInt(chapter -> allChapters.indexOf(chapter)));
         setStatus(localizationService.get("generate.dialog.status.ready"), false);
+        updateAvailablePointOptions();
         updateSelectionButtons();
     }
 
@@ -170,10 +207,8 @@ public class ExamGenerationDialogController {
     @FXML
     private void handleGenerate() {
         String title = titleField.getText() == null ? "" : titleField.getText().trim();
-        int targetPoints;
-        try {
-            targetPoints = Integer.parseInt(pointsField.getText());
-        } catch (Exception exception) {
+        Double targetPoints = pointsBox.getSelectionModel().getSelectedItem();
+        if (targetPoints == null) {
             setStatus(localizationService.get("generate.dialog.error.invalidPoints"), true);
             return;
         }
@@ -186,7 +221,12 @@ public class ExamGenerationDialogController {
         setBusy(true);
         setStatus(localizationService.get("generate.dialog.status.checking"), false);
 
-        GenerateExamValues generateExamValues = new GenerateExamValues(title, targetPoints, new ArrayList<>(selectedChapters));
+        GenerateExamValues generateExamValues = new GenerateExamValues(
+                title,
+                targetPoints,
+                new ArrayList<>(selectedChapters),
+                currentExamType()
+        );
         Task<GeneratedExam> generationTask = new Task<>() {
             @Override
             protected GeneratedExam call() {
@@ -284,12 +324,15 @@ public class ExamGenerationDialogController {
     }
 
     private void setBusy(boolean busy) {
+        this.busy = busy;
         progressIndicator.setVisible(busy);
         progressIndicator.setManaged(busy);
-        generateButton.setDisable(busy);
+        generateButton.setDisable(busy || pointsBox.getSelectionModel().getSelectedItem() == null);
         cancelButton.setDisable(busy);
         layoutButton.setDisable(busy);
         includeSolutionsCheckBox.setDisable(busy);
+        examTypeBox.setDisable(busy);
+        pointsBox.setDisable(busy || availablePoints.isEmpty());
     }
 
     private void setStatus(String message, boolean error) {
@@ -307,9 +350,9 @@ public class ExamGenerationDialogController {
                 case NO_GENERATABLE_SUBTASKS -> localizationService.get("generate.dialog.error.noGeneratableSubtasks");
                 case POINTS_NOT_REACHABLE -> localizationService.get(
                         "generate.dialog.error.pointsNotReachable",
-                        generationException.getRequestedPoints(),
-                        generationException.getClosestReachablePoints(),
-                        generationException.getMaxReachablePoints()
+                        Points.format(generationException.getRequestedPoints()),
+                        Points.format(generationException.getClosestReachablePoints()),
+                        Points.format(generationException.getMaxReachablePoints())
                 );
             };
         }
@@ -331,14 +374,45 @@ public class ExamGenerationDialogController {
                 .orElse("");
     }
 
-    private UnaryOperator<TextFormatter.Change> buildNumericFilter() {
-        return change -> change.getControlNewText().matches("\\d*") ? change : null;
+    private void updateAvailablePointOptions() {
+        Double previousSelection = pointsBox.getSelectionModel().getSelectedItem();
+        availablePoints.setAll(examGenerationService.calculateAvailableTotalPoints(
+                new ArrayList<>(selectedChapters),
+                currentExamType()
+        ));
+
+        if (previousSelection != null && availablePoints.contains(previousSelection)) {
+            pointsBox.getSelectionModel().select(previousSelection);
+        } else if (!availablePoints.isEmpty()) {
+            pointsBox.getSelectionModel().selectFirst();
+        } else {
+            pointsBox.getSelectionModel().clearSelection();
+        }
+
+        pointsBox.setDisable(busy || availablePoints.isEmpty());
+        generateButton.setDisable(busy || pointsBox.getSelectionModel().getSelectedItem() == null);
+        if (availablePoints.isEmpty()) {
+            setStatus(localizationService.get("generate.dialog.error.noBalancedPointOptions"), true);
+        } else {
+            setStatus(localizationService.get("generate.dialog.status.ready"), false);
+        }
+    }
+
+    private ExamType currentExamType() {
+        ExamType selectedExamType = examTypeBox == null ? null : examTypeBox.getSelectionModel().getSelectedItem();
+        return selectedExamType == null ? ExamType.defaultType() : selectedExamType;
     }
 
     private void applyTranslations() {
         if (dialogStage != null) {
             dialogStage.setTitle(localizationService.get("generate.dialog.title"));
         }
+        contentSectionTitleLabel.setText(localizationService.get("generate.dialog.section.content.title"));
+        contentSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.content.note"));
+        requirementsSectionTitleLabel.setText(localizationService.get("generate.dialog.section.requirements.title"));
+        requirementsSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.requirements.note"));
+        outputSectionTitleLabel.setText(localizationService.get("generate.dialog.section.output.title"));
+        outputSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.output.note"));
         chapterLabel.setText(localizationService.get("generate.dialog.chapterSelection"));
         availableChapterBox.setPromptText(localizationService.get("generate.dialog.addChapter.prompt"));
         addButton.setText(localizationService.get("generate.dialog.addChapter"));
@@ -347,8 +421,13 @@ public class ExamGenerationDialogController {
         moveDownButton.setText(localizationService.get("generate.dialog.moveDown"));
         titleLabel.setText(localizationService.get("generate.dialog.examTitle"));
         titleField.setPromptText(localizationService.get("generate.dialog.examTitle.prompt"));
+        examTypeLabel.setText(localizationService.get("generate.dialog.examType"));
+        examTypeBox.setPromptText(localizationService.get("generate.dialog.examType.prompt"));
+        examTypeBox.setButtonCell(new ExamTypeListCell());
         pointsLabel.setText(localizationService.get("generate.dialog.points"));
-        pointsField.setPromptText(localizationService.get("generate.dialog.points.prompt"));
+        pointsBox.setPromptText(localizationService.get("generate.dialog.points.prompt"));
+        difficultyLabel.setText(localizationService.get("generate.dialog.difficulty"));
+        difficultySummaryLabel.setText(localizationService.get("generate.dialog.difficulty.summary"));
         layoutLabel.setText(localizationService.get("generate.dialog.layout"));
         layoutButton.setText(localizationService.get("generate.dialog.layoutButton"));
         includeSolutionsCheckBox.setText(localizationService.get("generate.dialog.includeSolutions"));
@@ -386,6 +465,42 @@ public class ExamGenerationDialogController {
                         : item.getTitle().trim();
                 setText(title);
             }
+        }
+    }
+
+    private static final class PointsListCell extends ListCell<Double> {
+        @Override
+        protected void updateItem(Double item, boolean empty) {
+            super.updateItem(item, empty);
+            setText(empty || item == null ? null : Points.format(item));
+        }
+    }
+
+    private final class ExamTypeListCell extends ListCell<ExamType> {
+        @Override
+        protected void updateItem(ExamType item, boolean empty) {
+            super.updateItem(item, empty);
+            getStyleClass().removeAll("exam-type-cell-exam", "exam-type-cell-practice");
+
+            if (empty || item == null) {
+                setText(null);
+                setGraphic(null);
+                return;
+            }
+
+            Region icon = new Region();
+            icon.getStyleClass().addAll("exam-type-icon", "exam-type-icon-" + item.name().toLowerCase());
+
+            Label text = new Label(localizationService.get(item.getLocalizationKey()));
+            text.getStyleClass().add("exam-type-text");
+
+            HBox content = new HBox(8, icon, text);
+            content.getStyleClass().add("exam-type-option");
+            getStyleClass().add("exam-type-cell-" + item.name().toLowerCase());
+
+            setText(null);
+            setGraphic(content);
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         }
     }
 }

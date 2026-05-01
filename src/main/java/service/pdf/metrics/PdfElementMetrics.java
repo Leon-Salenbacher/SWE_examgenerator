@@ -82,6 +82,37 @@ public final class PdfElementMetrics {
     }
 
     /**
+     * Returns the configured default answer box height per task point.
+     *
+     * @return default proportional height in PDF units
+     */
+    public static int answerBoxDefaultHeightPerPoint() {
+        return PdfLayoutMetrics.ANSWER_BOX_HEIGHT_PER_POINT;
+    }
+
+    /**
+     * Returns the proportional answer box height for a task's point value.
+     *
+     * @param points task points used to reserve writing space
+     * @return answer box height in PDF units
+     */
+    public static int answerBoxHeightForPoints(double points) {
+        return answerBoxHeightForPoints(points, PdfLayoutMetrics.ANSWER_BOX_HEIGHT_PER_POINT);
+    }
+
+    /**
+     * Returns the proportional answer box height for a task's point value and user-selected scale.
+     *
+     * @param points task points used to reserve writing space
+     * @param heightPerPoint reserved answer box height per task point
+     * @return answer box height in PDF units
+     */
+    public static int answerBoxHeightForPoints(double points, double heightPerPoint) {
+        int pointScaledHeight = (int) Math.ceil(Math.max(0, points) * Math.max(0, heightPerPoint));
+        return Math.max(answerBoxMinHeight(), pointScaledHeight);
+    }
+
+    /**
      * Returns the inner answer box padding.
      *
      * @return padding in PDF units

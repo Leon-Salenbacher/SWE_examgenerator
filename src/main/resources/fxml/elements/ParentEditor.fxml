@@ -26,19 +26,29 @@
         <TextField fx:id="pointsField" promptText="Points" styleClass="dark-input"/>
     </VBox>
 
+    <VBox fx:id="difficultyBoxContainer" spacing="6.0" visible="false" managed="false">
+        <Label fx:id="difficultyLabel" text="Difficulty" styleClass="section-label" />
+        <ComboBox fx:id="difficultyBox" maxWidth="1.7976931348623157E308" styleClass="dark-input"/>
+    </VBox>
+
+    <VBox fx:id="usageBoxContainer" spacing="6.0" visible="false" managed="false">
+        <Label fx:id="usageLabel" text="Usage" styleClass="section-label" />
+        <ComboBox fx:id="usageBox" maxWidth="1.7976931348623157E308" styleClass="dark-input"/>
+    </VBox>
+
     <VBox fx:id="labelsBox" spacing="6.0" visible="false" managed="false">
         <Label fx:id="labelsLabel" text="Labels" styleClass="section-label" />
         <TextField fx:id="labelsField" promptText="Practice, Exam" styleClass="dark-input" />
     </VBox>
 
-    <VBox fx:id="questionBox" spacing="6.0" visible="false" managed="false">
+    <VBox fx:id="questionBox" spacing="6.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
         <Label fx:id="questionLabel" text="Question" styleClass="section-label" />
-        <TextArea fx:id="questionField" promptText="Question" prefRowCount="4" styleClass="dark-input" />
+        <TextArea fx:id="questionField" promptText="Question" prefRowCount="6" wrapText="true" maxHeight="1.7976931348623157E308" styleClass="dark-input" VBox.vgrow="ALWAYS" />
     </VBox>
 
-    <VBox fx:id="solutionBox" spacing="6.0" visible="false" managed="false">
+    <VBox fx:id="solutionBox" spacing="6.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
         <Label fx:id="solutionLabel" text="Solution" styleClass="section-label" />
-        <TextArea fx:id="solutionField" promptText="Solution" prefRowCount="4" styleClass="dark-input" />
+        <TextArea fx:id="solutionField" promptText="Solution" prefRowCount="6" wrapText="true" maxHeight="1.7976931348623157E308" styleClass="dark-input" VBox.vgrow="ALWAYS" />
     </VBox>
 
     <VBox spacing="8.0">
@@ -55,7 +65,7 @@
 
     <HBox spacing="10.0" alignment="CENTER_RIGHT" styleClass="action-bar">
         <Label fx:id="actionFeedbackLabel" text="" styleClass="action-feedback" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" visible="false" managed="false" />
-        <Button fx:id="deleteButton" text="Delete" styleClass="editor-danger-button" />
+        <Button fx:id="deleteButton" text="Delete" styleClass="editor-danger-button" onAction="#handleDelete" />
         <Button fx:id="saveButton" text="Save" styleClass="editor-primary-button" onAction="#handleSave" />
         <Button fx:id="createButton" text="Create" styleClass="editor-primary-button" onAction="#handleCreate" visible="false" managed="false" />
     </HBox>

@@ -2,15 +2,15 @@ package exceptions;
 
 public class ExamGenerationException extends RuntimeException {
     private final Reason reason;
-    private final int requestedPoints;
-    private final int closestReachablePoints;
-    private final int maxReachablePoints;
+    private final double requestedPoints;
+    private final double closestReachablePoints;
+    private final double maxReachablePoints;
 
     public ExamGenerationException(Reason reason) {
         this(reason, 0, 0, 0);
     }
 
-    public ExamGenerationException(Reason reason, int requestedPoints, int closestReachablePoints, int maxReachablePoints) {
+    public ExamGenerationException(Reason reason, double requestedPoints, double closestReachablePoints, double maxReachablePoints) {
         super(reason.name());
         this.reason = reason;
         this.requestedPoints = requestedPoints;
@@ -22,15 +22,15 @@ public class ExamGenerationException extends RuntimeException {
         return reason;
     }
 
-    public int getRequestedPoints() {
+    public double getRequestedPoints() {
         return requestedPoints;
     }
 
-    public int getClosestReachablePoints() {
+    public double getClosestReachablePoints() {
         return closestReachablePoints;
     }
 
-    public int getMaxReachablePoints() {
+    public double getMaxReachablePoints() {
         return maxReachablePoints;
     }
 

@@ -1,9 +1,13 @@
 package controller.editor;
 
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.BoundingBox;
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.StackPane;
 import models.ChildObject;
 import models.ParentObject;
@@ -13,6 +17,9 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 public class EditorHostController {
+    @FXML
+    private ScrollPane editorScroll;
+
     @FXML
     private StackPane contentHost;
 
@@ -30,11 +37,28 @@ public class EditorHostController {
 
     @FXML
     private void initialize(){
+        bindContentToViewport();
         showPlaceholder();
         localizationService
                 .localeProperty()
                 .addListener((obs, oldLocale, newLocale) -> applyTranslations());
         applyTranslations();
+    }
+
+    private void bindContentToViewport() {
+        contentHost.minWidthProperty().bind(Bindings.createDoubleBinding(
+                () -> viewportBounds().getWidth(),
+                editorScroll.viewportBoundsProperty()
+        ));
+        contentHost.minHeightProperty().bind(Bindings.createDoubleBinding(
+                () -> viewportBounds().getHeight(),
+                editorScroll.viewportBoundsProperty()
+        ));
+    }
+
+    private Bounds viewportBounds() {
+        Bounds bounds = editorScroll.getViewportBounds();
+        return bounds == null ? new BoundingBox(0, 0, 0, 0) : bounds;
     }
 
     public void displayObject(ChildObject data){
@@ -55,6 +79,12 @@ public class EditorHostController {
     private void showParentEditor(ParentObject<? extends ChildObject> data){
         ensureParentEditor();
         parentEditorController.displayParent(data);
+        setContent(parentEditorRoot);
+    }
+
+    public void displayCreateChapter() {
+        ensureParentEditor();
+        parentEditorController.displayCreateChapter();
         setContent(parentEditorRoot);
     }
 

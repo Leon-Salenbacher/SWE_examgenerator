@@ -1,6 +1,7 @@
 package service.impl.elements;
 
 import models.Subtask;
+import models.SubtaskDifficulty;
 import models.Variant;
 import repository.ParentRepository;
 
@@ -27,6 +28,7 @@ public class SubtaskServiceImpl
             throw new IllegalStateException("Parent id must be null");
         }
         subtask.setChapterId(command.parentId());
+        subtask.setDifficulty(defaultDifficulty(command.difficulty()));
         subtask.setLabels(command.labels() == null ? new ArrayList<>() : new ArrayList<>(command.labels()));
         return subtask;
     }
@@ -38,12 +40,18 @@ public class SubtaskServiceImpl
         if(command.parentId() != null){
             current.setChapterId(command.parentId());
         }
+        current.setDifficulty(defaultDifficulty(command.difficulty()));
         current.setLabels(command.labels() == null ? new ArrayList<>() : new ArrayList<>(command.labels()));
         return current;
     }
 
     public interface SubtaskCommand extends ParentCommand{
-        int points();
+        double points();
+        SubtaskDifficulty difficulty();
         List<String> labels();
+    }
+
+    private SubtaskDifficulty defaultDifficulty(SubtaskDifficulty difficulty) {
+        return difficulty == null ? SubtaskDifficulty.MEDIUM : difficulty;
     }
 }

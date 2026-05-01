@@ -3,6 +3,7 @@ package service.pdf;
 import service.exam.dto.GeneratedExam;
 import service.exam.dto.GeneratedChapter;
 import service.exam.dto.PdfLayoutSettings;
+import models.Points;
 import service.pdf.dto.PageContent;
 import service.pdf.dto.PdfElement;
 import service.pdf.dto.PdfElementType;
@@ -53,7 +54,7 @@ public class PdfExamWriter {
             boolean includeSolutions
     ) throws IOException {
         PdfLayoutSettings sanitizedSettings = sanitizeSettings(exam, layoutSettings);
-        List<PdfElement> elements = elementBuilder.buildElements(exam, includeSolutions);
+        List<PdfElement> elements = elementBuilder.buildElements(exam, includeSolutions, sanitizedSettings);
         List<PageContent> pages = buildPagesWithTableOfContents(exam, elements, sanitizedSettings);
         byte[] pdfBytes = documentBuilder.buildPdfDocument(pages);
 
@@ -171,9 +172,9 @@ public class PdfExamWriter {
      * @param chapter generated chapter content
      * @return total chapter points
      */
-    private int calculateChapterPoints(GeneratedChapter chapter) {
+    private double calculateChapterPoints(GeneratedChapter chapter) {
         return chapter.subtasks().stream()
-                .mapToInt(generatedSubtask -> generatedSubtask.subtask().getPoints())
+                .mapToDouble(generatedSubtask -> generatedSubtask.subtask().getPoints())
                 .sum();
     }
 

@@ -100,6 +100,12 @@ public class DataObjectReflectionSupport {
                     .reduce((left, right) -> left + "," + right)
                     .orElse("");
         }
+        if (value instanceof SubtaskDifficulty difficulty) {
+            return difficulty.getXmlValue();
+        }
+        if (value instanceof Double || value instanceof Float) {
+            return Points.format(((Number) value).doubleValue());
+        }
         return value.toString();
     }
 
@@ -114,6 +120,9 @@ public class DataObjectReflectionSupport {
             }
             return Integer.parseInt(rawValue);
         }
+        if (type == double.class || type == Double.class) {
+            return Points.parse(rawValue);
+        }
         if (List.class.isAssignableFrom(type)) {
             if (rawValue == null || rawValue.isBlank()) {
                 return new ArrayList<>();
@@ -122,6 +131,9 @@ public class DataObjectReflectionSupport {
                     .map(String::trim)
                     .filter(value -> !value.isBlank())
                     .toList();
+        }
+        if (type == SubtaskDifficulty.class) {
+            return SubtaskDifficulty.fromXmlValue(rawValue);
         }
         throw new IllegalStateException(
                 "Unsupported XML field type '%s' for field '%s'.".formatted(

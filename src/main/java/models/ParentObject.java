@@ -1,6 +1,7 @@
 package models;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +18,7 @@ import java.util.List;
 public abstract class ParentObject<C extends ChildObject> extends ChildObject {
     public static final String CHILD_TAG_NAME = "child";
 
+    @Builder.Default
     protected List<C> childElements = new ArrayList<>();
 
     public void setChildElements(List<C> childElements){

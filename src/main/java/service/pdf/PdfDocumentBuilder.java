@@ -1,5 +1,6 @@
 package service.pdf;
 
+import models.Points;
 import service.exam.dto.PdfLayoutSettings;
 import service.pdf.dto.PageContent;
 import service.pdf.dto.PdfElement;
@@ -165,7 +166,7 @@ final class PdfDocumentBuilder {
             appendTableRow(builder, currentY, false,
                     Integer.toString(entry.page()),
                     entry.chapter(),
-                    Integer.toString(entry.possiblePoints()),
+                    Points.format(entry.possiblePoints()),
                     "");
             currentY -= PdfLayoutMetrics.TOC_ROW_HEIGHT;
         }

@@ -41,6 +41,8 @@ public final class PdfLayoutMetrics {
     public static final int ANSWER_BOX_WIDTH = PdfMetricsConfig.intValue("layout.answerBoxWidth", 495);
     /** Minimum answer box height. */
     public static final int ANSWER_BOX_MIN_HEIGHT = PdfMetricsConfig.intValue("layout.answerBoxMinHeight", 86);
+    /** Answer box height reserved per achievable point. */
+    public static final int ANSWER_BOX_HEIGHT_PER_POINT = PdfMetricsConfig.intValue("layout.answerBoxHeightPerPoint", 18);
     /** Inner padding for answer boxes. */
     public static final int ANSWER_BOX_PADDING = PdfMetricsConfig.intValue("layout.answerBoxPadding", 8);
     /** Spacing after answer boxes before the next heading. */
