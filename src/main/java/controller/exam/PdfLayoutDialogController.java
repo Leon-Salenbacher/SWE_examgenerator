@@ -13,6 +13,18 @@ import service.impl.LocalizationService;
 public class PdfLayoutDialogController {
 
     @FXML
+    private Label coverSectionTitleLabel;
+    @FXML
+    private Label coverSectionFootnoteLabel;
+    @FXML
+    private Label frameSectionTitleLabel;
+    @FXML
+    private Label frameSectionFootnoteLabel;
+    @FXML
+    private Label answerBoxSectionTitleLabel;
+    @FXML
+    private Label answerBoxSectionFootnoteLabel;
+    @FXML
     private CheckBox coverPageCheckBox;
     @FXML
     private VBox coverFieldsBox;
@@ -116,6 +128,12 @@ public class PdfLayoutDialogController {
     }
 
     private void applyTranslations() {
+        coverSectionTitleLabel.setText(localizationService.get("layout.dialog.section.cover.title"));
+        coverSectionFootnoteLabel.setText(localizationService.get("layout.dialog.section.cover.note"));
+        frameSectionTitleLabel.setText(localizationService.get("layout.dialog.section.frame.title"));
+        frameSectionFootnoteLabel.setText(localizationService.get("layout.dialog.section.frame.note"));
+        answerBoxSectionTitleLabel.setText(localizationService.get("layout.dialog.section.answerBoxes.title"));
+        answerBoxSectionFootnoteLabel.setText(localizationService.get("layout.dialog.section.answerBoxes.note"));
         coverPageCheckBox.setText(localizationService.get("layout.dialog.coverPage"));
         coverTitleLabel.setText(localizationService.get("layout.dialog.coverTitle"));
         coverTitleField.setPromptText(localizationService.get("layout.dialog.coverTitle.prompt"));

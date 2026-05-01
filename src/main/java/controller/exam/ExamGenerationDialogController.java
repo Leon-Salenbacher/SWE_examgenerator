@@ -41,6 +41,18 @@ import java.util.List;
 public class ExamGenerationDialogController {
 
     @FXML
+    private Label contentSectionTitleLabel;
+    @FXML
+    private Label contentSectionFootnoteLabel;
+    @FXML
+    private Label requirementsSectionTitleLabel;
+    @FXML
+    private Label requirementsSectionFootnoteLabel;
+    @FXML
+    private Label outputSectionTitleLabel;
+    @FXML
+    private Label outputSectionFootnoteLabel;
+    @FXML
     private Label chapterLabel;
     @FXML
     private ComboBox<Chapter> availableChapterBox;
@@ -66,6 +78,10 @@ public class ExamGenerationDialogController {
     private Label pointsLabel;
     @FXML
     private ComboBox<Double> pointsBox;
+    @FXML
+    private Label difficultyLabel;
+    @FXML
+    private Label difficultySummaryLabel;
     @FXML
     private Label layoutLabel;
     @FXML
@@ -391,6 +407,12 @@ public class ExamGenerationDialogController {
         if (dialogStage != null) {
             dialogStage.setTitle(localizationService.get("generate.dialog.title"));
         }
+        contentSectionTitleLabel.setText(localizationService.get("generate.dialog.section.content.title"));
+        contentSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.content.note"));
+        requirementsSectionTitleLabel.setText(localizationService.get("generate.dialog.section.requirements.title"));
+        requirementsSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.requirements.note"));
+        outputSectionTitleLabel.setText(localizationService.get("generate.dialog.section.output.title"));
+        outputSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.output.note"));
         chapterLabel.setText(localizationService.get("generate.dialog.chapterSelection"));
         availableChapterBox.setPromptText(localizationService.get("generate.dialog.addChapter.prompt"));
         addButton.setText(localizationService.get("generate.dialog.addChapter"));
@@ -404,6 +426,8 @@ public class ExamGenerationDialogController {
         examTypeBox.setButtonCell(new ExamTypeListCell());
         pointsLabel.setText(localizationService.get("generate.dialog.points"));
         pointsBox.setPromptText(localizationService.get("generate.dialog.points.prompt"));
+        difficultyLabel.setText(localizationService.get("generate.dialog.difficulty"));
+        difficultySummaryLabel.setText(localizationService.get("generate.dialog.difficulty.summary"));
         layoutLabel.setText(localizationService.get("generate.dialog.layout"));
         layoutButton.setText(localizationService.get("generate.dialog.layoutButton"));
         includeSolutionsCheckBox.setText(localizationService.get("generate.dialog.includeSolutions"));

@@ -6,9 +6,12 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
@@ -19,44 +22,90 @@
             fx:controller="controller.exam.ExamGenerationDialogController"
             styleClass="root">
     <center>
-        <VBox fx:id="contentBox" spacing="12.0" styleClass="generate-dialog-content">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="generate-dialog-scroll">
+            <content>
+                <VBox fx:id="contentBox" spacing="14.0" styleClass="generate-dialog-content">
+                    <padding>
+                        <Insets top="20" right="20" bottom="18" left="20"/>
+                    </padding>
+
+                    <VBox spacing="10.0" styleClass="generate-dialog-section">
+                        <Label fx:id="contentSectionTitleLabel" styleClass="generate-section-title"/>
+                        <Label fx:id="contentSectionFootnoteLabel" styleClass="generate-section-footnote" wrapText="true"/>
+
+                        <Label fx:id="chapterLabel" styleClass="section-label"/>
+
+                        <HBox spacing="10.0" styleClass="add-row">
+                            <ComboBox fx:id="availableChapterBox" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" styleClass="generate-dialog-combo"/>
+                            <Button fx:id="addButton" styleClass="editor-secondary-button" onAction="#handleAddChapter"/>
+                        </HBox>
+
+                        <ListView fx:id="selectedChapterList" prefHeight="200.0" styleClass="generate-dialog-list"/>
+
+                        <HBox spacing="10.0" styleClass="action-bar">
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="removeButton" styleClass="editor-danger-button" onAction="#handleRemoveChapter"/>
+                            <Button fx:id="moveUpButton" styleClass="editor-secondary-button" onAction="#handleMoveUp"/>
+                            <Button fx:id="moveDownButton" styleClass="editor-secondary-button" onAction="#handleMoveDown"/>
+                        </HBox>
+                    </VBox>
+
+                    <VBox spacing="10.0" styleClass="generate-dialog-section">
+                        <Label fx:id="requirementsSectionTitleLabel" styleClass="generate-section-title"/>
+                        <Label fx:id="requirementsSectionFootnoteLabel" styleClass="generate-section-footnote" wrapText="true"/>
+
+                        <GridPane hgap="14.0" vgap="12.0">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="50.0" hgrow="ALWAYS"/>
+                                <ColumnConstraints percentWidth="50.0" hgrow="ALWAYS"/>
+                            </columnConstraints>
+
+                            <VBox spacing="6.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Label fx:id="titleLabel" styleClass="section-label"/>
+                                <TextField fx:id="titleField" maxWidth="1.7976931348623157E308" styleClass="title-field"/>
+                            </VBox>
+
+                            <VBox spacing="6.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Label fx:id="examTypeLabel" styleClass="section-label"/>
+                                <ComboBox fx:id="examTypeBox" maxWidth="1.7976931348623157E308" styleClass="generate-dialog-combo"/>
+                            </VBox>
+
+                            <VBox spacing="6.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                <Label fx:id="pointsLabel" styleClass="section-label"/>
+                                <ComboBox fx:id="pointsBox" maxWidth="1.7976931348623157E308" styleClass="generate-dialog-combo"/>
+                            </VBox>
+
+                            <VBox spacing="6.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                <Label fx:id="difficultyLabel" styleClass="section-label"/>
+                                <Label fx:id="difficultySummaryLabel" maxWidth="1.7976931348623157E308" styleClass="generate-dialog-summary-label" wrapText="true"/>
+                            </VBox>
+                        </GridPane>
+                    </VBox>
+
+                    <VBox spacing="10.0" styleClass="generate-dialog-section">
+                        <Label fx:id="outputSectionTitleLabel" styleClass="generate-section-title"/>
+                        <Label fx:id="outputSectionFootnoteLabel" styleClass="generate-section-footnote" wrapText="true"/>
+
+                        <HBox spacing="12.0" alignment="CENTER_LEFT">
+                            <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                                <Label fx:id="layoutLabel" styleClass="section-label"/>
+                                <Label fx:id="layoutSummaryLabel" maxWidth="1.7976931348623157E308" styleClass="generate-dialog-summary-label" wrapText="true"/>
+                            </VBox>
+                            <Button fx:id="layoutButton" styleClass="editor-secondary-button" onAction="#handleOpenLayoutDialog"/>
+                        </HBox>
+
+                        <Separator/>
+                        <CheckBox fx:id="includeSolutionsCheckBox" styleClass="generate-dialog-checkbox"/>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+    <bottom>
+        <VBox spacing="10.0" styleClass="generate-dialog-footer-bar">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="12" right="20" bottom="18" left="20"/>
             </padding>
-
-            <Label fx:id="chapterLabel" styleClass="section-label"/>
-
-            <HBox spacing="10.0" styleClass="add-row">
-                <ComboBox fx:id="availableChapterBox" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" styleClass="generate-dialog-combo"/>
-                <Button fx:id="addButton" styleClass="editor-secondary-button" onAction="#handleAddChapter"/>
-            </HBox>
-
-            <ListView fx:id="selectedChapterList" prefHeight="220.0" styleClass="generate-dialog-list"/>
-
-            <HBox spacing="10.0" styleClass="action-bar">
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button fx:id="removeButton" styleClass="editor-danger-button" onAction="#handleRemoveChapter"/>
-                <Button fx:id="moveUpButton" styleClass="editor-secondary-button" onAction="#handleMoveUp"/>
-                <Button fx:id="moveDownButton" styleClass="editor-secondary-button" onAction="#handleMoveDown"/>
-            </HBox>
-
-            <Separator/>
-
-            <Label fx:id="titleLabel" styleClass="section-label"/>
-            <TextField fx:id="titleField" styleClass="title-field"/>
-
-            <Label fx:id="examTypeLabel" styleClass="section-label"/>
-            <ComboBox fx:id="examTypeBox" maxWidth="1.7976931348623157E308" styleClass="generate-dialog-combo"/>
-
-            <Label fx:id="pointsLabel" styleClass="section-label"/>
-            <ComboBox fx:id="pointsBox" maxWidth="1.7976931348623157E308" styleClass="generate-dialog-combo"/>
-
-            <Label fx:id="layoutLabel" styleClass="section-label"/>
-            <Button fx:id="layoutButton" styleClass="editor-secondary-button" onAction="#handleOpenLayoutDialog"/>
-            <Label fx:id="layoutSummaryLabel" styleClass="generate-dialog-status" wrapText="true"/>
-
-            <CheckBox fx:id="includeSolutionsCheckBox" styleClass="generate-dialog-checkbox"/>
-
             <HBox spacing="12.0" alignment="CENTER_LEFT">
                 <ProgressIndicator fx:id="progressIndicator" visible="false" managed="false" prefHeight="26.0" prefWidth="26.0"/>
                 <Label fx:id="statusLabel" styleClass="generate-dialog-status" wrapText="true" HBox.hgrow="ALWAYS"/>
@@ -68,5 +117,5 @@
                 <Button fx:id="generateButton" styleClass="editor-primary-button" onAction="#handleGenerate"/>
             </HBox>
         </VBox>
-    </center>
+    </bottom>
 </BorderPane>

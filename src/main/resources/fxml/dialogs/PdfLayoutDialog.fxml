@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -14,38 +15,61 @@
             fx:controller="controller.exam.PdfLayoutDialogController"
             styleClass="root">
     <center>
-        <VBox spacing="12.0" styleClass="generate-dialog-content">
+        <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="generate-dialog-scroll">
+            <content>
+                <VBox spacing="14.0" styleClass="generate-dialog-content">
+                    <padding>
+                        <Insets top="20" right="20" bottom="18" left="20"/>
+                    </padding>
+
+                    <VBox spacing="10.0" styleClass="generate-dialog-section">
+                        <Label fx:id="coverSectionTitleLabel" styleClass="generate-section-title"/>
+                        <Label fx:id="coverSectionFootnoteLabel" styleClass="generate-section-footnote" wrapText="true"/>
+                        <CheckBox fx:id="coverPageCheckBox" styleClass="generate-dialog-checkbox"/>
+
+                        <VBox fx:id="coverFieldsBox" spacing="10.0" styleClass="generate-dialog-subsection">
+                            <Label fx:id="coverTitleLabel" styleClass="section-label"/>
+                            <TextField fx:id="coverTitleField" maxWidth="1.7976931348623157E308" styleClass="title-field"/>
+                            <Label fx:id="coverSubtitleLabel" styleClass="section-label"/>
+                            <TextField fx:id="coverSubtitleField" maxWidth="1.7976931348623157E308" styleClass="title-field"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox spacing="10.0" styleClass="generate-dialog-section">
+                        <Label fx:id="frameSectionTitleLabel" styleClass="generate-section-title"/>
+                        <Label fx:id="frameSectionFootnoteLabel" styleClass="generate-section-footnote" wrapText="true"/>
+
+                        <Label fx:id="headerLabel" styleClass="section-label"/>
+                        <TextField fx:id="headerField" maxWidth="1.7976931348623157E308" styleClass="title-field"/>
+
+                        <Label fx:id="footerLabel" styleClass="section-label"/>
+                        <TextField fx:id="footerField" maxWidth="1.7976931348623157E308" styleClass="title-field"/>
+
+                        <CheckBox fx:id="pageNumbersCheckBox" styleClass="generate-dialog-checkbox"/>
+                    </VBox>
+
+                    <VBox spacing="10.0" styleClass="generate-dialog-section">
+                        <Label fx:id="answerBoxSectionTitleLabel" styleClass="generate-section-title"/>
+                        <Label fx:id="answerBoxSectionFootnoteLabel" styleClass="generate-section-footnote" wrapText="true"/>
+
+                        <Label fx:id="answerBoxHeightPerPointLabel" styleClass="section-label"/>
+                        <TextField fx:id="answerBoxHeightPerPointField" maxWidth="1.7976931348623157E308" styleClass="title-field"/>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+    <bottom>
+        <VBox spacing="10.0" styleClass="generate-dialog-footer-bar">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="12" right="20" bottom="18" left="20"/>
             </padding>
-
-            <CheckBox fx:id="coverPageCheckBox"/>
-
-            <VBox fx:id="coverFieldsBox" spacing="10.0">
-                <Label fx:id="coverTitleLabel" styleClass="section-label"/>
-                <TextField fx:id="coverTitleField" styleClass="title-field"/>
-                <Label fx:id="coverSubtitleLabel" styleClass="section-label"/>
-                <TextField fx:id="coverSubtitleField" styleClass="title-field"/>
-            </VBox>
-
-            <Label fx:id="headerLabel" styleClass="section-label"/>
-            <TextField fx:id="headerField" styleClass="title-field"/>
-
-            <Label fx:id="footerLabel" styleClass="section-label"/>
-            <TextField fx:id="footerField" styleClass="title-field"/>
-
-            <CheckBox fx:id="pageNumbersCheckBox"/>
-
-            <Label fx:id="answerBoxHeightPerPointLabel" styleClass="section-label"/>
-            <TextField fx:id="answerBoxHeightPerPointField" styleClass="title-field"/>
-
             <Label fx:id="helperLabel" styleClass="generate-dialog-status" wrapText="true"/>
-
             <HBox spacing="10.0" alignment="CENTER_RIGHT">
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button fx:id="cancelButton" styleClass="editor-secondary-button" onAction="#handleCancel"/>
                 <Button fx:id="saveButton" styleClass="editor-primary-button" onAction="#handleSave"/>
             </HBox>
         </VBox>
-    </center>
+    </bottom>
 </BorderPane>

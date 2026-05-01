@@ -446,6 +446,58 @@
     -fx-background-color: #1c1c1c;
 }
 
+.generate-dialog-scroll,
+.generate-dialog-scroll > .viewport {
+    -fx-background-color: #1c1c1c;
+}
+
+.generate-dialog-scroll {
+    -fx-background: #1c1c1c;
+    -fx-padding: 0;
+}
+
+.generate-dialog-section {
+    -fx-background-color: #232323;
+    -fx-background-radius: 8;
+    -fx-border-color: #363c4b;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 14 16 16 16;
+}
+
+.generate-dialog-subsection {
+    -fx-padding: 2 0 0 0;
+}
+
+.generate-section-title {
+    -fx-text-fill: #f0f3ff;
+    -fx-font-size: 16px;
+    -fx-font-weight: 800;
+}
+
+.generate-section-footnote {
+    -fx-text-fill: #98a1b8;
+    -fx-font-size: 12px;
+    -fx-padding: 0 0 4 0;
+}
+
+.generate-dialog-summary-label {
+    -fx-background-color: #1b1f29;
+    -fx-background-radius: 8;
+    -fx-border-color: #38445f;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 10 12 10 12;
+    -fx-text-fill: #d5dcf0;
+    -fx-font-size: 12px;
+}
+
+.generate-dialog-footer-bar {
+    -fx-background-color: #202020;
+    -fx-border-color: #343434 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
 .generate-dialog-list {
     -fx-background-color: #2a2a2a;
     -fx-control-inner-background: #2a2a2a;
