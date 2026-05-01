@@ -37,8 +37,10 @@ final class PdfExamElementBuilder {
         int chapterNumber = 1;
         for (GeneratedChapter generatedChapter : exam.chapters()) {
             Chapter chapter = generatedChapter.chapter();
+            double chapterPoints = calculateChapterPoints(generatedChapter);
             elements.add(PdfElement.chapterHeading(chapterNumber + ". "
-                    + textFormatter.safeLabel(chapter.getTitle(), "Chapter " + chapter.getId())));
+                    + textFormatter.safeLabel(chapter.getTitle(), "Chapter " + chapter.getId())
+                    + " (" + Points.format(chapterPoints) + " pts)"));
 
             int subtaskNumber = 0;
             for (GeneratedSubtask generatedSubtask : generatedChapter.subtasks()) {
@@ -60,6 +62,18 @@ final class PdfExamElementBuilder {
         }
 
         return elements;
+    }
+
+    /**
+     * Calculates the sum of all selected task points in one generated chapter.
+     *
+     * @param chapter generated chapter content
+     * @return total points for the chapter
+     */
+    private double calculateChapterPoints(GeneratedChapter chapter) {
+        return chapter.subtasks().stream()
+                .mapToDouble(generatedSubtask -> generatedSubtask.subtask().getPoints())
+                .sum();
     }
 
     /**
