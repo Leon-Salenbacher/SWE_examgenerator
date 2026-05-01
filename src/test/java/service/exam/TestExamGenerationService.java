@@ -66,8 +66,35 @@ public class TestExamGenerationService {
                 subtask(6, "Practice hard", 6, SubtaskDifficulty.HARD, ExamType.PRACTICE)
         ));
 
-        assertEquals(List.of(12.0), service.calculateAvailableTotalPoints(List.of(chapter), ExamType.EXAM));
-        assertEquals(List.of(18.0), service.calculateAvailableTotalPoints(List.of(chapter), ExamType.PRACTICE));
+        assertEquals(List.of(4.0, 8.0, 12.0), service.calculateAvailableTotalPoints(List.of(chapter), ExamType.EXAM));
+        assertEquals(List.of(6.0, 12.0, 18.0), service.calculateAvailableTotalPoints(List.of(chapter), ExamType.PRACTICE));
+    }
+
+    @Test
+    public void test_generateExam_goodcase03_balanceDifficultiesAsCloselyAsPossible() {
+        ExamGenerationService service = new ExamGenerationService();
+        Chapter chapter = new Chapter();
+        chapter.setId(1);
+        chapter.setTitle("Chapter");
+        chapter.setChildElements(List.of(
+                subtask(1, "Easy large", 5, SubtaskDifficulty.EASY, ExamType.EXAM),
+                subtask(2, "Easy small", 2, SubtaskDifficulty.EASY, ExamType.EXAM),
+                subtask(3, "Medium", 4, SubtaskDifficulty.MEDIUM, ExamType.EXAM),
+                subtask(4, "Hard", 4, SubtaskDifficulty.HARD, ExamType.EXAM),
+                subtask(5, "Hard small", 1, SubtaskDifficulty.HARD, ExamType.EXAM)
+        ));
+
+        GeneratedExam generatedExam = service.generateExam(new GenerateExamValues(
+                "Klausur",
+                10,
+                List.of(chapter),
+                ExamType.EXAM
+        ));
+
+        assertEquals(
+                List.of("Easy small", "Medium", "Hard"),
+                generatedSubtaskTitles(generatedExam)
+        );
     }
 
     private Chapter chapterWithMixedExamTypes() {

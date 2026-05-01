@@ -12,15 +12,12 @@ import service.exam.dto.GenerateExamValues;
 import service.exam.dto.GeneratedChapter;
 import service.exam.dto.GeneratedExam;
 import service.exam.dto.GeneratedSubtask;
-import service.exam.dto.SelectionState;
 import validation.exam.ExamGenerationValidator;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +55,9 @@ public class ExamGenerationService {
     }
 
     /**
-     * Calculates the total point values that can be generated with an exact third
-     * of the points from each difficulty.
+     * Calculates all total point values that can be generated from the selected chapters.
+     * Generated exams prefer the closest possible balance across difficulties, but no
+     * longer require an exact third from each difficulty.
      *
      * @param selectedChapters chapters selected by the user
      * @return sorted reachable total point values
@@ -81,26 +79,12 @@ public class ExamGenerationService {
         }
 
         List<CandidateTask> candidateTasks = collectCandidateTasksWithoutValidation(selectedChapters, examType);
-        Map<SubtaskDifficulty, List<CandidateTask>> tasksByDifficulty = groupTasksByDifficulty(candidateTasks);
-        Set<Integer> commonThirdValues = null;
+        Set<Integer> reachablePoints = calculateReachablePointValues(candidateTasks);
+        reachablePoints.remove(0);
 
-        for (SubtaskDifficulty difficulty : SubtaskDifficulty.values()) {
-            Set<Integer> reachablePoints = calculateReachablePointValues(tasksByDifficulty.getOrDefault(difficulty, List.of()));
-            reachablePoints.remove(0);
-            if (commonThirdValues == null) {
-                commonThirdValues = new HashSet<>(reachablePoints);
-            } else {
-                commonThirdValues.retainAll(reachablePoints);
-            }
-        }
-
-        if (commonThirdValues == null || commonThirdValues.isEmpty()) {
-            return List.of();
-        }
-
-        return commonThirdValues.stream()
+        return reachablePoints.stream()
                 .sorted()
-                .map(thirdHalfPoints -> Points.fromHalfPoints(thirdHalfPoints * SubtaskDifficulty.values().length))
+                .map(Points::fromHalfPoints)
                 .toList();
     }
 
@@ -122,7 +106,8 @@ public class ExamGenerationService {
     }
 
     /**
-     * Selects subtasks so each difficulty contributes exactly one third of the target points.
+     * Selects subtasks whose total points match the target and whose difficulty
+     * distribution is as close as possible to one third each.
      *
      * @param candidateTasks available tasks
      * @param targetPoints requested total points
@@ -130,28 +115,20 @@ public class ExamGenerationService {
      */
     private List<CandidateTask> selectBalancedTasks(List<CandidateTask> candidateTasks, double targetPoints) {
         int targetHalfPoints = Points.toHalfPoints(targetPoints);
-        if (targetHalfPoints % SubtaskDifficulty.values().length != 0) {
-            throw new ExamGenerationException(
-                    ExamGenerationException.Reason.POINTS_NOT_REACHABLE,
-                    targetPoints,
-                    0,
-                    calculateMaxBalancedTotalPoints(candidateTasks)
-            );
+        List<Map<DifficultyPointTotals, BalancedSelectionState>> statesByTotal =
+                calculateBalancedSelections(candidateTasks, targetHalfPoints);
+        Map<DifficultyPointTotals, BalancedSelectionState> targetSelections = statesByTotal.get(targetHalfPoints);
+        if (targetSelections.isEmpty()) {
+            throwPointsNotReachable(candidateTasks, targetHalfPoints);
         }
 
-        int halfPointsPerDifficulty = targetHalfPoints / SubtaskDifficulty.values().length;
-        Map<SubtaskDifficulty, List<CandidateTask>> tasksByDifficulty = groupTasksByDifficulty(candidateTasks);
-        List<CandidateTask> selectedTasks = new ArrayList<>();
+        DifficultyPointTotals bestTotals = targetSelections.keySet().stream()
+                .min(Comparator
+                        .comparingLong((DifficultyPointTotals totals) -> totals.squaredDistanceFromEqualShare(targetHalfPoints))
+                        .thenComparingInt(DifficultyPointTotals::range))
+                .orElseThrow();
 
-        for (SubtaskDifficulty difficulty : SubtaskDifficulty.values()) {
-            Map<Integer, SelectionState> reachableSelections = calculateReachableSelections(
-                    tasksByDifficulty.getOrDefault(difficulty, List.of()),
-                    halfPointsPerDifficulty
-            );
-            selectedTasks.addAll(reconstructSelectedTasks(reachableSelections, halfPointsPerDifficulty));
-        }
-
-        return selectedTasks;
+        return reconstructSelectedTasks(statesByTotal, targetHalfPoints, bestTotals);
     }
 
     /**
@@ -206,19 +183,6 @@ public class ExamGenerationService {
         return candidateTasks;
     }
 
-    private Map<SubtaskDifficulty, List<CandidateTask>> groupTasksByDifficulty(List<CandidateTask> candidateTasks) {
-        Map<SubtaskDifficulty, List<CandidateTask>> tasksByDifficulty = new EnumMap<>(SubtaskDifficulty.class);
-        for (CandidateTask candidateTask : candidateTasks) {
-            SubtaskDifficulty difficulty = candidateTask.subtask().getDifficulty() == null
-                    ? SubtaskDifficulty.MEDIUM
-                    : candidateTask.subtask().getDifficulty();
-            tasksByDifficulty
-                    .computeIfAbsent(difficulty, ignored -> new ArrayList<>())
-                    .add(candidateTask);
-        }
-        return tasksByDifficulty;
-    }
-
     private Set<Integer> calculateReachablePointValues(List<CandidateTask> candidateTasks) {
         Set<Integer> reachablePoints = new TreeSet<>();
         reachablePoints.add(0);
@@ -232,37 +196,6 @@ public class ExamGenerationService {
         }
 
         return reachablePoints;
-    }
-
-    private double calculateMaxBalancedTotalPoints(List<CandidateTask> candidateTasks) {
-        return calculateAvailableTotalPointsFromCandidates(candidateTasks).stream()
-                .mapToDouble(Double::doubleValue)
-                .max()
-                .orElse(0);
-    }
-
-    private List<Double> calculateAvailableTotalPointsFromCandidates(List<CandidateTask> candidateTasks) {
-        Map<SubtaskDifficulty, List<CandidateTask>> tasksByDifficulty = groupTasksByDifficulty(candidateTasks);
-        Set<Integer> commonThirdValues = null;
-
-        for (SubtaskDifficulty difficulty : SubtaskDifficulty.values()) {
-            Set<Integer> reachablePoints = calculateReachablePointValues(tasksByDifficulty.getOrDefault(difficulty, List.of()));
-            reachablePoints.remove(0);
-            if (commonThirdValues == null) {
-                commonThirdValues = new HashSet<>(reachablePoints);
-            } else {
-                commonThirdValues.retainAll(reachablePoints);
-            }
-        }
-
-        if (commonThirdValues == null || commonThirdValues.isEmpty()) {
-            return List.of();
-        }
-
-        return commonThirdValues.stream()
-                .sorted()
-                .map(thirdHalfPoints -> Points.fromHalfPoints(thirdHalfPoints * SubtaskDifficulty.values().length))
-                .toList();
     }
 
     /**
@@ -315,78 +248,100 @@ public class ExamGenerationService {
     }
 
     /**
-     * Calculates all reachable point totals up to the requested target.
+     * Calculates all reachable difficulty distributions up to the requested target.
      *
      * @param candidateTasks available tasks to choose from
      * @param targetHalfPoints requested total number of points in half-point units
-     * @return reachable point totals with the information required to rebuild the selection
-     * @throws ExamGenerationException if the requested number of points cannot be reached
+     * @return selection states grouped by total point value
      */
-    private Map<Integer, SelectionState> calculateReachableSelections(List<CandidateTask> candidateTasks, int targetHalfPoints) {
+    private List<Map<DifficultyPointTotals, BalancedSelectionState>> calculateBalancedSelections(
+            List<CandidateTask> candidateTasks,
+            int targetHalfPoints
+    ) {
         List<CandidateTask> shuffledCandidates = new ArrayList<>(candidateTasks);
         Collections.shuffle(shuffledCandidates, random);
 
-        Map<Integer, SelectionState> reachableSelections = new LinkedHashMap<>();
-        reachableSelections.put(0, new SelectionState(null, null));
+        List<Map<DifficultyPointTotals, BalancedSelectionState>> statesByTotal = new ArrayList<>();
+        for (int halfPoints = 0; halfPoints <= targetHalfPoints; halfPoints++) {
+            statesByTotal.add(new LinkedHashMap<>());
+        }
+        statesByTotal.get(0).put(DifficultyPointTotals.zero(), new BalancedSelectionState(null, null));
 
         for (CandidateTask candidate : shuffledCandidates) {
-            reachableSelections = extendReachableSelections(reachableSelections, candidate, targetHalfPoints);
-            if (reachableSelections.containsKey(targetHalfPoints)) {
-                break;
+            int candidateHalfPoints = Points.toHalfPoints(candidate.subtask().getPoints());
+            SubtaskDifficulty difficulty = difficultyOf(candidate);
+            for (int currentHalfPoints = targetHalfPoints - candidateHalfPoints; currentHalfPoints >= 0; currentHalfPoints--) {
+                Map<DifficultyPointTotals, BalancedSelectionState> currentStates = statesByTotal.get(currentHalfPoints);
+                if (currentStates.isEmpty()) {
+                    continue;
+                }
+
+                List<DifficultyPointTotals> currentTotals = new ArrayList<>(currentStates.keySet());
+                for (DifficultyPointTotals currentTotal : currentTotals) {
+                    DifficultyPointTotals nextTotal = currentTotal.add(difficulty, candidateHalfPoints);
+                    statesByTotal
+                            .get(currentHalfPoints + candidateHalfPoints)
+                            .putIfAbsent(nextTotal, new BalancedSelectionState(currentTotal, candidate));
+                }
             }
         }
 
-        examGenerationValidator.validateReachableStates(reachableSelections, targetHalfPoints);
-        return reachableSelections;
+        return statesByTotal;
+    }
+
+    private SubtaskDifficulty difficultyOf(CandidateTask candidateTask) {
+        return candidateTask.subtask().getDifficulty() == null
+                ? SubtaskDifficulty.MEDIUM
+                : candidateTask.subtask().getDifficulty();
+    }
+
+    private void throwPointsNotReachable(List<CandidateTask> candidateTasks, int targetHalfPoints) {
+        Set<Integer> reachablePoints = calculateReachablePointValues(candidateTasks);
+        reachablePoints.remove(0);
+
+        int closestReachableHalfPoints = reachablePoints.stream()
+                .filter(points -> points <= targetHalfPoints)
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+        int maxReachableHalfPoints = reachablePoints.stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+
+        throw new ExamGenerationException(
+                ExamGenerationException.Reason.POINTS_NOT_REACHABLE,
+                Points.fromHalfPoints(targetHalfPoints),
+                Points.fromHalfPoints(closestReachableHalfPoints),
+                Points.fromHalfPoints(maxReachableHalfPoints)
+        );
     }
 
     /**
-     * Extends the currently reachable point totals with one additional candidate task.
+     * Rebuilds the best balanced selected tasks from the final reachable-selection state.
      *
-     * @param currentSelections currently reachable selections
-     * @param candidate candidate task that may be added
+     * @param statesByTotal reachable difficulty distributions and predecessor information
      * @param targetHalfPoints requested total number of points in half-point units
-     * @return updated selection map
-     */
-    private Map<Integer, SelectionState> extendReachableSelections(
-            Map<Integer, SelectionState> currentSelections,
-            CandidateTask candidate,
-            int targetHalfPoints
-    ) {
-        Map<Integer, SelectionState> extendedSelections = new LinkedHashMap<>(currentSelections);
-
-        for (Map.Entry<Integer, SelectionState> entry : currentSelections.entrySet()) {
-            int nextHalfPoints = entry.getKey() + Points.toHalfPoints(candidate.subtask().getPoints());
-            if (nextHalfPoints > targetHalfPoints || extendedSelections.containsKey(nextHalfPoints)) {
-                continue;
-            }
-            extendedSelections.put(nextHalfPoints, new SelectionState(entry.getKey(), candidate));
-        }
-
-        return extendedSelections;
-    }
-
-    /**
-     * Rebuilds the selected tasks from the final reachable-selection state.
-     *
-     * @param reachableSelections reachable point totals and their predecessor information
-     * @param targetHalfPoints requested total number of points in half-point units
+     * @param targetTotals chosen difficulty totals for the requested target
      * @return selected tasks in reconstruction order
      */
     private List<CandidateTask> reconstructSelectedTasks(
-            Map<Integer, SelectionState> reachableSelections,
-            int targetHalfPoints
+            List<Map<DifficultyPointTotals, BalancedSelectionState>> statesByTotal,
+            int targetHalfPoints,
+            DifficultyPointTotals targetTotals
     ) {
         List<CandidateTask> selectedTasks = new ArrayList<>();
-        Integer currentHalfPoints = targetHalfPoints;
+        int currentHalfPoints = targetHalfPoints;
+        DifficultyPointTotals currentTotals = targetTotals;
 
-        while (currentHalfPoints != null && currentHalfPoints > 0) {
-            SelectionState state = reachableSelections.get(currentHalfPoints);
+        while (currentHalfPoints > 0) {
+            BalancedSelectionState state = statesByTotal.get(currentHalfPoints).get(currentTotals);
             if (state == null || state.candidateTask() == null) {
-                break;
+                throw new IllegalStateException("Could not reconstruct generated exam selection.");
             }
             selectedTasks.add(state.candidateTask());
-            currentHalfPoints = state.previousHalfPoints();
+            currentHalfPoints -= Points.toHalfPoints(state.candidateTask().subtask().getPoints());
+            currentTotals = state.previousTotals();
         }
 
         Collections.reverse(selectedTasks);
@@ -458,5 +413,46 @@ public class ExamGenerationService {
      */
     private Variant pickRandomVariant(List<Variant> variants) {
         return variants.get(random.nextInt(variants.size()));
+    }
+
+    private record BalancedSelectionState(
+            DifficultyPointTotals previousTotals,
+            CandidateTask candidateTask
+    ) {
+    }
+
+    private record DifficultyPointTotals(
+            int easyHalfPoints,
+            int mediumHalfPoints,
+            int hardHalfPoints
+    ) {
+        private static DifficultyPointTotals zero() {
+            return new DifficultyPointTotals(0, 0, 0);
+        }
+
+        private DifficultyPointTotals add(SubtaskDifficulty difficulty, int halfPoints) {
+            return switch (difficulty) {
+                case EASY -> new DifficultyPointTotals(easyHalfPoints + halfPoints, mediumHalfPoints, hardHalfPoints);
+                case MEDIUM -> new DifficultyPointTotals(easyHalfPoints, mediumHalfPoints + halfPoints, hardHalfPoints);
+                case HARD -> new DifficultyPointTotals(easyHalfPoints, mediumHalfPoints, hardHalfPoints + halfPoints);
+            };
+        }
+
+        private long squaredDistanceFromEqualShare(int targetHalfPoints) {
+            return squaredDeviation(easyHalfPoints, targetHalfPoints)
+                    + squaredDeviation(mediumHalfPoints, targetHalfPoints)
+                    + squaredDeviation(hardHalfPoints, targetHalfPoints);
+        }
+
+        private long squaredDeviation(int difficultyHalfPoints, int targetHalfPoints) {
+            long scaledDeviation = (long) difficultyHalfPoints * SubtaskDifficulty.values().length - targetHalfPoints;
+            return scaledDeviation * scaledDeviation;
+        }
+
+        private int range() {
+            int max = Math.max(easyHalfPoints, Math.max(mediumHalfPoints, hardHalfPoints));
+            int min = Math.min(easyHalfPoints, Math.min(mediumHalfPoints, hardHalfPoints));
+            return max - min;
+        }
     }
 }
