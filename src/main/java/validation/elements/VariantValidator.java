@@ -9,10 +9,6 @@ public class VariantValidator extends AbstractTitleValidator<Variant> {
             return ValidationResult.error(localizationService.get("validation.question.required"));
         }
 
-        if (isBlank(element.getSolution())) {
-            return ValidationResult.error(localizationService.get("validation.solution.required"));
-        }
-
         return ValidationResult.ok();
     }
 }
