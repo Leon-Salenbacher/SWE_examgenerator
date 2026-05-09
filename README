@@ -27,6 +27,9 @@ Dieses Projekt ist eine JavaFX-Anwendung, die einen Editor zum Erstellen und Exp
 ## Sprachen/Internationalisierung
 Die `LocalizationService`-Klasse lädt Übersetzungen aus `src/main/resources/i18n`. Beim Start wird der Fenstertitel aus den Sprachdateien gesetzt; Änderungen am Locale aktualisieren den Titel automatisch.
 
+## Geplante Einstellungen
+Persistente Anwendungseinstellungen werden spaeter in einer user- oder projektlokalen `.properties`-Datei abgelegt. Die bestehende XML-Datei bleibt fuer Aufgabendaten reserviert.
+
 ## Troubleshooting
 - **Fehlende JavaFX-Klassen**: VM-Options prüfen (`--module-path` + `--add-modules`).
 - **FXML wird nicht gefunden**: Pfad muss im Klassenpfad liegen (`/fxml/...`), sonst wirft der Loader eine `IllegalStateException`.

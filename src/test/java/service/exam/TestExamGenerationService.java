@@ -1,5 +1,6 @@
 package service.exam;
 
+import exceptions.ExamGenerationException;
 import models.Chapter;
 import models.ExamType;
 import models.Subtask;
@@ -8,10 +9,12 @@ import models.Variant;
 import org.junit.jupiter.api.Test;
 import service.exam.dto.GenerateExamValues;
 import service.exam.dto.GeneratedExam;
+import support.ExamTestData;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestExamGenerationService {
 
@@ -97,6 +100,96 @@ public class TestExamGenerationService {
         );
     }
 
+    @Test
+    public void test_generateExam_goodcase04_nullExamTypeFallsBackToDefaultExamType() {
+        ExamGenerationService service = new ExamGenerationService();
+        Chapter chapter = ExamTestData.chapter(1, "Chapter", List.of(
+                subtask(1, "Exam task", 2, SubtaskDifficulty.MEDIUM, ExamType.EXAM),
+                subtask(2, "Practice task", 2, SubtaskDifficulty.MEDIUM, ExamType.PRACTICE)
+        ));
+
+        GeneratedExam generatedExam = service.generateExam(new GenerateExamValues(
+                "Klausur",
+                2,
+                List.of(chapter),
+                null
+        ));
+
+        assertEquals(List.of("Exam task"), generatedSubtaskTitles(generatedExam));
+    }
+
+    @Test
+    public void test_generateExam_badcase01_rejectBlankTitle() {
+        ExamGenerationException exception = assertThrows(ExamGenerationException.class,
+                () -> new ExamGenerationService().generateExam(new GenerateExamValues(
+                        "   ",
+                        2,
+                        List.of(chapterWithSingleExamTask()),
+                        ExamType.EXAM
+                )));
+
+        assertEquals(ExamGenerationException.Reason.INVALID_TITLE, exception.getReason());
+    }
+
+    @Test
+    public void test_generateExam_badcase02_rejectInvalidPointStep() {
+        ExamGenerationException exception = assertThrows(ExamGenerationException.class,
+                () -> new ExamGenerationService().generateExam(new GenerateExamValues(
+                        "Klausur",
+                        1.25,
+                        List.of(chapterWithSingleExamTask()),
+                        ExamType.EXAM
+                )));
+
+        assertEquals(ExamGenerationException.Reason.INVALID_POINTS, exception.getReason());
+    }
+
+    @Test
+    public void test_generateExam_badcase03_rejectEmptyChapterSelection() {
+        ExamGenerationException exception = assertThrows(ExamGenerationException.class,
+                () -> new ExamGenerationService().generateExam(new GenerateExamValues(
+                        "Klausur",
+                        2,
+                        List.of(),
+                        ExamType.EXAM
+                )));
+
+        assertEquals(ExamGenerationException.Reason.EMPTY_SELECTION, exception.getReason());
+    }
+
+    @Test
+    public void test_generateExam_badcase04_rejectChapterWithoutGeneratableVariants() {
+        Chapter chapter = ExamTestData.chapter(1, "Chapter", List.of(
+                ExamTestData.subtaskWithoutVariants(1, "Task without variant", 2)
+        ));
+
+        ExamGenerationException exception = assertThrows(ExamGenerationException.class,
+                () -> new ExamGenerationService().generateExam(new GenerateExamValues(
+                        "Klausur",
+                        2,
+                        List.of(chapter),
+                        ExamType.EXAM
+                )));
+
+        assertEquals(ExamGenerationException.Reason.NO_GENERATABLE_SUBTASKS, exception.getReason());
+    }
+
+    @Test
+    public void test_generateExam_badcase05_reportUnreachablePoints() {
+        ExamGenerationException exception = assertThrows(ExamGenerationException.class,
+                () -> new ExamGenerationService().generateExam(new GenerateExamValues(
+                        "Klausur",
+                        3,
+                        List.of(chapterWithSingleExamTask()),
+                        ExamType.EXAM
+                )));
+
+        assertEquals(ExamGenerationException.Reason.POINTS_NOT_REACHABLE, exception.getReason());
+        assertEquals(3.0, exception.getRequestedPoints());
+        assertEquals(2.0, exception.getClosestReachablePoints());
+        assertEquals(2.0, exception.getMaxReachablePoints());
+    }
+
     private Chapter chapterWithMixedExamTypes() {
         Chapter chapter = new Chapter();
         chapter.setId(1);
@@ -110,6 +203,12 @@ public class TestExamGenerationService {
                 subtask(6, "Practice hard", 4, SubtaskDifficulty.HARD, ExamType.PRACTICE)
         ));
         return chapter;
+    }
+
+    private Chapter chapterWithSingleExamTask() {
+        return ExamTestData.chapter(1, "Chapter", List.of(
+                subtask(1, "Exam task", 2, SubtaskDifficulty.MEDIUM, ExamType.EXAM)
+        ));
     }
 
     private Subtask subtask(int id, String title, double points, SubtaskDifficulty difficulty, ExamType examType) {
