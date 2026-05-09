@@ -1,36 +1,77 @@
 # SWE Exam Generator
 
-Dieses Projekt ist eine JavaFX-Anwendung, die einen Editor zum Erstellen und Exportieren von Prüfungen bereitstellt.
+Dieses Projekt ist eine JavaFX-Anwendung zum Erstellen, Bearbeiten und Exportieren von Pruefungsaufgaben. Aus den gespeicherten Kapiteln, Aufgaben und Varianten kann eine Klausur generiert und als PDF ausgegeben werden.
 
-## Vorraussetzungen
+## Voraussetzungen
+
 - Java 21
-- JavaFX 21
-- Eine IDE mit JavaFX-Unterstützung (z. B. IntelliJ IDEA) wird empfohlen.
+- JavaFX SDK 21
+- IntelliJ IDEA
+- Lombok als IntelliJ-Plugin und als Projekt-Library
+- JUnit 5 fuer die Tests
 
-## Projektstruktur (relevant für das Einbinden der Ressourcen)
-- `src/main/java` enthält den Application-Startpunkt (`App`) und alle Controller/Klassen.
-- `src/main/resources/fxml` enthält die FXML-Dateien (z. B. `MainView.fxml`).
-- `src/main/resources/style` enthält die CSS-Dateien.
-- Weitere Ressourcen wie Icons und Übersetzungen liegen ebenfalls unter `src/main/resources`.
+Das Projekt verwendet bewusst kein Maven oder Gradle. Die Abgabe ist als IntelliJ-Projekt vorbereitet.
 
-## Einrichtung in IntelliJ IDEA (empfohlen)
-1. **JDK 21 wählen**: In den Projekteinstellungen als Projekt-SDK und Sprachlevel einstellen.
-2. **JavaFX SDK 21 hinzufügen**:
-   - JavaFX SDK 21 herunterladen (z. B. von https://openjfx.io) und entpacken.
-   - Unter `Project Structure` → `Libraries` die entpackten JavaFX-`lib`-Dateien als Bibliothek hinzufügen.
-   - Für Run/Debug-Konfiguration (Application, Main-Class `App`):
-     - VM-Options setzen, damit JavaFX gefunden wird:
-       `--module-path <PFAD_ZUM_JAVAFX_SDK>/lib --add-modules javafx.controls,javafx.fxml`
-3. **Ressourcen-Kopie aktivieren**: Sicherstellen, dass IntelliJ die Ressourcen (`src/main/resources`) beim Build kopiert (Standard bei IntelliJ-Projekten).
-4. **Starten**: Run-Konfiguration ausführen. Die Anwendung lädt `MainView.fxml` und die CSS-Dateien automatisch.
+## Projektstruktur
 
-## Sprachen/Internationalisierung
-Die `LocalizationService`-Klasse lädt Übersetzungen aus `src/main/resources/i18n`. Beim Start wird der Fenstertitel aus den Sprachdateien gesetzt; Änderungen am Locale aktualisieren den Titel automatisch.
+- `src/main/java` enthaelt den Application-Startpunkt `App`, Controller, Modelle, Repositories, Services und Validierung.
+- `src/main/resources/fxml` enthaelt die JavaFX-Layouts.
+- `src/main/resources/style` enthaelt die CSS-Dateien.
+- `src/main/resources/i18n` enthaelt die Sprachdateien.
+- `src/main/resources/data/sample-data.xml` ist nur der Demo-/Startdatenbestand.
+- `src/test/java` enthaelt die JUnit-Tests.
+- `data/` wird zur Laufzeit projektlokal erzeugt und enthaelt echte Arbeitsdaten und Einstellungen.
 
-## Geplante Einstellungen
-Persistente Anwendungseinstellungen werden spaeter in einer user- oder projektlokalen `.properties`-Datei abgelegt. Die bestehende XML-Datei bleibt fuer Aufgabendaten reserviert.
+## Einrichtung in IntelliJ IDEA
+
+1. Projekt in IntelliJ IDEA oeffnen.
+2. Projekt-SDK und Sprachlevel auf Java 21 setzen.
+3. JavaFX SDK 21 als Library einbinden.
+4. Lombok als Library einbinden und Annotation Processing aktivieren.
+5. Run Configuration als Application mit Main-Class `App` anlegen.
+6. VM Options fuer JavaFX setzen:
+
+```text
+--module-path <PFAD_ZUM_JAVAFX_SDK>/lib --add-modules javafx.controls,javafx.fxml
+```
+
+7. Sicherstellen, dass `src/main/resources` als Resources Root markiert ist.
+8. Anwendung starten.
+
+## Daten und Einstellungen
+
+Beim ersten Start legt die App projektlokal folgende Dateien an:
+
+- `data/exam-generator-data.xml`
+- `data/settings.properties`
+
+Wenn noch keine Arbeitsdatei existiert, wird `src/main/resources/data/sample-data.xml` nach `data/exam-generator-data.xml` kopiert. Die Sample-Datei bleibt unveraendert und dient nur als Startbestand.
+
+Die Spracheinstellung wird in `data/settings.properties` gespeichert und beim naechsten Start wieder geladen.
+
+## Funktionen
+
+- Kapitel, Aufgaben und Varianten bearbeiten
+- Aufgaben mit Punkten, Schwierigkeit und Klausurtyp pflegen
+- XML importieren und exportieren
+- Klausuren nach Punktzahl, Kapitelreihenfolge und Klausurtyp generieren
+- PDF mit Inhaltsverzeichnis, optionalem Deckblatt, Header/Footer, Seitenzahlen und separater Loesungs-PDF erzeugen
+
+## Tests
+
+Die Tests liegen unter `src/test/java` und sind fuer JUnit 5 geschrieben. In IntelliJ koennen einzelne Testklassen oder das gesamte Testverzeichnis ausgefuehrt werden.
+
+Wichtige Testbereiche:
+
+- XML-Repositories und XML-Speicherung
+- Validierung von Kapiteln, Aufgaben und Varianten
+- Klausurgenerierung
+- PDF-Erzeugung
+- projektlokale Settings und Dateninitialisierung
 
 ## Troubleshooting
-- **Fehlende JavaFX-Klassen**: VM-Options prüfen (`--module-path` + `--add-modules`).
-- **FXML wird nicht gefunden**: Pfad muss im Klassenpfad liegen (`/fxml/...`), sonst wirft der Loader eine `IllegalStateException`.
-- **CSS wird nicht angewendet**: Sicherstellen, dass die Ressourcen in den Build-Output kopiert werden oder nach dem Reload (F5) neu geladen werden.
+
+- Fehlende JavaFX-Klassen: VM Options und JavaFX Library pruefen.
+- FXML wird nicht gefunden: `src/main/resources` muss als Resources Root im Klassenpfad liegen.
+- Lombok-Fehler: Lombok-Plugin installieren und Annotation Processing aktivieren.
+- Sprache oder Daten bleiben nicht erhalten: Schreibrechte fuer den Projektordner und den Ordner `data/` pruefen.

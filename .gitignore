@@ -5,6 +5,7 @@ out/
 .idea
 build/
 **.iml
+data/
 
 ### Eclipse ###
 .apt_generated
