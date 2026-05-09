@@ -31,6 +31,24 @@ public interface XMLStorageConnector {
     void saveDocument() throws  XmlStorageException;
 
     /**
+     * Replaces the managed XML document with the contents of another XML file
+     * and persists it to the configured storage location.
+     *
+     * @param sourcePath path to the XML file that should be imported
+     * @throws XmlStorageException if the XML cannot be read or is not compatible
+     */
+    void importDocument(Path sourcePath) throws XmlStorageException;
+
+    /**
+     * Writes the current in-memory DOM state to another XML file without
+     * changing the configured storage location.
+     *
+     * @param targetPath path where the XML export should be written
+     * @throws XmlStorageException if the export cannot be written
+     */
+    void exportDocument(Path targetPath) throws XmlStorageException;
+
+    /**
      * Returns the file system path of the XML file managed by this connector.
      *
      * @return path to the XML storage file
