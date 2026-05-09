@@ -61,6 +61,11 @@ public class SidebarController implements SidebarSelectionCoordinator {
         restoreSelection();
     }
 
+    public void reloadFromStorage() {
+        clearSelection();
+        loadChapters();
+    }
+
     public void refreshAndRevealSelection(ChildObject target) {
         Set<String> expandedKeys = captureExpandedKeys();
         loadChapters();

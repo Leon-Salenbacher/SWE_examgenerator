@@ -119,4 +119,116 @@ public class TestXMLStorageConnector {
         assertThrows(XmlStorageException.class, connector::saveDocument);
     }
 
+    @Test
+    public void test_importDocument_goodcase01_replaceDocumentAndPersistStorage() throws Exception{
+        Path xmlFile = tempDir.resolve("exam.xml");
+        Path importFile = tempDir.resolve("import.xml");
+        Files.writeString(importFile, "<ExamGenerator><Chapter id=\"42\" title=\"Imported\"/></ExamGenerator>");
+        XMLStorageConnector connector = new XMLStorageConnectorImpl(
+                xmlFile,
+                DocumentBuilderFactory.newInstance(),
+                TransformerFactory.newInstance()
+        );
+
+        connector.importDocument(importFile);
+
+        Document document = connector.getDocument();
+        assertEquals(1, document.getElementsByTagName("Chapter").getLength());
+        assertTrue(Files.readString(xmlFile).contains("Imported"));
+    }
+
+    @Test
+    public void test_importDocument_badcase01_rejectInvalidRoot() throws Exception{
+        Path xmlFile = tempDir.resolve("exam.xml");
+        Path importFile = tempDir.resolve("import.xml");
+        Files.writeString(importFile, "<OtherRoot/>");
+        XMLStorageConnector connector = new XMLStorageConnectorImpl(
+                xmlFile,
+                DocumentBuilderFactory.newInstance(),
+                TransformerFactory.newInstance()
+        );
+
+        assertThrows(XmlStorageException.class, () -> connector.importDocument(importFile));
+    }
+
+    @Test
+    public void test_importDocument_badcase02_rejectMissingImportFile(){
+        Path xmlFile = tempDir.resolve("exam.xml");
+        Path importFile = tempDir.resolve("missing.xml");
+        XMLStorageConnector connector = new XMLStorageConnectorImpl(
+                xmlFile,
+                DocumentBuilderFactory.newInstance(),
+                TransformerFactory.newInstance()
+        );
+
+        assertThrows(XmlStorageException.class, () -> connector.importDocument(importFile));
+    }
+
+    @Test
+    public void test_importDocument_badcase03_rejectMalformedXml() throws Exception{
+        Path xmlFile = tempDir.resolve("exam.xml");
+        Path importFile = tempDir.resolve("malformed.xml");
+        Files.writeString(importFile, "<ExamGenerator>");
+        XMLStorageConnector connector = new XMLStorageConnectorImpl(
+                xmlFile,
+                DocumentBuilderFactory.newInstance(),
+                TransformerFactory.newInstance()
+        );
+
+        assertThrows(XmlStorageException.class, () -> connector.importDocument(importFile));
+    }
+
+    @Test
+    public void test_exportDocument_goodcase01_writeCurrentDocumentToTarget() throws Exception{
+        Path xmlFile = tempDir.resolve("exam.xml");
+        Path exportFile = tempDir.resolve("exports").resolve("exam-export.xml");
+        XMLStorageConnector connector = new XMLStorageConnectorImpl(
+                xmlFile,
+                DocumentBuilderFactory.newInstance(),
+                TransformerFactory.newInstance()
+        );
+        Document document = connector.getDocument();
+        Element chapter = document.createElement("Chapter");
+        chapter.setAttribute("id", "7");
+        chapter.setAttribute("title", "Exported");
+        document.getDocumentElement().appendChild(chapter);
+
+        connector.exportDocument(exportFile);
+
+        String exportedXml = Files.readString(exportFile);
+        assertTrue(exportedXml.contains("<Chapter"));
+        assertTrue(exportedXml.contains("id=\"7\""));
+        assertTrue(exportedXml.contains("title=\"Exported\""));
+    }
+
+    @Test
+    public void test_exportDocument_goodcase02_writeToTargetWithoutXmlExtension() throws Exception{
+        Path xmlFile = tempDir.resolve("exam.xml");
+        Path exportFile = tempDir.resolve("exports").resolve("exam-export");
+        XMLStorageConnector connector = new XMLStorageConnectorImpl(
+                xmlFile,
+                DocumentBuilderFactory.newInstance(),
+                TransformerFactory.newInstance()
+        );
+        connector.getDocument();
+
+        connector.exportDocument(exportFile);
+
+        assertTrue(Files.exists(exportFile));
+        assertTrue(Files.readString(exportFile).contains("<ExamGenerator"));
+    }
+
+    @Test
+    public void test_exportDocument_badcase01_missingRootThrows(){
+        Path xmlFile = tempDir.resolve("exam.xml");
+        XMLStorageConnector connector = new XMLStorageConnectorImpl(
+                xmlFile,
+                DocumentBuilderFactory.newInstance(),
+                TransformerFactory.newInstance()
+        );
+        connector.getDocument().removeChild(connector.getDocument().getDocumentElement());
+
+        assertThrows(XmlStorageException.class, () -> connector.exportDocument(tempDir.resolve("export.xml")));
+    }
+
 }
