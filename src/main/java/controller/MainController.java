@@ -17,6 +17,9 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Root controller that connects the sidebar, editor host and top-level actions.
+ */
 public class MainController {
     @FXML
     private Label titleLabel;
@@ -41,6 +44,7 @@ public class MainController {
     @FXML
     private void initialize(){
         if(sidebarController != null && editorHostController != null){
+            // Keep navigation and editor refreshes synchronized through lightweight callbacks.
             sidebarController.setSelectionListener(this::handleSelection);
             sidebarController.setCreateChapterHandler(editorHostController::displayCreateChapter);
             editorHostController.setDataChangedHandler(sidebarController::setChapters);

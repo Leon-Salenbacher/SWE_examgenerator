@@ -25,6 +25,12 @@ import java.util.Objects;
 
 import org.xml.sax.SAXException;
 
+/**
+ * DOM-based XML storage connector used by all repositories.
+ *
+ * <p>The connector lazily loads the XML file, keeps the DOM in memory, and writes
+ * it back after repository mutations, imports or exports.</p>
+ */
 public class XMLStorageConnectorImpl implements XMLStorageConnector {
 
     private static final String ROOT_ELEMENT_NAME = "ExamGenerator";
@@ -34,6 +40,13 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
     private final TransformerFactory transformerFactory;
     private Document document;
 
+    /**
+     * Creates a connector with injectable XML factories for production or tests.
+     *
+     * @param xmlPath project-local XML data path
+     * @param documentBuilderFactory XML parser factory, or {@code null} for the default
+     * @param transformerFactory XML writer factory, or {@code null} for the default
+     */
     public XMLStorageConnectorImpl(Path xmlPath, DocumentBuilderFactory documentBuilderFactory, TransformerFactory transformerFactory) {
         this.xmlPath = Objects.requireNonNull(xmlPath, "xmlPath must not be null.");
         this.documentBuilderFactory = documentBuilderFactory == null
@@ -46,6 +59,9 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
     }
 
     @Override
+    /**
+     * @return lazily loaded DOM document for the current XML file
+     */
     public Document getDocument() {
         if (document == null) {
             document = loadDocument();
@@ -54,6 +70,9 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
     }
 
     @Override
+    /**
+     * Persists the currently loaded DOM document to the configured XML path.
+     */
     public void saveDocument() {
         Document currentDocument = getDocument();
         Element rootElement = currentDocument.getDocumentElement();
@@ -67,6 +86,11 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
     }
 
     @Override
+    /**
+     * Replaces the current storage document with an imported XML file.
+     *
+     * @param sourcePath source XML file
+     */
     public void importDocument(Path sourcePath) {
         if (sourcePath == null) {
             throw new XmlStorageException("No XML import file was selected.");
@@ -82,6 +106,11 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
     }
 
     @Override
+    /**
+     * Writes the current storage document to a chosen export location.
+     *
+     * @param targetPath target XML file
+     */
     public void exportDocument(Path targetPath) {
         if (targetPath == null) {
             throw new XmlStorageException("No XML export file was selected.");
@@ -98,6 +127,9 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
     }
 
     @Override
+    /**
+     * @return configured project XML data path
+     */
     public Path getXmlPath() {
         return xmlPath;
     }
@@ -178,6 +210,7 @@ public class XMLStorageConnectorImpl implements XMLStorageConnector {
 
     private void removeWhitespaceOnlyTextNodes(Node node) {
         NodeList childNodes = node.getChildNodes();
+        // Iterate backwards because child removal changes the live DOM NodeList.
         for (int index = childNodes.getLength() - 1; index >= 0; index--) {
             Node child = childNodes.item(index);
             if (child.getNodeType() == Node.TEXT_NODE && child.getTextContent().trim().isEmpty()) {

@@ -1,5 +1,8 @@
 package models;
 
+/**
+ * Difficulty level used for balancing generated exams.
+ */
 public enum SubtaskDifficulty {
     EASY("easy"),
     MEDIUM("medium"),
@@ -11,10 +14,19 @@ public enum SubtaskDifficulty {
         this.xmlValue = xmlValue;
     }
 
+    /**
+     * @return stable XML representation for this difficulty
+     */
     public String getXmlValue() {
         return xmlValue;
     }
 
+    /**
+     * Parses persisted or legacy difficulty values.
+     *
+     * @param rawValue raw XML or enum value
+     * @return parsed difficulty, defaulting to {@link #MEDIUM}
+     */
     public static SubtaskDifficulty fromXmlValue(String rawValue) {
         if (rawValue == null || rawValue.isBlank()) {
             return MEDIUM;

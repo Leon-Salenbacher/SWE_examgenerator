@@ -8,10 +8,20 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
+/**
+ * Initializes the project-local XML data file before repositories are created.
+ */
 public final class ProjectDataInitializer {
 
     private static final String EMPTY_DOCUMENT = "<ExamGenerator/>" + System.lineSeparator();
 
+    /**
+     * Ensures that the data file exists, copying sample data when available.
+     *
+     * @param dataPath target data file path
+     * @param sampleDataPath bundled sample data file path
+     * @return target data file path
+     */
     public Path ensureDataFile(Path dataPath, Path sampleDataPath) {
         Objects.requireNonNull(dataPath, "dataPath must not be null.");
         if (Files.exists(dataPath)) {
@@ -36,6 +46,7 @@ public final class ProjectDataInitializer {
             return;
         }
 
+        // Keep startup robust even when sample data is missing from the classpath.
         Files.writeString(dataPath, EMPTY_DOCUMENT);
     }
 }

@@ -14,6 +14,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * JavaFX entry point for the SWE Exam Generator application.
+ */
 public class App extends Application {
 
     private static final String FXML_PATH = "/fxml/MainView.fxml";
@@ -23,6 +26,12 @@ public class App extends Application {
     private Scene scene;
     private final LocalizationService localizationService = LocalizationService.getInstance();
 
+    /**
+     * Initializes the primary JavaFX stage and loads the main view.
+     *
+     * @param stage primary stage provided by JavaFX
+     * @throws Exception if the initial view cannot be loaded
+     */
     @Override
     public void start(Stage stage) throws Exception {
         this.primaryStage = stage;
@@ -42,19 +51,19 @@ public class App extends Application {
         stage.centerOnScreen();
         stage.show();
 
-        // F5 = reload
+        // F5 triggers a lightweight UI reload during development.
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.F5) {
                 reloadUI();
             }
         });
 
-        // Optional: File-Watcher für Dev (funktioniert, wenn IntelliJ Ressourcen bei Save automatisch kopiert)
+        // Optional file watcher for development when resources are copied on save.
         // new DevReloader(this::reloadUI).watchResourcesAsync();
     }
 
     /**
-     * Lädt das FXML frisch und liefert die Wurzel zurück.
+     * Loads the main FXML and returns its root node.
      */
     private Parent loadRoot() {
         URL fxml = getClass().getResource(FXML_PATH);
@@ -67,10 +76,10 @@ public class App extends Application {
     }
 
     /**
-     * Lädt CSS neu (cleart die Stylesheets und hängt sie erneut an).
+     * Reloads the configured CSS files for the target scene.
      */
     private void applyCss(Scene targetScene) {
-        targetScene.getStylesheets().clear(); // clear once
+        targetScene.getStylesheets().clear();
 
         for (String path : CSS_PATHS) {
             URL css = getClass().getResource(path);
@@ -78,14 +87,14 @@ public class App extends Application {
             targetScene.getStylesheets().add(css.toExternalForm());
         }
 
-        // Optional: force re-apply of CSS to current root
+        // Force CSS re-application to the current root after stylesheet reload.
         if (targetScene.getRoot() != null) {
             targetScene.getRoot().applyCss();
         }
     }
 
     /**
-     * Public, damit du sie auch aus Controllern oder Dev-Buttons triggern kannst.
+     * Reloads FXML and CSS without restarting the application.
      */
     public void reloadUI() {
         try {
@@ -98,12 +107,17 @@ public class App extends Application {
         }
     }
 
+    /**
+     * Starts the JavaFX runtime.
+     *
+     * @param args command-line arguments
+     */
     public static void main(String[] args) {
         launch(args);
     }
 
     /**
-     * ---- Optionaler Dev-Watcher (leichtgewichtig) ----
+     * Lightweight development watcher for FXML and CSS resources.
      */
     static final class DevReloader {
         private final Runnable onChange;
@@ -113,12 +127,10 @@ public class App extends Application {
         }
 
         void watchResourcesAsync() {
-            // Passen: Pfad zum ausgegebenen Ressourcen-Ordner (IntelliJ kopiert hierher)
-            // z.B. out/production/<module>/fxml  und  out/production/<module>/style
-            // Oder bei Gradle: build/resources/main
+            // Candidate output locations for IDE and build-tool resource copies.
             Path[] candidates = new Path[]{
-                    Paths.get("out/production"), // IntelliJ (anpassen!)
-                    Paths.get("build/resources/main") // Gradle (anpassen!)
+                    Paths.get("out/production"),
+                    Paths.get("build/resources/main")
             };
 
             for (Path base : candidates) {

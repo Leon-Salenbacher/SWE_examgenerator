@@ -3,6 +3,9 @@ package models;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * Concrete task variant containing the visible question and optional solution text.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -19,6 +22,11 @@ public class Variant extends ChildObject {
     @XmlField(SOLUTION_ATTRIBUTE_LABEL)
     private String solution;
 
+    /**
+     * Returns a display title, falling back to the question or id when no title is set.
+     *
+     * @return user-facing title for editor lists and generated output
+     */
     @Override
     public String getTitle() {
         String title = super.getTitle();

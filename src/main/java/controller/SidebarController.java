@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
+/**
+ * Controller for the navigation tree of chapters, subtasks and variants.
+ */
 public class SidebarController implements SidebarSelectionCoordinator {
 
     @FXML private VBox chapterBox;
@@ -54,6 +57,9 @@ public class SidebarController implements SidebarSelectionCoordinator {
             chapterBox.getChildren().add(node);
         }
     }
+    /**
+     * Reloads chapters while preserving expanded nodes and the selected element.
+     */
     public void setChapters(){
         Set<String> expandedKeys = captureExpandedKeys();
         loadChapters();
@@ -61,11 +67,19 @@ public class SidebarController implements SidebarSelectionCoordinator {
         restoreSelection();
     }
 
+    /**
+     * Reloads the sidebar after a full XML import.
+     */
     public void reloadFromStorage() {
         clearSelection();
         loadChapters();
     }
 
+    /**
+     * Reloads the sidebar and reveals the requested object when it still exists.
+     *
+     * @param target object that should be selected after refresh
+     */
     public void refreshAndRevealSelection(ChildObject target) {
         Set<String> expandedKeys = captureExpandedKeys();
         loadChapters();
@@ -83,6 +97,12 @@ public class SidebarController implements SidebarSelectionCoordinator {
         }
     }
 
+    /**
+     * Handles selection requests from sidebar row controllers.
+     *
+     * @param newlySelected selected row node
+     * @param data domain object represented by the row
+     */
     @Override
     public void select(Node newlySelected, ChildObject data){
         if(selectedNode == newlySelected){
@@ -102,10 +122,20 @@ public class SidebarController implements SidebarSelectionCoordinator {
     }
 
 
+    /**
+     * Registers the callback invoked when the user selects a domain object.
+     *
+     * @param selectionListener selection callback
+     */
     public void setSelectionListener(Consumer<ChildObject> selectionListener) {
         this.selectionListener = selectionListener;
     }
 
+    /**
+     * Registers the callback invoked when the user starts creating a chapter.
+     *
+     * @param createChapterHandler create-chapter callback
+     */
     public void setCreateChapterHandler(Runnable createChapterHandler) {
         this.createChapterHandler = createChapterHandler;
     }

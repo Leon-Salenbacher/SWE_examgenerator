@@ -6,10 +6,19 @@ import repository.XMLStorageConnector;
 import repository.detailed.SubtaskRepository;
 import repository.impl.ParentRepositoryImpl;
 
+/**
+ * XML repository for subtasks and their nested variants.
+ */
 public class SubtaskRepositoryImpl
         extends ParentRepositoryImpl<Subtask, Variant>
         implements SubtaskRepository {
 
+    /**
+     * Creates a subtask repository backed by the shared XML connector.
+     *
+     * @param xmlStorageConnector shared XML connector
+     * @param variantRepository repository used to map nested variants
+     */
     public SubtaskRepositoryImpl(XMLStorageConnector xmlStorageConnector, VariantRepositoryImpl variantRepository){
         super(xmlStorageConnector, variantRepository);
     }

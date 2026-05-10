@@ -10,10 +10,18 @@ import service.impl.LocalizationService;
 
 import java.io.IOException;
 
+/**
+ * Opens the modal dialog used to configure and generate an exam PDF.
+ */
 public class ExamGenerationDialog {
 
     private final LocalizationService localizationService = LocalizationService.getInstance();
 
+    /**
+     * Loads and displays the exam generation dialog.
+     *
+     * @param owner owner window used for modality and stylesheet inheritance
+     */
     public void show(Window owner) {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dialogs/ExamGenerationDialog.fxml"));
         Parent root;

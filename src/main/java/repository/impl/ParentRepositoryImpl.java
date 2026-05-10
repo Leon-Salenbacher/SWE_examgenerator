@@ -13,6 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * Repository base class for XML elements that persist nested child elements.
+ *
+ * @param <T> parent entity type
+ * @param <C> nested child entity type
+ */
 public abstract class ParentRepositoryImpl<
         T extends ParentObject<C>,
         C extends ChildObject>
@@ -25,6 +31,9 @@ public abstract class ParentRepositoryImpl<
         this.childRepository = childRepository;
     }
 
+    /**
+     * @return XML tag name used for nested child elements
+     */
     protected abstract String getChildTagName();
 
     @Override
@@ -45,6 +54,12 @@ public abstract class ParentRepositoryImpl<
     }
 
     @Override
+    /**
+     * Rewrites the parent element and replaces all nested children in the XML document.
+     *
+     * @param object parent aggregate to persist
+     * @return updated parent aggregate
+     */
     public T update(T object){
         Element element = findElementById(object.getId())
                 .orElseThrow(() -> new XmlStorageException(
@@ -59,6 +74,12 @@ public abstract class ParentRepositoryImpl<
     }
 
     @Override
+    /**
+     * Loads all children for the parent with the given id.
+     *
+     * @param id parent id
+     * @return nested children or an empty list when the parent does not exist
+     */
     public List<C> findAllChildren(int id){
         return findById(id)
                 .map(ParentObject::getChildElements)
@@ -71,6 +92,7 @@ public abstract class ParentRepositoryImpl<
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node node = childNodes.item(i);
             if (node instanceof Element childElement && getChildTagName().equals(childElement.getTagName())) {
+                // Child repositories own field mapping for their element type.
                 children.add(childRepository.mapElement(childElement));
             }
         }

@@ -16,6 +16,9 @@ import service.impl.LocalizationService;
 import java.io.IOException;
 import java.util.function.Consumer;
 
+/**
+ * Hosts either the parent editor, the child editor or an empty placeholder.
+ */
 public class EditorHostController {
     @FXML
     private ScrollPane editorScroll;
@@ -61,6 +64,11 @@ public class EditorHostController {
         return bounds == null ? new BoundingBox(0, 0, 0, 0) : bounds;
     }
 
+    /**
+     * Displays the correct editor for the selected domain object.
+     *
+     * @param data selected object, or {@code null} for the placeholder
+     */
     public void displayObject(ChildObject data){
         if(data == null){
             showPlaceholder();
@@ -82,6 +90,9 @@ public class EditorHostController {
         setContent(parentEditorRoot);
     }
 
+    /**
+     * Displays the chapter creation form in the parent editor.
+     */
     public void displayCreateChapter() {
         ensureParentEditor();
         parentEditorController.displayCreateChapter();
@@ -113,6 +124,11 @@ public class EditorHostController {
         }
     }
 
+    /**
+     * Registers a callback that refreshes external views after data changes.
+     *
+     * @param dataChangedHandler refresh callback
+     */
     public void setDataChangedHandler(Runnable dataChangedHandler) {
         this.dataChangedHandler = dataChangedHandler;
         if (parentEditorController != null) {
@@ -123,6 +139,11 @@ public class EditorHostController {
         }
     }
 
+    /**
+     * Registers a callback used to reveal an object after save, create or delete actions.
+     *
+     * @param navigationHandler navigation callback
+     */
     public void setNavigationHandler(Consumer<ChildObject> navigationHandler) {
         this.navigationHandler = navigationHandler;
         if (parentEditorController != null) {
@@ -130,6 +151,11 @@ public class EditorHostController {
         }
     }
 
+    /**
+     * Displays an object and forwards a transient feedback message to its editor.
+     *
+     * @param feedbackRequest feedback and target object
+     */
     public void displayObjectWithFeedback(EditorFeedbackRequest feedbackRequest) {
         if (feedbackRequest == null) {
             return;
@@ -182,6 +208,7 @@ public class EditorHostController {
             return;
         }
 
+        // Feedback is delayed until the target editor has been loaded and populated.
         if (!sameObject(pendingFeedback.data(), data)) {
             return;
         }

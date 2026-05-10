@@ -7,10 +7,21 @@ import models.ParentObject;
 
 import java.io.IOException;
 
+/**
+ * Factory interface for sidebar row controllers loaded from FXML.
+ */
 public interface SidebarElementController {
     public static final String PARENT_ELEMENT_FXML_PATH = "/fxml/components/Sidebar_ParentElement.fxml";
     public static final String CHILD_ELEMENT_FXML_PATH = "/fxml/components/Sidebar_ChildElement.fxml";
 
+    /**
+     * Creates a sidebar row for a parent object and recursively loads its children.
+     *
+     * @param element parent object to render
+     * @param selectionCoordinator sidebar selection coordinator
+     * @return loaded sidebar node
+     * @param <T> child type stored by the parent
+     */
     public static <T extends ChildObject> Node createElement(ParentObject<T> element, SidebarSelectionCoordinator selectionCoordinator){
         try {
             FXMLLoader loader = new FXMLLoader(SidebarParentElementController.class.getResource(PARENT_ELEMENT_FXML_PATH));
@@ -29,6 +40,13 @@ public interface SidebarElementController {
         }
     }
 
+    /**
+     * Creates a sidebar row for either a leaf child object or a nested parent object.
+     *
+     * @param element object to render
+     * @param sidebarSelectionCoordinator sidebar selection coordinator
+     * @return loaded sidebar node
+     */
     public static  Node createElement(ChildObject element, SidebarSelectionCoordinator sidebarSelectionCoordinator) {
         if(element instanceof ParentObject<?>){
             ParentObject<? extends ChildObject> parent = (ParentObject<? extends  ChildObject>) element;

@@ -5,6 +5,9 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.*;
 
+/**
+ * Exam task with points, difficulty, usage labels and alternative variants.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,6 +33,11 @@ public class Subtask extends ParentObject<Variant> {
     @XmlField(LABELS_ATTRIBUTE_LABEL)
     private List<String> labels = new ArrayList<>();
 
+    /**
+     * Derives the exam type from the persisted label list.
+     *
+     * @return practice only when the practice label is present without the exam label
+     */
     public ExamType getExamType() {
         if (hasExamTypeLabel(ExamType.PRACTICE) && !hasExamTypeLabel(ExamType.EXAM)) {
             return ExamType.PRACTICE;
@@ -37,15 +45,27 @@ public class Subtask extends ParentObject<Variant> {
         return ExamType.EXAM;
     }
 
+    /**
+     * Updates the label list so it contains exactly one exam type label.
+     *
+     * @param examType requested exam type, or the default when {@code null}
+     */
     public void setExamType(ExamType examType) {
         labels = ExamType.replaceExamTypeLabel(labels, examType);
     }
 
+    /**
+     * Checks whether this task may be selected for the requested generated exam type.
+     *
+     * @param examType requested exam type
+     * @return {@code true} if labels match the requested type
+     */
     public boolean isEligibleForExamType(ExamType examType) {
         ExamType requestedType = examType == null ? ExamType.defaultType() : examType;
         boolean hasExamLabel = hasExamTypeLabel(ExamType.EXAM);
         boolean hasPracticeLabel = hasExamTypeLabel(ExamType.PRACTICE);
 
+        // Ambiguous labels are excluded so a task cannot silently appear in both outputs.
         if (hasExamLabel && hasPracticeLabel) {
             return false;
         }

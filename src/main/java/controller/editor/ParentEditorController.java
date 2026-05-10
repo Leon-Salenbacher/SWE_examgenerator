@@ -43,6 +43,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Controller for editing parent objects such as chapters and subtasks.
+ */
 public class ParentEditorController {
     @FXML
     private Label typeLabel;
@@ -240,6 +243,11 @@ public class ParentEditorController {
         applyTranslations();
     }
 
+    /**
+     * Displays a chapter, subtask or other parent object in the editor form.
+     *
+     * @param parent selected parent object
+     */
     public void displayParent(ParentObject<? extends ChildObject> parent){
         this.currentParent = parent;
         if(parent == null){
@@ -256,6 +264,9 @@ public class ParentEditorController {
         }
     }
 
+    /**
+     * Switches the editor into chapter creation mode.
+     */
     public void displayCreateChapter() {
         currentParent = null;
         createMode = true;
@@ -281,22 +292,47 @@ public class ParentEditorController {
         updateActionButtons();
     }
 
+    /**
+     * Registers a callback invoked when the user opens a child row.
+     *
+     * @param selectionHandler child selection callback
+     */
     public void setSelectionHandler(Consumer<ChildObject> selectionHandler){
         this.selectionHandler = selectionHandler;
     }
 
+    /**
+     * Registers a callback used to display a different object directly.
+     *
+     * @param displayHandler display callback
+     */
     public void setDisplayHandler(Consumer<ChildObject> displayHandler) {
         this.displayHandler = displayHandler;
     }
 
+    /**
+     * Registers a callback for feedback that should survive navigation.
+     *
+     * @param feedbackHandler feedback callback
+     */
     public void setFeedbackHandler(Consumer<EditorFeedbackRequest> feedbackHandler) {
         this.feedbackHandler = feedbackHandler;
     }
 
+    /**
+     * Registers a callback used to reveal an object after create, save or delete actions.
+     *
+     * @param navigationHandler navigation callback
+     */
     public void setNavigationHandler(Consumer<ChildObject> navigationHandler) {
         this.navigationHandler = navigationHandler;
     }
 
+    /**
+     * Registers a callback that refreshes external views after data changes.
+     *
+     * @param dataChangedHandler refresh callback
+     */
     public void setDataChangedHandler(Runnable dataChangedHandler) {
         this.dataChangedHandler = dataChangedHandler;
     }
@@ -592,6 +628,9 @@ public class ParentEditorController {
         showErrorFeedback(localizationService.get("validation.points.halfStep"));
     }
 
+    /**
+     * Switches the form into create-child mode for the current parent.
+     */
     public void toggleAddNewChild(){
         if (currentParent == null) {
             return;
@@ -852,6 +891,7 @@ public class ParentEditorController {
                 List<Subtask> children = new ArrayList<>(updatedChapter.getChildElements());
                 children.add(createdSubtask);
                 updatedChapter.setChildElements(children);
+                // Persist the aggregate because subtasks are stored nested under chapters in XML.
                 ApplicationContext.getInstance().getChapterRepository().update(updatedChapter);
 
                 if (navigationHandler != null) {
@@ -889,6 +929,7 @@ public class ParentEditorController {
                 List<Variant> children = new ArrayList<>(updatedSubtask.getChildElements());
                 children.add(createdVariant);
                 updatedSubtask.setChildElements(children);
+                // Persist the aggregate because variants are stored nested under subtasks in XML.
                 ApplicationContext.getInstance().getSubtaskRepository().update(updatedSubtask);
 
                 if (navigationHandler != null) {
@@ -982,6 +1023,12 @@ public class ParentEditorController {
         feedbackHideTransition.play();
     }
 
+    /**
+     * Shows a transient save/delete/create feedback message.
+     *
+     * @param message feedback message
+     * @param success whether the message represents a successful action
+     */
     public void showTransientFeedback(String message, boolean success) {
         showFeedback(message, success ? FEEDBACK_SUCCESS_STYLE : FEEDBACK_ERROR_STYLE);
     }

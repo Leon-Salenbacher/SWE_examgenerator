@@ -3,6 +3,9 @@ package models;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * Top-level exam content group that owns a list of subtasks.
+ */
 @Getter
 @Setter
 @SuperBuilder

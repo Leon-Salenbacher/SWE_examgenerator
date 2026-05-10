@@ -38,6 +38,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Controller for selecting exam content, point totals and PDF output options.
+ */
 public class ExamGenerationDialogController {
 
     @FXML
@@ -135,6 +138,11 @@ public class ExamGenerationDialogController {
         applyTranslations();
     }
 
+    /**
+     * Initializes the dialog after FXML loading.
+     *
+     * @param dialogStage modal stage controlled by this controller
+     */
     public void configure(Stage dialogStage) {
         this.dialogStage = dialogStage;
         this.allChapters = ApplicationContext.getInstance().getChapterRepository().findAll();
@@ -218,6 +226,7 @@ public class ExamGenerationDialogController {
                 : currentLayoutSettings).sanitize(title);
         currentLayoutSettings = layoutSettings;
 
+        // Generation and PDF writing are split into background tasks so the dialog stays responsive.
         setBusy(true);
         setStatus(localizationService.get("generate.dialog.status.checking"), false);
 
@@ -381,6 +390,7 @@ public class ExamGenerationDialogController {
                 currentExamType()
         ));
 
+        // Preserve the user's point choice whenever it is still reachable after a selection change.
         if (previousSelection != null && availablePoints.contains(previousSelection)) {
             pointsBox.getSelectionModel().select(previousSelection);
         } else if (!availablePoints.isEmpty()) {

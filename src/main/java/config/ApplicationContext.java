@@ -16,6 +16,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerFactory;
 import java.nio.file.Path;
 
+/**
+ * Central application wiring point for services, repositories and XML storage.
+ *
+ * <p>The JavaFX controllers use this singleton instead of creating repositories
+ * themselves, which keeps one shared XML document and one shared settings service
+ * active throughout the application.</p>
+ */
 @Getter
 public final class ApplicationContext {
 
@@ -42,17 +49,22 @@ public final class ApplicationContext {
                 DocumentBuilderFactory.newInstance(),
                 TransformerFactory.newInstance()
         );
-        //repository
+        // Repositories share the same XML connector so nested data stays consistent.
         this.variantRepository = new VariantRepositoryImpl(xmlStorageConnector);
         this.subtaskRepository = new SubtaskRepositoryImpl(xmlStorageConnector, variantRepository);
         this.chapterRepository = new ChapterRepositoryImpl(xmlStorageConnector, subtaskRepository);
 
-        //service
+        // Services wrap repository access for the controller layer.
         this.variantService = new VariantServiceImpl(variantRepository);
         this.subtaskService = new SubtaskServiceImpl(subtaskRepository);
         this.chapterService = new ChapterServiceImpl(chapterRepository);
     }
 
+    /**
+     * Returns the shared application context.
+     *
+     * @return singleton context containing application services and repositories
+     */
     public static ApplicationContext getInstance() {
         return INSTANCE;
     }

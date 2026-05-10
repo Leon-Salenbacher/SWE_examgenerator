@@ -28,8 +28,10 @@ public abstract class DataObject {
 
     /**
      * Returns all XML attributes that should be written for this object.
+     *
      * The map key is the XML attribute name, the value is the serialized value.
-     * @return
+     *
+     * @return ordered XML attribute map
      */
     public Map<String, String> getAttributes(){
         return DataObjectReflectionSupport.getAttributes(this);
@@ -37,7 +39,8 @@ public abstract class DataObject {
 
     /**
      * Convenience method for code that only needs the configured attribute names.
-     * @return
+     *
+     * @return XML attribute names configured for this object type
      */
     public List<String> getAttributeNames(){
         return DataObjectReflectionSupport.getAttributeNames(getClass());

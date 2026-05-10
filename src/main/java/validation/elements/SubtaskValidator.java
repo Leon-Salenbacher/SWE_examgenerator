@@ -3,6 +3,9 @@ package validation.elements;
 import models.Points;
 import models.Subtask;
 
+/**
+ * Validator for subtasks, including point-specific rules.
+ */
 public class SubtaskValidator extends AbstractTitleValidator<Subtask> {
     @Override
     protected ValidationResult validateInternal(Subtask element) {
