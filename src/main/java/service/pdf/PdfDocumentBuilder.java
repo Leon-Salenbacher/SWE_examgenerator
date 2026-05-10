@@ -18,6 +18,13 @@ import java.util.List;
  */
 final class PdfDocumentBuilder {
 
+    private static final int CATALOG_OBJECT_NUMBER = 1;
+    private static final int PAGES_OBJECT_NUMBER = 2;
+    private static final int REGULAR_FONT_OBJECT_NUMBER = 3;
+    private static final int BOLD_FONT_OBJECT_NUMBER = 4;
+    private static final int FIRST_PAGE_OBJECT_NUMBER = 5;
+    private static final int PAGE_OBJECT_STRIDE = 2;
+
     private final PdfTextFormatter textFormatter;
 
     PdfDocumentBuilder(PdfTextFormatter textFormatter) {
@@ -32,46 +39,76 @@ final class PdfDocumentBuilder {
      * @throws IOException if the PDF byte stream cannot be written
      */
     byte[] buildPdfDocument(List<PageContent> pages) throws IOException {
-        int pageCount = pages.size();
-        int regularFontObjectNumber = 3;
-        int boldFontObjectNumber = 4;
-        int nextObjectNumber = 5;
-
         ByteArrayOutputStream document = new ByteArrayOutputStream();
         List<Integer> offsets = new ArrayList<>();
         offsets.add(0);
 
+        writePdfHeader(document);
+        writeCatalogObject(document, offsets);
+        writePagesObject(document, offsets, pages.size());
+        writeFontObjects(document, offsets);
+        writePageObjects(document, offsets, pages);
+        writeCrossReferenceAndTrailer(document, offsets);
+
+        return document.toByteArray();
+    }
+
+    private void writePdfHeader(ByteArrayOutputStream document) throws IOException {
         write(document, "%PDF-1.4\n");
         write(document, "%\u00E2\u00E3\u00CF\u00D3\n");
+    }
 
-        writeObject(document, offsets, 1, "<< /Type /Catalog /Pages 2 0 R >>");
+    private void writeCatalogObject(ByteArrayOutputStream document, List<Integer> offsets) throws IOException {
+        writeObject(document, offsets, CATALOG_OBJECT_NUMBER,
+                "<< /Type /Catalog /Pages " + PAGES_OBJECT_NUMBER + " 0 R >>");
+    }
 
+    private void writePagesObject(ByteArrayOutputStream document, List<Integer> offsets, int pageCount) throws IOException {
         StringBuilder pagesObject = new StringBuilder("<< /Type /Pages /Kids [");
         for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
-            int pageObjectNumber = nextObjectNumber + (pageIndex * 2);
+            int pageObjectNumber = pageObjectNumber(pageIndex);
             pagesObject.append(pageObjectNumber).append(" 0 R ");
         }
         pagesObject.append("] /Count ").append(pageCount).append(" >>");
-        writeObject(document, offsets, 2, pagesObject.toString());
+        writeObject(document, offsets, PAGES_OBJECT_NUMBER, pagesObject.toString());
+    }
 
-        writeObject(document, offsets, regularFontObjectNumber,
+    private void writeFontObjects(ByteArrayOutputStream document, List<Integer> offsets) throws IOException {
+        writeObject(document, offsets, REGULAR_FONT_OBJECT_NUMBER,
                 "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
-        writeObject(document, offsets, boldFontObjectNumber,
+        writeObject(document, offsets, BOLD_FONT_OBJECT_NUMBER,
                 "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
+    }
 
-        for (int pageIndex = 0; pageIndex < pageCount; pageIndex++) {
-            int pageObjectNumber = nextObjectNumber + (pageIndex * 2);
-            int contentObjectNumber = pageObjectNumber + 1;
+    private void writePageObjects(
+            ByteArrayOutputStream document,
+            List<Integer> offsets,
+            List<PageContent> pages
+    ) throws IOException {
+        for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
+            int pageObjectNumber = pageObjectNumber(pageIndex);
+            int contentObjectNumber = contentObjectNumber(pageIndex);
 
             String pageObject = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] "
-                    + "/Resources << /Font << /F1 " + regularFontObjectNumber + " 0 R /F2 " + boldFontObjectNumber + " 0 R >> >> "
+                    + "/Resources << /Font << /F1 " + REGULAR_FONT_OBJECT_NUMBER + " 0 R /F2 "
+                    + BOLD_FONT_OBJECT_NUMBER + " 0 R >> >> "
                     + "/Contents " + contentObjectNumber + " 0 R >>";
             writeObject(document, offsets, pageObjectNumber, pageObject);
 
             byte[] contentBytes = buildContentStream(pages.get(pageIndex)).getBytes(PdfLayoutMetrics.PDF_CHARSET);
             writeStreamObject(document, offsets, contentObjectNumber, contentBytes);
         }
+    }
 
+    private int pageObjectNumber(int pageIndex) {
+        return FIRST_PAGE_OBJECT_NUMBER + (pageIndex * PAGE_OBJECT_STRIDE);
+    }
+
+    private int contentObjectNumber(int pageIndex) {
+        return pageObjectNumber(pageIndex) + 1;
+    }
+
+    private void writeCrossReferenceAndTrailer(ByteArrayOutputStream document, List<Integer> offsets) throws IOException {
         int xrefOffset = document.size();
         write(document, "xref\n");
         write(document, "0 " + offsets.size() + "\n");
@@ -85,8 +122,6 @@ final class PdfDocumentBuilder {
         write(document, "startxref\n");
         write(document, Integer.toString(xrefOffset));
         write(document, "\n%%EOF");
-
-        return document.toByteArray();
     }
 
     /**
@@ -99,30 +134,30 @@ final class PdfDocumentBuilder {
         StringBuilder builder = new StringBuilder();
 
         if (page.coverPage()) {
-            appendText(builder, 120, PdfLayoutMetrics.COVER_TITLE_Y, 28, true, page.coverTitle());
-            if (page.coverSubtitle() != null && !page.coverSubtitle().isBlank()) {
-                appendText(builder, 120, PdfLayoutMetrics.COVER_SUBTITLE_Y, 16, false, page.coverSubtitle());
-            }
+            appendCoverPage(builder, page);
         } else if (page.tableOfContentsPage()) {
             appendTableOfContents(builder, page);
         } else {
-            PdfLayoutSettings settings = page.layoutSettings();
-            if (settings.headerText() != null && !settings.headerText().isBlank()) {
-                appendText(builder, 50, 812, 10, false, settings.headerText());
-            }
-
-            appendBodyElements(builder, page.bodyElements(), PdfLayoutMetrics.calculateBodyStartY(settings.headerText()));
-
-            if (settings.footerText() != null && !settings.footerText().isBlank()) {
-                appendText(builder, 50, PdfLayoutMetrics.FOOTER_Y, 10, false, settings.footerText());
-            }
-
-            if (settings.pageNumbersEnabled()) {
-                appendText(builder, 500, PdfLayoutMetrics.PAGE_NUMBER_Y, 10, false, "Page " + page.logicalPageNumber());
-            }
+            appendExamContentPage(builder, page);
         }
 
         return builder.toString();
+    }
+
+    private void appendCoverPage(StringBuilder builder, PageContent page) {
+        appendText(builder, 120, PdfLayoutMetrics.COVER_TITLE_Y, 28, true, page.coverTitle());
+        if (hasText(page.coverSubtitle())) {
+            appendText(builder, 120, PdfLayoutMetrics.COVER_SUBTITLE_Y, 16, false, page.coverSubtitle());
+        }
+    }
+
+    private void appendExamContentPage(StringBuilder builder, PageContent page) {
+        PdfLayoutSettings settings = page.layoutSettings();
+
+        appendHeader(builder, settings);
+        appendBodyElements(builder, page.bodyElements(), PdfLayoutMetrics.calculateBodyStartY(settings.headerText()));
+        appendFooter(builder, settings);
+        appendPageNumber(builder, settings, page.logicalPageNumber());
     }
 
     /**
@@ -160,14 +195,14 @@ final class PdfDocumentBuilder {
         appendText(builder, PdfLayoutMetrics.BODY_X, PdfLayoutMetrics.TOC_TITLE_Y, 20, true, "Inhaltsverzeichnis");
 
         int topY = PdfLayoutMetrics.TOC_TABLE_TOP_Y;
-        appendTableRow(builder, topY, true, "Seite", "Chapter", "M\u00f6gliche Punkte", "Erreichte Punkte");
+        appendTableRow(builder, topY, TocTableRow.headerRow());
         int currentY = topY - PdfLayoutMetrics.TOC_ROW_HEIGHT;
         for (var entry : page.tocEntries()) {
-            appendTableRow(builder, currentY, false,
+            appendTableRow(builder, currentY, TocTableRow.entry(
                     Integer.toString(entry.page()),
                     entry.chapter(),
-                    Points.format(entry.possiblePoints()),
-                    "");
+                    Points.format(entry.possiblePoints())
+            ));
             currentY -= PdfLayoutMetrics.TOC_ROW_HEIGHT;
         }
     }
@@ -180,15 +215,31 @@ final class PdfDocumentBuilder {
      * @param logicalPageNumber visible logical page number
      */
     private void appendPageFrame(StringBuilder builder, PdfLayoutSettings settings, int logicalPageNumber) {
-        if (settings.headerText() != null && !settings.headerText().isBlank()) {
+        appendHeader(builder, settings);
+        appendFooter(builder, settings);
+        appendPageNumber(builder, settings, logicalPageNumber);
+    }
+
+    private void appendHeader(StringBuilder builder, PdfLayoutSettings settings) {
+        if (hasText(settings.headerText())) {
             appendText(builder, 50, 812, 10, false, settings.headerText());
         }
-        if (settings.footerText() != null && !settings.footerText().isBlank()) {
+    }
+
+    private void appendFooter(StringBuilder builder, PdfLayoutSettings settings) {
+        if (hasText(settings.footerText())) {
             appendText(builder, 50, PdfLayoutMetrics.FOOTER_Y, 10, false, settings.footerText());
         }
+    }
+
+    private void appendPageNumber(StringBuilder builder, PdfLayoutSettings settings, int logicalPageNumber) {
         if (settings.pageNumbersEnabled()) {
             appendText(builder, 500, PdfLayoutMetrics.PAGE_NUMBER_Y, 10, false, "Page " + logicalPageNumber);
         }
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     /**
@@ -196,30 +247,38 @@ final class PdfDocumentBuilder {
      *
      * @param builder target PDF stream
      * @param y row baseline y-position
-     * @param header whether this row is a header row
-     * @param page page cell text
-     * @param chapter chapter cell text
-     * @param possiblePoints possible-points cell text
-     * @param achievedPoints achieved-points cell text
+     * @param row all content that should be written in this row
      */
     private void appendTableRow(
             StringBuilder builder,
             int y,
-            boolean header,
-            String page,
-            String chapter,
-            String possiblePoints,
-            String achievedPoints
+            TocTableRow row
     ) {
         appendRectangle(builder, PdfLayoutMetrics.BODY_X, y - 16, 495, PdfLayoutMetrics.TOC_ROW_HEIGHT);
         appendVerticalLine(builder, 100, y - 16, PdfLayoutMetrics.TOC_ROW_HEIGHT);
         appendVerticalLine(builder, 350, y - 16, PdfLayoutMetrics.TOC_ROW_HEIGHT);
         appendVerticalLine(builder, 445, y - 16, PdfLayoutMetrics.TOC_ROW_HEIGHT);
         int textY = y - 7;
-        appendCenteredText(builder, 50, 50, textY, 10, header, page);
-        appendCenteredText(builder, 100, 250, textY, 10, header, truncate(chapter, 42));
-        appendCenteredText(builder, 350, 95, textY, 10, header, possiblePoints);
-        appendCenteredText(builder, 445, 100, textY, 10, header, achievedPoints);
+        appendCenteredText(builder, 50, 50, textY, 10, row.header(), row.page());
+        appendCenteredText(builder, 100, 250, textY, 10, row.header(), truncate(row.chapter(), 42));
+        appendCenteredText(builder, 350, 95, textY, 10, row.header(), row.possiblePoints());
+        appendCenteredText(builder, 445, 100, textY, 10, row.header(), row.achievedPoints());
+    }
+
+    private record TocTableRow(
+            boolean header,
+            String page,
+            String chapter,
+            String possiblePoints,
+            String achievedPoints
+    ) {
+        private static TocTableRow headerRow() {
+            return new TocTableRow(true, "Seite", "Chapter", "M\u00f6gliche Punkte", "Erreichte Punkte");
+        }
+
+        private static TocTableRow entry(String page, String chapter, String possiblePoints) {
+            return new TocTableRow(false, page, chapter, possiblePoints, "");
+        }
     }
 
     /**
