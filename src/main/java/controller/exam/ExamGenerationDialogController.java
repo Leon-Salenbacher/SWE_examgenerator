@@ -52,6 +52,8 @@ public class ExamGenerationDialogController {
     @FXML
     private Label requirementsSectionFootnoteLabel;
     @FXML
+    private Label guidanceLabel;
+    @FXML
     private Label outputSectionTitleLabel;
     @FXML
     private Label outputSectionFootnoteLabel;
@@ -134,6 +136,9 @@ public class ExamGenerationDialogController {
         examTypeBox.getSelectionModel().select(ExamType.defaultType());
         examTypeBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateAvailablePointOptions());
         selectedChapterList.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateSelectionButtons());
+        titleField.textProperty().addListener((obs, oldValue, newValue) -> updateGuidance());
+        pointsBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateGuidance());
+        selectedChapters.addListener((javafx.collections.ListChangeListener<Chapter>) change -> updateGuidance());
         localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
         applyTranslations();
     }
@@ -155,6 +160,7 @@ public class ExamGenerationDialogController {
         statusLabel.setText(localizationService.get("generate.dialog.status.ready"));
         updateAvailablePointOptions();
         updateSelectionButtons();
+        updateGuidance();
         applyTranslations();
     }
 
@@ -406,6 +412,28 @@ public class ExamGenerationDialogController {
         } else {
             setStatus(localizationService.get("generate.dialog.status.ready"), false);
         }
+        updateGuidance();
+    }
+
+    private void updateGuidance() {
+        if (guidanceLabel == null) {
+            return;
+        }
+
+        // Aufgabe 22 - UI/UX-Rule "Guidance": keep the generation dialog focused on the next concrete step.
+        if (selectedChapters.isEmpty()) {
+            guidanceLabel.setText(localizationService.get("generate.dialog.guidance.chapters"));
+        } else if (titleField.getText() == null || titleField.getText().isBlank()) {
+            guidanceLabel.setText(localizationService.get("generate.dialog.guidance.title"));
+        } else if (pointsBox.getSelectionModel().getSelectedItem() == null) {
+            guidanceLabel.setText(localizationService.get("generate.dialog.guidance.points"));
+        } else {
+            guidanceLabel.setText(localizationService.get(
+                    "generate.dialog.guidance.ready",
+                    selectedChapters.size(),
+                    Points.format(pointsBox.getSelectionModel().getSelectedItem())
+            ));
+        }
     }
 
     private ExamType currentExamType() {
@@ -421,6 +449,7 @@ public class ExamGenerationDialogController {
         contentSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.content.note"));
         requirementsSectionTitleLabel.setText(localizationService.get("generate.dialog.section.requirements.title"));
         requirementsSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.requirements.note"));
+        updateGuidance();
         outputSectionTitleLabel.setText(localizationService.get("generate.dialog.section.output.title"));
         outputSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.output.note"));
         chapterLabel.setText(localizationService.get("generate.dialog.chapterSelection"));

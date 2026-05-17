@@ -93,6 +93,15 @@ public class ParentEditorController {
     private Label actionFeedbackLabel;
 
     @FXML
+    private HBox uxNoveltyBox;
+
+    @FXML
+    private Button inspireButton;
+
+    @FXML
+    private Label uxNoveltyLabel;
+
+    @FXML
     private VBox labelsBox;
 
     @FXML
@@ -181,6 +190,7 @@ public class ParentEditorController {
 
         titleField.textProperty().addListener((observable, oldValue, newValue) -> {
             clearFeedback();
+            updateUxSupport();
             if (updatingFields) {
                 return;
             }
@@ -196,6 +206,7 @@ public class ParentEditorController {
 
         pointsField.textProperty().addListener((observable, oldValue, newValue) -> {
             clearFeedback();
+            updateUxSupport();
             if (updatingFields) {
                 return;
             }
@@ -216,6 +227,7 @@ public class ParentEditorController {
 
         labelsField.textProperty().addListener((observable, oldValue, newValue) -> {
             clearFeedback();
+            updateUxSupport();
             if (updatingFields) {
                 return;
             }
@@ -279,6 +291,7 @@ public class ParentEditorController {
 
         difficultyBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             clearFeedback();
+            updateUxSupport();
             if (updatingFields) {
                 return;
             }
@@ -290,6 +303,7 @@ public class ParentEditorController {
 
         usageBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             clearFeedback();
+            updateUxSupport();
             if (updatingFields) {
                 return;
             }
@@ -299,6 +313,16 @@ public class ParentEditorController {
             Subtask subtask = (Subtask) currentParent;
             subtask.setExamType(newValue);
             setLabelValues(defaultLabels(subtask.getLabels()));
+        });
+
+        questionField.textProperty().addListener((observable, oldValue, newValue) -> {
+            clearFeedback();
+            updateUxSupport();
+        });
+
+        solutionField.textProperty().addListener((observable, oldValue, newValue) -> {
+            clearFeedback();
+            updateUxSupport();
         });
 
         displayPlaceholder();
@@ -344,6 +368,7 @@ public class ParentEditorController {
             questionField.clear();
             solutionField.clear();
         });
+        hideNoveltyFeedback();
         togglePoints(false);
         toggleDifficulty(false);
         toggleUsage(false);
@@ -353,6 +378,7 @@ public class ParentEditorController {
         childList.getChildren().clear();
         clearFeedback();
         updateActionButtons();
+        updateUxSupport();
     }
 
     /**
@@ -453,6 +479,7 @@ public class ParentEditorController {
         currentParent = null;
         clearFeedback();
         updateActionButtons();
+        updateUxSupport();
     }
 
     private String defaultText(String value, String fallback){
@@ -475,6 +502,7 @@ public class ParentEditorController {
         renderChildren(chapter.getChildElements());
         clearFeedback();
         updateActionButtons();
+        updateUxSupport();
     }
 
     private void displaySubtask(Subtask subtask){
@@ -497,6 +525,7 @@ public class ParentEditorController {
         renderChildren(subtask.getChildElements());
         clearFeedback();
         updateActionButtons();
+        updateUxSupport();
     }
 
     private void displayGeneric(ParentObject<? extends ChildObject> parent){
@@ -515,6 +544,7 @@ public class ParentEditorController {
         renderChildren(parent.getChildElements());
         clearFeedback();
         updateActionButtons();
+        updateUxSupport();
     }
 
     private void togglePoints(boolean visible){
@@ -792,6 +822,20 @@ public class ParentEditorController {
         deleteButton.setManaged(hasParent && !createMode);
     }
 
+    private void updateUxSupport() {
+        if (uxNoveltyBox == null) {
+            return;
+        }
+
+        // Aufgabe 22 - UI/UX-Rule "Novelty": offer a lightweight creative assist only while a new item is drafted.
+        boolean showInspiration = createMode && !createChapterMode;
+        uxNoveltyBox.setVisible(showInspiration);
+        uxNoveltyBox.setManaged(showInspiration);
+        if (inspireButton != null) {
+            inspireButton.setText(localizationService.get("ux.inspire.button"));
+        }
+    }
+
     private void notifyDataChanged() {
         if (dataChangedHandler != null) {
             dataChangedHandler.run();
@@ -858,6 +902,7 @@ public class ParentEditorController {
 
         createMode = true;
         createChapterMode = false;
+        hideNoveltyFeedback();
         setFieldValues(() -> {
             titleField.clear();
             pointsField.clear();
@@ -869,6 +914,7 @@ public class ParentEditorController {
         });
         clearFeedback();
         displayCreateChildForm();
+        updateUxSupport();
     }
 
     private void displayCreateChildForm() {
@@ -896,6 +942,55 @@ public class ParentEditorController {
         }
 
         updateActionButtons();
+        updateUxSupport();
+    }
+
+    @FXML
+    private void handleInspireDraft() {
+        // Aufgabe 22 - UI/UX-Rule "Novelty": generate a small draft suggestion to make task creation more playful.
+        if (!createMode || currentParent == null) {
+            return;
+        }
+
+        setFieldValues(() -> {
+            if (isBlank(titleField.getText())) {
+                titleField.setText(localizationService.get("ux.inspire.title"));
+            }
+            if (currentParent instanceof Chapter) {
+                if (isBlank(pointsField.getText())) {
+                    pointsField.setText("5");
+                }
+                if (isBlank(labelsField.getText()) && labelValues.isEmpty()) {
+                    labelsField.setText(localizationService.get("ux.inspire.label"));
+                    commitLabelInput();
+                }
+            }
+            if (currentParent instanceof Subtask) {
+                if (isBlank(questionField.getText())) {
+                    questionField.setText(localizationService.get("ux.inspire.question"));
+                }
+                if (isBlank(solutionField.getText())) {
+                    solutionField.setText(localizationService.get("ux.inspire.solution"));
+                }
+            }
+        });
+        uxNoveltyLabel.setText(localizationService.get("ux.inspire.applied"));
+        uxNoveltyLabel.setVisible(true);
+        uxNoveltyLabel.setManaged(true);
+        updateUxSupport();
+    }
+
+    private void hideNoveltyFeedback() {
+        if (uxNoveltyLabel == null) {
+            return;
+        }
+        uxNoveltyLabel.setVisible(false);
+        uxNoveltyLabel.setManaged(false);
+        uxNoveltyLabel.setText("");
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     @FXML

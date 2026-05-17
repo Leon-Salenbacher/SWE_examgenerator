@@ -11,6 +11,12 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.34), 18, 0.18, 0, 5);
 }
 
+.header-empathy-label {
+    -fx-text-fill: #bfcaff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
 .root{
 -fx-background-color: #1C1C1C;
 }
@@ -624,6 +630,18 @@
     -fx-text-fill: #98a1b8;
     -fx-font-size: 12px;
     -fx-padding: 0 0 4 0;
+}
+
+.generate-dialog-guidance {
+    -fx-background-color: rgba(86, 137, 225, 0.16);
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(141, 166, 255, 0.45);
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 9 12 9 12;
+    -fx-text-fill: #e5ebff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
 }
 
 .generate-dialog-summary-label {

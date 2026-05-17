@@ -53,6 +53,8 @@
                     <VBox spacing="10.0" styleClass="generate-dialog-section">
                         <Label fx:id="requirementsSectionTitleLabel" styleClass="generate-section-title"/>
                         <Label fx:id="requirementsSectionFootnoteLabel" styleClass="generate-section-footnote" wrapText="true"/>
+                        <!-- Aufgabe 22 - UI/UX-Rule "Guidance": shows the next missing generation step. -->
+                        <Label fx:id="guidanceLabel" styleClass="generate-dialog-guidance" wrapText="true"/>
 
                         <GridPane hgap="14.0" vgap="12.0">
                             <columnConstraints>

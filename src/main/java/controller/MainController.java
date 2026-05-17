@@ -13,7 +13,10 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import models.Chapter;
 import models.ChildObject;
+import models.Subtask;
+import models.Variant;
 import repository.XMLStorageConnector;
 import service.impl.LocalizationService;
 import service.impl.SettingsService;
@@ -32,6 +35,8 @@ public class MainController {
 
     @FXML
     private Label titleLabel;
+    @FXML
+    private Label empathyStatusLabel;
     @FXML
     private Button sidebarToggleButton;
     @FXML
@@ -62,13 +67,14 @@ public class MainController {
     private final SettingsService settingsService = SettingsService.getInstance();
     private final ExamGenerationDialog examGenerationDialog = new ExamGenerationDialog();
     private final XMLStorageConnector xmlStorageConnector = ApplicationContext.getInstance().getXmlStorageConnector();
+    private ChildObject currentSelection;
 
     @FXML
     private void initialize(){
         if(sidebarController != null && editorHostController != null){
             // Keep navigation and editor refreshes synchronized through lightweight callbacks.
             sidebarController.setSelectionListener(this::handleSelection);
-            sidebarController.setCreateChapterHandler(editorHostController::displayCreateChapter);
+            sidebarController.setCreateChapterHandler(this::handleCreateChapter);
             editorHostController.setDataChangedHandler(sidebarController::setChapters);
             editorHostController.setNavigationHandler(sidebarController::refreshAndRevealSelection);
         }
@@ -226,7 +232,15 @@ public class MainController {
 
     @FXML
     private void handleSelection(ChildObject selection){
+        currentSelection = selection;
+        updateEmpathyStatus();
         editorHostController.displayObject(selection);
+    }
+
+    private void handleCreateChapter() {
+        currentSelection = null;
+        updateEmpathyStatus();
+        editorHostController.displayCreateChapter();
     }
 
     private void showInfo(String title, String message) {
@@ -300,6 +314,7 @@ public class MainController {
         if(titleLabel != null){
             titleLabel.setText(localizationService.get("header.title"));
         }
+        updateEmpathyStatus();
         if (optionsButton != null) {
             optionsButton.setText(localizationService.get("buttons.options"));
         }
@@ -314,6 +329,31 @@ public class MainController {
         }
         if (sidebarPane != null) {
             setSidebarVisible(sidebarPane.isVisible());
+        }
+    }
+
+    private void updateEmpathyStatus() {
+        if (empathyStatusLabel == null) {
+            return;
+        }
+
+        // Aufgabe 22 - UI/UX-Rule "Empathy": react to the user's current focus with reassuring context.
+        if (currentSelection == null) {
+            empathyStatusLabel.setText(localizationService.get("main.empathy.default"));
+            return;
+        }
+
+        String title = currentSelection.getTitle() == null || currentSelection.getTitle().isBlank()
+                ? String.valueOf(currentSelection.getId())
+                : currentSelection.getTitle();
+        if (currentSelection instanceof Chapter) {
+            empathyStatusLabel.setText(localizationService.get("main.empathy.chapter", title));
+        } else if (currentSelection instanceof Subtask) {
+            empathyStatusLabel.setText(localizationService.get("main.empathy.subtask", title));
+        } else if (currentSelection instanceof Variant) {
+            empathyStatusLabel.setText(localizationService.get("main.empathy.variant", title));
+        } else {
+            empathyStatusLabel.setText(localizationService.get("main.empathy.generic", title));
         }
     }
 }
