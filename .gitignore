@@ -6,6 +6,7 @@ out/
 build/
 **.iml
 data/
+/javadocs
 
 ### Eclipse ###
 .apt_generated
