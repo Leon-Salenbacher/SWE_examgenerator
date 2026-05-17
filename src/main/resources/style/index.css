@@ -263,6 +263,97 @@
     -fx-border-color: transparent;
 }
 
+.label-chip-editor {
+    -fx-background-color: #2A2A2A;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-padding: 8;
+}
+
+.label-chip {
+    -fx-background-color: #343844;
+    -fx-background-radius: 999;
+    -fx-border-color: #53607a;
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+    -fx-padding: 5 9 5 9;
+    -fx-text-fill: #eef3ff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.label-chip-text {
+    -fx-text-fill: #eef3ff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.label-chip-exam {
+    -fx-background-color: rgba(86, 137, 225, 0.32);
+    -fx-border-color: #6792df;
+}
+
+.label-chip-practice {
+    -fx-background-color: rgba(71, 156, 101, 0.32);
+    -fx-border-color: #5fbf7f;
+}
+
+.label-chip-remove {
+    -fx-background-color: transparent;
+    -fx-background-radius: 999;
+    -fx-border-width: 0;
+    -fx-text-fill: #c7d0e6;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 0 2 0 4;
+    -fx-min-width: 18;
+    -fx-min-height: 18;
+    -fx-pref-width: 18;
+    -fx-pref-height: 18;
+    -fx-cursor: hand;
+}
+
+.label-chip-remove:hover {
+    -fx-text-fill: #ffffff;
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+}
+
+.label-chip-input {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-text-fill: #EDEDED;
+    -fx-prompt-text-fill: #6E6E6E;
+    -fx-padding: 4 2 4 2;
+    -fx-border-color: transparent;
+    -fx-min-width: 140;
+    -fx-pref-width: 180;
+}
+
+.label-suggestions-list {
+    -fx-background-color: #25272d;
+    -fx-control-inner-background: #25272d;
+    -fx-background-radius: 8;
+    -fx-border-color: #3f4960;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 4;
+}
+
+.label-suggestions-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #eef3ff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 7 10 7 10;
+}
+
+.label-suggestions-list .list-cell:hover,
+.label-suggestions-list .list-cell:selected {
+    -fx-background-color: rgba(123, 143, 214, 0.32);
+    -fx-background-radius: 6;
+    -fx-text-fill: #ffffff;
+}
+
 
 .add-row {
     -fx-spacing: 8;

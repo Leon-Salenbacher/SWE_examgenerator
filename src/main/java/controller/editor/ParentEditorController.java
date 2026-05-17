@@ -5,6 +5,7 @@ import exceptions.XmlStorageException;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.ScaleTransition;
+import javafx.geometry.Pos;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -16,9 +17,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -41,7 +45,10 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
@@ -95,6 +102,12 @@ public class ParentEditorController {
     private TextField labelsField;
 
     @FXML
+    private FlowPane labelsChipPane;
+
+    @FXML
+    private ListView<String> labelSuggestionsList;
+
+    @FXML
     private Label titleLabel;
 
     @FXML
@@ -142,6 +155,7 @@ public class ParentEditorController {
     private boolean createMode;
     private boolean createChapterMode;
     private boolean updatingFields;
+    private final List<String> labelValues = new ArrayList<>();
     private final LocalizationService localizationService = LocalizationService.getInstance();
     private final ChapterServiceImpl chapterService = ApplicationContext.getInstance().getChapterService();
     private final SubtaskServiceImpl subtaskService = ApplicationContext.getInstance().getSubtaskService();
@@ -205,6 +219,11 @@ public class ParentEditorController {
             if (updatingFields) {
                 return;
             }
+            if (newValue != null && newValue.contains(",")) {
+                commitCompletedLabels(newValue);
+                return;
+            }
+            updateLabelSuggestions(newValue);
             if (createMode) {
                 return;
             }
@@ -212,8 +231,50 @@ public class ParentEditorController {
                 return;
             }
             Subtask subtask = (Subtask) currentParent;
-            subtask.setLabels(parseLabels(newValue));
+            subtask.setLabels(labelsWithDraftInput());
             setFieldValues(() -> usageBox.setValue(subtask.getExamType()));
+        });
+
+        labelsField.setOnAction(event -> commitLabelInput());
+        labelsField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER && labelSuggestionsList.isVisible()) {
+                acceptSelectedSuggestion();
+                event.consume();
+                return;
+            }
+            if (event.getCode() == KeyCode.DOWN && labelSuggestionsList.isVisible()) {
+                labelSuggestionsList.requestFocus();
+                labelSuggestionsList.getSelectionModel().selectFirst();
+                event.consume();
+                return;
+            }
+            if (event.getCode() == KeyCode.BACK_SPACE && labelsField.getText().isEmpty() && !labelValues.isEmpty()) {
+                labelValues.remove(labelValues.size() - 1);
+                refreshLabelChips();
+                updateCurrentSubtaskLabels();
+            }
+        });
+        labelsField.focusedProperty().addListener((observable, oldValue, focused) -> {
+            if (!focused && !labelSuggestionsList.isHover()) {
+                commitLabelInput();
+                hideLabelSuggestions();
+            }
+        });
+        labelSuggestionsList.setOnMouseClicked(event -> acceptSelectedSuggestion());
+        labelSuggestionsList.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                acceptSelectedSuggestion();
+                event.consume();
+            } else if (event.getCode() == KeyCode.ESCAPE) {
+                hideLabelSuggestions();
+                labelsField.requestFocus();
+                event.consume();
+            }
+        });
+        labelSuggestionsList.focusedProperty().addListener((observable, oldValue, focused) -> {
+            if (!focused && !labelsField.isFocused()) {
+                hideLabelSuggestions();
+            }
         });
 
         difficultyBox.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -237,7 +298,7 @@ public class ParentEditorController {
             }
             Subtask subtask = (Subtask) currentParent;
             subtask.setExamType(newValue);
-            setFieldValues(() -> labelsField.setText(String.join(", ", defaultLabels(subtask.getLabels()))));
+            setLabelValues(defaultLabels(subtask.getLabels()));
         });
 
         displayPlaceholder();
@@ -279,7 +340,7 @@ public class ParentEditorController {
             pointsField.clear();
             difficultyBox.setValue(SubtaskDifficulty.MEDIUM);
             usageBox.setValue(ExamType.defaultType());
-            labelsField.clear();
+            setLabelValues(List.of());
             questionField.clear();
             solutionField.clear();
         });
@@ -378,7 +439,7 @@ public class ParentEditorController {
             titleField.clear();
             pointsField.clear();
             usageBox.setValue(ExamType.defaultType());
-            labelsField.clear();
+            setLabelValues(List.of());
             questionField.clear();
             solutionField.clear();
         });
@@ -425,7 +486,7 @@ public class ParentEditorController {
             pointsField.setText(Points.format(subtask.getPoints()));
             difficultyBox.setValue(defaultDifficulty(subtask.getDifficulty()));
             usageBox.setValue(subtask.getExamType());
-            labelsField.setText(String.join(", ", defaultLabels(subtask.getLabels())));
+            setLabelValues(defaultLabels(subtask.getLabels()));
         });
         togglePoints(true);
         toggleDifficulty(true);
@@ -496,7 +557,164 @@ public class ParentEditorController {
     }
 
     private List<String> labelsWithSelectedExamType() {
-        return ExamType.replaceExamTypeLabel(parseLabels(labelsField.getText()), defaultExamType(usageBox.getValue()));
+        return ExamType.replaceExamTypeLabel(labelsWithDraftInput(), defaultExamType(usageBox.getValue()));
+    }
+
+    private List<String> labelsWithDraftInput() {
+        List<String> labels = new ArrayList<>(labelValues);
+        parseLabels(labelsField.getText()).forEach(label -> addLabelValue(labels, label));
+        return labels;
+    }
+
+    private void commitCompletedLabels(String input) {
+        List<String> parts = Arrays.stream(input.split(",", -1))
+                .map(String::trim)
+                .toList();
+        int lastIndex = parts.size() - 1;
+        for (int i = 0; i < lastIndex; i++) {
+            addLabelValue(labelValues, parts.get(i));
+        }
+        refreshLabelChips();
+        setFieldValues(() -> labelsField.setText(parts.get(lastIndex)));
+        updateCurrentSubtaskLabels();
+        updateLabelSuggestions(labelsField.getText());
+    }
+
+    private void commitLabelInput() {
+        List<String> enteredLabels = parseLabels(labelsField.getText());
+        if (enteredLabels.isEmpty()) {
+            updateCurrentSubtaskLabels();
+            hideLabelSuggestions();
+            return;
+        }
+        enteredLabels.forEach(label -> addLabelValue(labelValues, label));
+        refreshLabelChips();
+        setFieldValues(labelsField::clear);
+        updateCurrentSubtaskLabels();
+        hideLabelSuggestions();
+    }
+
+    private void setLabelValues(List<String> labels) {
+        labelValues.clear();
+        defaultLabels(labels).forEach(label -> addLabelValue(labelValues, label));
+        setFieldValues(labelsField::clear);
+        refreshLabelChips();
+        hideLabelSuggestions();
+    }
+
+    private void refreshLabelChips() {
+        labelsChipPane.getChildren().clear();
+        labelValues.stream()
+                .map(this::createLabelChip)
+                .forEach(labelsChipPane.getChildren()::add);
+        labelsChipPane.getChildren().add(labelsField);
+    }
+
+    private Node createLabelChip(String value) {
+        Label text = new Label(value);
+        text.getStyleClass().add("label-chip-text");
+
+        Button removeButton = new Button("x");
+        removeButton.getStyleClass().add("label-chip-remove");
+        removeButton.setFocusTraversable(false);
+        removeButton.setOnAction(event -> {
+            labelValues.remove(value);
+            refreshLabelChips();
+            updateCurrentSubtaskLabels();
+            updateLabelSuggestions(labelsField.getText());
+            labelsField.requestFocus();
+        });
+
+        HBox chip = new HBox(4, text, removeButton);
+        chip.setAlignment(Pos.CENTER);
+        chip.getStyleClass().add("label-chip");
+        chip.getStyleClass().add(labelStyleClass(value));
+        return chip;
+    }
+
+    private String labelStyleClass(String value) {
+        if (ExamType.EXAM.getLabel().equalsIgnoreCase(value)) {
+            return "label-chip-exam";
+        }
+        if (ExamType.PRACTICE.getLabel().equalsIgnoreCase(value)) {
+            return "label-chip-practice";
+        }
+        return "label-chip-custom";
+    }
+
+    private boolean addLabelValue(List<String> labels, String value) {
+        String normalizedValue = value == null ? "" : value.trim();
+        if (normalizedValue.isBlank()) {
+            return false;
+        }
+        boolean exists = labels.stream().anyMatch(label -> label.equalsIgnoreCase(normalizedValue));
+        if (exists) {
+            return false;
+        }
+        labels.add(normalizedValue);
+        return true;
+    }
+
+    private void updateCurrentSubtaskLabels() {
+        if (updatingFields || createMode || !(currentParent instanceof Subtask subtask)) {
+            return;
+        }
+        subtask.setLabels(labelsWithDraftInput());
+        setFieldValues(() -> usageBox.setValue(subtask.getExamType()));
+    }
+
+    private void updateLabelSuggestions(String input) {
+        String query = input == null ? "" : input.trim().toLowerCase(Locale.ROOT);
+        if (query.isBlank()) {
+            hideLabelSuggestions();
+            return;
+        }
+
+        List<String> suggestions = availableLabelSuggestions().stream()
+                .filter(label -> label.toLowerCase(Locale.ROOT).contains(query))
+                .filter(label -> labelValues.stream().noneMatch(selected -> selected.equalsIgnoreCase(label)))
+                .sorted(Comparator
+                        .comparing((String label) -> !label.toLowerCase(Locale.ROOT).startsWith(query))
+                        .thenComparing(String.CASE_INSENSITIVE_ORDER))
+                .limit(6)
+                .toList();
+
+        labelSuggestionsList.getItems().setAll(suggestions);
+        boolean visible = !suggestions.isEmpty();
+        labelSuggestionsList.setVisible(visible);
+        labelSuggestionsList.setManaged(visible);
+        if (visible) {
+            labelSuggestionsList.getSelectionModel().selectFirst();
+        }
+    }
+
+    private List<String> availableLabelSuggestions() {
+        return subtaskService.getAll().stream()
+                .flatMap(subtask -> defaultLabels(subtask.getLabels()).stream())
+                .map(label -> label == null ? "" : label.trim())
+                .filter(label -> !label.isBlank())
+                .filter(label -> !ExamType.isExamTypeLabel(label))
+                .distinct()
+                .toList();
+    }
+
+    private void acceptSelectedSuggestion() {
+        String selectedSuggestion = labelSuggestionsList.getSelectionModel().getSelectedItem();
+        if (selectedSuggestion == null || selectedSuggestion.isBlank()) {
+            return;
+        }
+        addLabelValue(labelValues, selectedSuggestion);
+        refreshLabelChips();
+        setFieldValues(labelsField::clear);
+        updateCurrentSubtaskLabels();
+        hideLabelSuggestions();
+        labelsField.requestFocus();
+    }
+
+    private void hideLabelSuggestions() {
+        labelSuggestionsList.getItems().clear();
+        labelSuggestionsList.setVisible(false);
+        labelSuggestionsList.setManaged(false);
     }
 
     private List<String> defaultLabels(List<String> labels){
@@ -645,7 +863,7 @@ public class ParentEditorController {
             pointsField.clear();
             difficultyBox.setValue(SubtaskDifficulty.MEDIUM);
             usageBox.setValue(ExamType.defaultType());
-            labelsField.clear();
+            setLabelValues(List.of());
             questionField.clear();
             solutionField.clear();
         });

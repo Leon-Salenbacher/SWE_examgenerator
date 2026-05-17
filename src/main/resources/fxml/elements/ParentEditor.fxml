@@ -38,7 +38,10 @@
 
     <VBox fx:id="labelsBox" spacing="6.0" visible="false" managed="false">
         <Label fx:id="labelsLabel" text="Labels" styleClass="section-label" />
-        <TextField fx:id="labelsField" promptText="Practice, Exam" styleClass="dark-input" />
+        <FlowPane fx:id="labelsChipPane" hgap="6.0" vgap="6.0" styleClass="label-chip-editor">
+            <TextField fx:id="labelsField" promptText="Practice, Exam" styleClass="label-chip-input" />
+        </FlowPane>
+        <ListView fx:id="labelSuggestionsList" maxHeight="120.0" visible="false" managed="false" styleClass="label-suggestions-list" />
     </VBox>
 
     <VBox fx:id="questionBox" spacing="6.0" visible="false" managed="false" VBox.vgrow="ALWAYS">
