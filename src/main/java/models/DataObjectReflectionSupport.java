@@ -6,9 +6,18 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
+/**
+ * Reflection helper that maps annotated model fields to and from XML attributes.
+ */
 @NoArgsConstructor
 public class DataObjectReflectionSupport {
 
+    /**
+     * Reads all {@link XmlField}-annotated values from a model object.
+     *
+     * @param object model object to inspect
+     * @return ordered XML attribute map
+     */
     public static Map<String, String> getAttributes(DataObject object) {
         Map<String, String> attributes = new LinkedHashMap<>();
         for (Field field : getAnnotatedFields(object.getClass())) {
@@ -19,12 +28,24 @@ public class DataObjectReflectionSupport {
         return attributes;
     }
 
+    /**
+     * Lists XML attribute names declared by the given model type and its superclasses.
+     *
+     * @param type model type to inspect
+     * @return XML attribute names in inheritance order
+     */
     public static List<String> getAttributeNames(Class<?> type) {
         return getAnnotatedFields(type).stream()
                 .map(field -> field.getAnnotation(XmlField.class).value())
                 .toList();
     }
 
+    /**
+     * Applies XML attributes to the annotated fields of a model object.
+     *
+     * @param object target model object
+     * @param attributes XML attributes keyed by attribute name
+     */
     public static void applyAttributes(DataObject object, Map<String, String> attributes) {
         for (Field field : getAnnotatedFields(object.getClass())) {
             XmlField annotation = field.getAnnotation(XmlField.class);
@@ -41,6 +62,7 @@ public class DataObjectReflectionSupport {
             hierarchy.add(0, current);
         }
 
+        // Process superclasses first so base attributes are written before specialized fields.
         List<Field> fields = new ArrayList<>();
         for (Class<?> current : hierarchy) {
             for (Field field : current.getDeclaredFields()) {

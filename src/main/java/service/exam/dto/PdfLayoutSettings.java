@@ -1,5 +1,16 @@
 package service.exam.dto;
 
+/**
+ * User-configurable PDF layout options for generated exams.
+ *
+ * @param coverPageEnabled whether an additional cover page should be written
+ * @param coverTitle cover page title
+ * @param coverSubtitle cover page subtitle
+ * @param headerText header text printed on body pages
+ * @param footerText footer text printed on body pages
+ * @param pageNumbersEnabled whether body pages should display page numbers
+ * @param answerBoxHeightPerPoint answer field height per point in PDF units
+ */
 public record PdfLayoutSettings(
         boolean coverPageEnabled,
         String coverTitle,
@@ -13,10 +24,22 @@ public record PdfLayoutSettings(
     public static final int MIN_ANSWER_BOX_HEIGHT_PER_POINT = 0;
     public static final int MAX_ANSWER_BOX_HEIGHT_PER_POINT = 60;
 
+    /**
+     * Creates default layout settings for a new exam.
+     *
+     * @param examTitle title used as cover fallback
+     * @return default layout settings
+     */
     public static PdfLayoutSettings defaults(String examTitle) {
         return new PdfLayoutSettings(false, examTitle, "", "", "", true, DEFAULT_ANSWER_BOX_HEIGHT_PER_POINT);
     }
 
+    /**
+     * Normalizes blank text values and clamps numeric settings.
+     *
+     * @param fallbackExamTitle title used when the cover title is blank
+     * @return sanitized layout settings
+     */
     public PdfLayoutSettings sanitize(String fallbackExamTitle) {
         return new PdfLayoutSettings(
                 coverPageEnabled,
@@ -29,6 +52,12 @@ public record PdfLayoutSettings(
         );
     }
 
+    /**
+     * Clamps answer box height to the supported UI range.
+     *
+     * @param value requested answer box height per point
+     * @return clamped value
+     */
     public static int sanitizeAnswerBoxHeightPerPoint(int value) {
         if (value < MIN_ANSWER_BOX_HEIGHT_PER_POINT) {
             return MIN_ANSWER_BOX_HEIGHT_PER_POINT;
@@ -36,6 +65,11 @@ public record PdfLayoutSettings(
         return Math.min(value, MAX_ANSWER_BOX_HEIGHT_PER_POINT);
     }
 
+    /**
+     * Builds a short German summary for the layout dialog.
+     *
+     * @return human-readable settings summary
+     */
     public String summary() {
         StringBuilder builder = new StringBuilder();
         builder.append(coverPageEnabled ? "Deckblatt aktiv" : "Kein Deckblatt");

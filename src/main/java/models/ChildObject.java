@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * Base class for all editable domain objects that can appear in the UI tree.
+ */
 @Getter
 @Setter
 @SuperBuilder

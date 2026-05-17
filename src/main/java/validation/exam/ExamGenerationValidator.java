@@ -8,6 +8,9 @@ import service.exam.dto.GenerateExamValues;
 
 import java.util.List;
 
+/**
+ * Validates user input and collected candidates before exam generation.
+ */
 public class ExamGenerationValidator {
 
     /**

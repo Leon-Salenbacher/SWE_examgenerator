@@ -5,21 +5,42 @@ import controller.exam.ExamGenerationDialog;
 import controller.editor.EditorHostController;
 import exceptions.XmlStorageException;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import models.Chapter;
 import models.ChildObject;
+import models.Subtask;
+import models.Variant;
 import repository.XMLStorageConnector;
 import service.impl.LocalizationService;
+import service.impl.SettingsService;
 
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Root controller that connects the sidebar, editor host and top-level actions.
+ */
 public class MainController {
+    private static final double MIN_SIDEBAR_WIDTH = 220.0;
+    private static final double MAX_SIDEBAR_WIDTH = 480.0;
+
     @FXML
     private Label titleLabel;
+    @FXML
+    private Label empathyStatusLabel;
+    @FXML
+    private Button sidebarToggleButton;
+    @FXML
+    private Region sidebarToggleIcon;
     @FXML
     private Button optionsButton;
     @FXML
@@ -28,6 +49,14 @@ public class MainController {
     private Button exportButton;
     @FXML
     private Button generateButton;
+    @FXML
+    private HBox sidebarHost;
+    @FXML
+    private StackPane sidebarPane;
+    @FXML
+    private Region sidebarResizeHandle;
+    @FXML
+    private Node sidebar;
 
     @FXML
     private SidebarController sidebarController;
@@ -35,22 +64,92 @@ public class MainController {
     private EditorHostController editorHostController;
 
     private final LocalizationService localizationService = LocalizationService.getInstance();
+    private final SettingsService settingsService = SettingsService.getInstance();
     private final ExamGenerationDialog examGenerationDialog = new ExamGenerationDialog();
     private final XMLStorageConnector xmlStorageConnector = ApplicationContext.getInstance().getXmlStorageConnector();
+    private ChildObject currentSelection;
 
     @FXML
     private void initialize(){
         if(sidebarController != null && editorHostController != null){
+            // Keep navigation and editor refreshes synchronized through lightweight callbacks.
             sidebarController.setSelectionListener(this::handleSelection);
-            sidebarController.setCreateChapterHandler(editorHostController::displayCreateChapter);
+            sidebarController.setCreateChapterHandler(this::handleCreateChapter);
             editorHostController.setDataChangedHandler(sidebarController::setChapters);
             editorHostController.setNavigationHandler(sidebarController::refreshAndRevealSelection);
         }
 
+        initializeSidebarLayout();
         applyTranslations();
         localizationService.localeProperty().addListener((obs, oldLocal, newLocal) -> applyTranslations());
     }
 
+    private void initializeSidebarLayout() {
+        setSidebarWidth(settingsService.getSidebarWidth());
+        setSidebarVisible(settingsService.isSidebarVisible());
+
+        if (sidebarResizeHandle != null) {
+            sidebarResizeHandle.setCursor(Cursor.H_RESIZE);
+            sidebarResizeHandle.setOnMouseDragged(event -> {
+                if (sidebarHost == null) {
+                    return;
+                }
+                double leftEdge = sidebarHost.localToScene(0, 0).getX();
+                double requestedWidth = event.getSceneX() - leftEdge;
+                setSidebarWidth(requestedWidth);
+                settingsService.setSidebarWidth(requestedWidth);
+                event.consume();
+            });
+        }
+    }
+
+    @FXML
+    private void handleToggleSidebar() {
+        boolean visible = sidebarPane == null || !sidebarPane.isVisible();
+        setSidebarVisible(visible);
+        settingsService.setSidebarVisible(visible);
+    }
+
+    private void setSidebarVisible(boolean visible) {
+        setNodeVisible(sidebarPane, visible);
+        setNodeVisible(sidebarResizeHandle, visible);
+        if (sidebarToggleButton != null) {
+            sidebarToggleButton.setTooltip(new Tooltip(localizationService.get(
+                    visible ? "sidebar.toggle.hide" : "sidebar.toggle.show"
+            )));
+        }
+        if (sidebarToggleIcon != null) {
+            sidebarToggleIcon.getStyleClass().removeAll("sidebar-toggle-icon-hidden", "sidebar-toggle-icon-visible");
+            sidebarToggleIcon.getStyleClass().add(visible ? "sidebar-toggle-icon-visible" : "sidebar-toggle-icon-hidden");
+        }
+    }
+
+    private void setNodeVisible(Node node, boolean visible) {
+        if (node != null) {
+            node.setVisible(visible);
+            node.setManaged(visible);
+        }
+    }
+
+    private void setSidebarWidth(double width) {
+        double clampedWidth = Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, width));
+        setFixedWidth(sidebarPane, clampedWidth);
+        setFixedWidth(sidebar, clampedWidth);
+    }
+
+    private void setFixedWidth(Region region, double width) {
+        if (region != null) {
+            region.setMinWidth(width);
+            region.setPrefWidth(width);
+            region.setMaxWidth(width);
+        }
+    }
+
+    private void setFixedWidth(Node node, double width) {
+        if (node instanceof Region region) {
+            setFixedWidth(region, width);
+        }
+    }
 
     @FXML
     private void handleOpenOptions() {
@@ -133,7 +232,15 @@ public class MainController {
 
     @FXML
     private void handleSelection(ChildObject selection){
+        currentSelection = selection;
+        updateEmpathyStatus();
         editorHostController.displayObject(selection);
+    }
+
+    private void handleCreateChapter() {
+        currentSelection = null;
+        updateEmpathyStatus();
+        editorHostController.displayCreateChapter();
     }
 
     private void showInfo(String title, String message) {
@@ -207,6 +314,7 @@ public class MainController {
         if(titleLabel != null){
             titleLabel.setText(localizationService.get("header.title"));
         }
+        updateEmpathyStatus();
         if (optionsButton != null) {
             optionsButton.setText(localizationService.get("buttons.options"));
         }
@@ -218,6 +326,34 @@ public class MainController {
         }
         if (generateButton != null) {
             generateButton.setText(localizationService.get("buttons.generateExam"));
+        }
+        if (sidebarPane != null) {
+            setSidebarVisible(sidebarPane.isVisible());
+        }
+    }
+
+    private void updateEmpathyStatus() {
+        if (empathyStatusLabel == null) {
+            return;
+        }
+
+        // Aufgabe 22 - UI/UX-Rule "Empathy": react to the user's current focus with reassuring context.
+        if (currentSelection == null) {
+            empathyStatusLabel.setText(localizationService.get("main.empathy.default"));
+            return;
+        }
+
+        String title = currentSelection.getTitle() == null || currentSelection.getTitle().isBlank()
+                ? String.valueOf(currentSelection.getId())
+                : currentSelection.getTitle();
+        if (currentSelection instanceof Chapter) {
+            empathyStatusLabel.setText(localizationService.get("main.empathy.chapter", title));
+        } else if (currentSelection instanceof Subtask) {
+            empathyStatusLabel.setText(localizationService.get("main.empathy.subtask", title));
+        } else if (currentSelection instanceof Variant) {
+            empathyStatusLabel.setText(localizationService.get("main.empathy.variant", title));
+        } else {
+            empathyStatusLabel.setText(localizationService.get("main.empathy.generic", title));
         }
     }
 }

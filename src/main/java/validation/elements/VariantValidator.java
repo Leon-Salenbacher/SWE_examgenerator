@@ -2,6 +2,9 @@ package validation.elements;
 
 import models.Variant;
 
+/**
+ * Validator for variants, including the required question text.
+ */
 public class VariantValidator extends AbstractTitleValidator<Variant> {
     @Override
     protected ValidationResult validateInternal(Variant element) {

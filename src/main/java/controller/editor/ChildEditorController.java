@@ -1,6 +1,7 @@
 package controller.editor;
 
 import config.ApplicationContext;
+import exceptions.XmlStorageException;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.ScaleTransition;
@@ -22,6 +23,11 @@ import validation.elements.ValidationResult;
 import validation.elements.VariantValidator;
 import javafx.util.Duration;
 
+import java.util.NoSuchElementException;
+
+/**
+ * Controller for editing leaf objects, currently variants.
+ */
 public class ChildEditorController {
 
     @FXML
@@ -67,22 +73,47 @@ public class ChildEditorController {
     private static final String FEEDBACK_ERROR_STYLE = "feedback-error";
     private PauseTransition feedbackHideTransition;
 
+    /**
+     * Registers a callback that refreshes external views after data changes.
+     *
+     * @param dataChangedHandler refresh callback
+     */
     public void setDataChangedHandler(Runnable dataChangedHandler) {
         this.dataChangedHandler = dataChangedHandler;
     }
 
+    /**
+     * Registers a callback for switching the visible editor object.
+     *
+     * @param displayHandler display callback
+     */
     public void setDisplayHandler(java.util.function.Consumer<ChildObject> displayHandler) {
         this.displayHandler = displayHandler;
     }
 
+    /**
+     * Registers a callback for showing feedback after a refresh or navigation.
+     *
+     * @param feedbackHandler feedback callback
+     */
     public void setFeedbackHandler(java.util.function.Consumer<EditorFeedbackRequest> feedbackHandler) {
         this.feedbackHandler = feedbackHandler;
     }
 
+    /**
+     * Registers a callback used to reveal an object after save or delete actions.
+     *
+     * @param navigationHandler navigation callback
+     */
     public void setNavigationHandler(java.util.function.Consumer<ChildObject> navigationHandler) {
         this.navigationHandler = navigationHandler;
     }
 
+    /**
+     * Displays a variant in the child editor.
+     *
+     * @param child selected child object
+     */
     public void displayChild(ChildObject child){
         if(child == null){
             displayPlaceholder();
@@ -126,6 +157,7 @@ public class ChildEditorController {
         titleField.textProperty().addListener((observable, oldValue, newValue) -> {
             clearFeedback();
             if(currentVariant != null){
+                // Keep the in-memory draft in sync so validation sees the latest field values.
                 currentVariant.setTitle(newValue);
             }
         });
@@ -208,7 +240,7 @@ public class ChildEditorController {
             } else {
                 showSuccessFeedback(localizationService.get("editor.save.success"));
             }
-        } catch (Exception exception) {
+        } catch (XmlStorageException | NoSuchElementException | IllegalStateException exception) {
             showErrorFeedback(localizationService.get("editor.save.failed", messageOrFallback(exception)));
         }
     }
@@ -248,7 +280,7 @@ public class ChildEditorController {
             } else {
                 showSuccessFeedback(localizationService.get("editor.delete.success"));
             }
-        } catch (Exception exception) {
+        } catch (XmlStorageException | NoSuchElementException | IllegalStateException exception) {
             showErrorFeedback(localizationService.get("editor.delete.failed", messageOrFallback(exception)));
         }
     }
@@ -331,6 +363,12 @@ public class ChildEditorController {
         feedbackHideTransition.play();
     }
 
+    /**
+     * Shows a transient save/delete feedback message.
+     *
+     * @param message feedback message
+     * @param success whether the message represents a successful action
+     */
     public void showTransientFeedback(String message, boolean success) {
         showFeedback(message, success ? FEEDBACK_SUCCESS_STYLE : FEEDBACK_ERROR_STYLE);
     }

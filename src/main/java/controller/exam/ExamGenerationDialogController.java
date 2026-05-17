@@ -38,6 +38,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Controller for selecting exam content, point totals and PDF output options.
+ */
 public class ExamGenerationDialogController {
 
     @FXML
@@ -48,6 +51,8 @@ public class ExamGenerationDialogController {
     private Label requirementsSectionTitleLabel;
     @FXML
     private Label requirementsSectionFootnoteLabel;
+    @FXML
+    private Label guidanceLabel;
     @FXML
     private Label outputSectionTitleLabel;
     @FXML
@@ -131,10 +136,18 @@ public class ExamGenerationDialogController {
         examTypeBox.getSelectionModel().select(ExamType.defaultType());
         examTypeBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateAvailablePointOptions());
         selectedChapterList.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateSelectionButtons());
+        titleField.textProperty().addListener((obs, oldValue, newValue) -> updateGuidance());
+        pointsBox.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateGuidance());
+        selectedChapters.addListener((javafx.collections.ListChangeListener<Chapter>) change -> updateGuidance());
         localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
         applyTranslations();
     }
 
+    /**
+     * Initializes the dialog after FXML loading.
+     *
+     * @param dialogStage modal stage controlled by this controller
+     */
     public void configure(Stage dialogStage) {
         this.dialogStage = dialogStage;
         this.allChapters = ApplicationContext.getInstance().getChapterRepository().findAll();
@@ -147,6 +160,7 @@ public class ExamGenerationDialogController {
         statusLabel.setText(localizationService.get("generate.dialog.status.ready"));
         updateAvailablePointOptions();
         updateSelectionButtons();
+        updateGuidance();
         applyTranslations();
     }
 
@@ -218,6 +232,7 @@ public class ExamGenerationDialogController {
                 : currentLayoutSettings).sanitize(title);
         currentLayoutSettings = layoutSettings;
 
+        // Generation and PDF writing are split into background tasks so the dialog stays responsive.
         setBusy(true);
         setStatus(localizationService.get("generate.dialog.status.checking"), false);
 
@@ -381,6 +396,7 @@ public class ExamGenerationDialogController {
                 currentExamType()
         ));
 
+        // Preserve the user's point choice whenever it is still reachable after a selection change.
         if (previousSelection != null && availablePoints.contains(previousSelection)) {
             pointsBox.getSelectionModel().select(previousSelection);
         } else if (!availablePoints.isEmpty()) {
@@ -395,6 +411,28 @@ public class ExamGenerationDialogController {
             setStatus(localizationService.get("generate.dialog.error.noBalancedPointOptions"), true);
         } else {
             setStatus(localizationService.get("generate.dialog.status.ready"), false);
+        }
+        updateGuidance();
+    }
+
+    private void updateGuidance() {
+        if (guidanceLabel == null) {
+            return;
+        }
+
+        // Aufgabe 22 - UI/UX-Rule "Guidance": keep the generation dialog focused on the next concrete step.
+        if (selectedChapters.isEmpty()) {
+            guidanceLabel.setText(localizationService.get("generate.dialog.guidance.chapters"));
+        } else if (titleField.getText() == null || titleField.getText().isBlank()) {
+            guidanceLabel.setText(localizationService.get("generate.dialog.guidance.title"));
+        } else if (pointsBox.getSelectionModel().getSelectedItem() == null) {
+            guidanceLabel.setText(localizationService.get("generate.dialog.guidance.points"));
+        } else {
+            guidanceLabel.setText(localizationService.get(
+                    "generate.dialog.guidance.ready",
+                    selectedChapters.size(),
+                    Points.format(pointsBox.getSelectionModel().getSelectedItem())
+            ));
         }
     }
 
@@ -411,6 +449,7 @@ public class ExamGenerationDialogController {
         contentSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.content.note"));
         requirementsSectionTitleLabel.setText(localizationService.get("generate.dialog.section.requirements.title"));
         requirementsSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.requirements.note"));
+        updateGuidance();
         outputSectionTitleLabel.setText(localizationService.get("generate.dialog.section.output.title"));
         outputSectionFootnoteLabel.setText(localizationService.get("generate.dialog.section.output.note"));
         chapterLabel.setText(localizationService.get("generate.dialog.chapterSelection"));

@@ -7,11 +7,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Repository contract for aggreagte roots that expose nested child objects.
- * Child persistence remains repository-specific, while read access to nested children is kept here for convenience.
- */
-
-/**
  * Repository contract for aggregate roots that own nested child objects.
  *
  * @param <T> Entity type handled by the repository.

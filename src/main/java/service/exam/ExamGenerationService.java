@@ -26,6 +26,13 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+/**
+ * Builds generated exams from selected chapters, target points and exam type.
+ *
+ * <p>The service filters unsuitable tasks, computes reachable point totals and
+ * chooses a task set whose difficulty distribution is as balanced as possible
+ * for the requested total.</p>
+ */
 public class ExamGenerationService {
 
     private final Random random = new Random();

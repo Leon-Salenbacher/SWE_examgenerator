@@ -11,10 +11,21 @@ import service.impl.LocalizationService;
 
 import java.io.IOException;
 
+/**
+ * Opens the modal dialog used to edit PDF layout settings.
+ */
 public class PdfLayoutDialog {
 
     private final LocalizationService localizationService = LocalizationService.getInstance();
 
+    /**
+     * Displays the layout dialog and returns the selected settings.
+     *
+     * @param owner owner window used for modality and stylesheet inheritance
+     * @param examTitle fallback title for cover settings
+     * @param currentSettings current layout settings
+     * @return selected settings, or the previous/default settings when unchanged
+     */
     public PdfLayoutSettings show(Window owner, String examTitle, PdfLayoutSettings currentSettings) {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dialogs/PdfLayoutDialog.fxml"));
         Parent root;

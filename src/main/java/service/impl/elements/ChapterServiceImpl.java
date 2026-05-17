@@ -4,6 +4,9 @@ import models.Chapter;
 import models.Subtask;
 import repository.ParentRepository;
 
+/**
+ * Service for creating, updating and loading chapter aggregates.
+ */
 public class ChapterServiceImpl
         extends ParentServiceImpl<
             Chapter,
@@ -12,6 +15,11 @@ public class ChapterServiceImpl
         > {
     private final ParentRepository<Chapter, Subtask> repository;
 
+    /**
+     * Creates a chapter service backed by the provided repository.
+     *
+     * @param repository chapter repository
+     */
     public ChapterServiceImpl(ParentRepository<Chapter, Subtask> repository) {
         super(repository);
         this.repository = repository;
@@ -35,6 +43,9 @@ public class ChapterServiceImpl
     }
 
 
+    /**
+     * Command object for chapter create and update operations.
+     */
     public interface ChapterCommand extends ParentCommand {
     }
 

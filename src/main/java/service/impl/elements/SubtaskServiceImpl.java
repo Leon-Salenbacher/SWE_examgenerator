@@ -8,6 +8,9 @@ import repository.ParentRepository;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service for creating, updating and loading subtasks.
+ */
 public class SubtaskServiceImpl
     extends ParentServiceImpl <
         Subtask,
@@ -15,6 +18,11 @@ public class SubtaskServiceImpl
         SubtaskServiceImpl.SubtaskCommand
         > {
 
+    /**
+     * Creates a subtask service backed by the provided repository.
+     *
+     * @param repository subtask repository
+     */
     public SubtaskServiceImpl(ParentRepository<Subtask, Variant> repository){
         super(repository);
     }
@@ -25,7 +33,7 @@ public class SubtaskServiceImpl
         subtask.setTitle(command.title());
         subtask.setPoints(command.points());
         if(command.parentId() == null){
-            throw new IllegalStateException("Parent id must be null");
+            throw new IllegalStateException("Parent id must not be null");
         }
         subtask.setChapterId(command.parentId());
         subtask.setDifficulty(defaultDifficulty(command.difficulty()));
@@ -45,9 +53,15 @@ public class SubtaskServiceImpl
         return current;
     }
 
+    /**
+     * Command object for subtask create and update operations.
+     */
     public interface SubtaskCommand extends ParentCommand{
+        /** @return point value assigned to the subtask */
         double points();
+        /** @return requested difficulty, or {@code null} for the default */
         SubtaskDifficulty difficulty();
+        /** @return labels assigned to the subtask */
         List<String> labels();
     }
 

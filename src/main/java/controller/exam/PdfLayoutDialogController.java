@@ -10,6 +10,9 @@ import javafx.stage.Stage;
 import service.exam.dto.PdfLayoutSettings;
 import service.impl.LocalizationService;
 
+/**
+ * Controller for cover, header, footer and answer-field PDF layout options.
+ */
 public class PdfLayoutDialogController {
 
     @FXML
@@ -69,6 +72,13 @@ public class PdfLayoutDialogController {
         localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
     }
 
+    /**
+     * Populates the dialog with the current layout settings.
+     *
+     * @param dialogStage modal stage controlled by this controller
+     * @param examTitle fallback title for cover settings
+     * @param currentSettings current layout settings
+     */
     public void configure(Stage dialogStage, String examTitle, PdfLayoutSettings currentSettings) {
         this.dialogStage = dialogStage;
         this.examTitle = examTitle;
@@ -88,6 +98,9 @@ public class PdfLayoutDialogController {
         updateCoverState();
     }
 
+    /**
+     * @return settings selected by the user
+     */
     public PdfLayoutSettings getResult() {
         return result;
     }
@@ -113,13 +126,21 @@ public class PdfLayoutDialogController {
 
     private int readAnswerBoxHeightPerPoint() {
         String value = answerBoxHeightPerPointField.getText();
+        if (value == null) {
+            return currentAnswerBoxHeightPerPoint();
+        }
+
         try {
             return PdfLayoutSettings.sanitizeAnswerBoxHeightPerPoint(Integer.parseInt(value.trim()));
-        } catch (NullPointerException | NumberFormatException exception) {
-            return result == null
-                    ? PdfLayoutSettings.DEFAULT_ANSWER_BOX_HEIGHT_PER_POINT
-                    : result.answerBoxHeightPerPoint();
+        } catch (NumberFormatException exception) {
+            return currentAnswerBoxHeightPerPoint();
         }
+    }
+
+    private int currentAnswerBoxHeightPerPoint() {
+        return result == null
+                ? PdfLayoutSettings.DEFAULT_ANSWER_BOX_HEIGHT_PER_POINT
+                : result.answerBoxHeightPerPoint();
     }
 
     private void updateCoverState() {
