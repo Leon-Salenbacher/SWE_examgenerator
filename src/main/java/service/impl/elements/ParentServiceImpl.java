@@ -39,8 +39,8 @@ public abstract class ParentServiceImpl<
      */
     @Override
     public int countChildren(int id) throws NoSuchElementException {
-        //TODO implement
-        return 0;
+        getById(id);
+        return repository.findAllChildren(id).size();
     }
 
     /**

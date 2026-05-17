@@ -37,6 +37,9 @@ public class SidebarController implements SidebarSelectionCoordinator {
     private final ChapterServiceImpl chapterService;
     private String selectedKey;
 
+    /**
+     * Creates a sidebar controller using the shared application context.
+     */
     public SidebarController() {
         chapterService = ApplicationContext.getInstance().getChapterService();
     }

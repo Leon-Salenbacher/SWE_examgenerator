@@ -135,11 +135,22 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
                 .findFirst();
     }
 
+    /**
+     * Finds one object by its XML id attribute.
+     *
+     * @param id object id
+     * @return matching object, or an empty optional when no element exists
+     */
     @Override
     public Optional<T> findById(int id){
         return findElementById(id).map(this::mapElement);
     }
 
+    /**
+     * Loads all XML elements handled by this repository.
+     *
+     * @return mapped domain objects in document order
+     */
     @Override
     public List<T> findAll(){
         return getElementsByTagName().stream()
@@ -147,6 +158,12 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
                 .toList();
     }
 
+    /**
+     * Appends a new object to the XML root element.
+     *
+     * @param object object to persist
+     * @return persisted object
+     */
     @Override
     public T save(T object) {
         Element root = getRootElement();
@@ -155,6 +172,13 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
         return object;
     }
 
+    /**
+     * Rewrites the XML element with the same id as the given object.
+     *
+     * @param object replacement object
+     * @return updated object
+     * @throws XmlStorageException if no matching element exists
+     */
     @Override
     public T update(T object){
         Element element = findElementById(object.getId())
@@ -167,6 +191,12 @@ public abstract class RepositoryImpl<T extends DataObject> implements Repository
         return object;
     }
 
+    /**
+     * Removes the XML element with the given id.
+     *
+     * @param id object id
+     * @throws XmlStorageException if no matching element exists or it cannot be removed
+     */
     @Override
     public void deleteById(int id){
         Element element = findElementById(id)

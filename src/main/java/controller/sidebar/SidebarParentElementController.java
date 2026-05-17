@@ -11,6 +11,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import models.ChildObject;
 
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,11 +35,11 @@ public class SidebarParentElementController extends SidebarChildElementControlle
     }
 
     protected void loadChevron(){
-        try{
-            chevronImg.setImage(new Image(getClass().getResource("/icons/chevron-down.png").toExternalForm()));
-        }catch(NullPointerException e){
-            e.printStackTrace();
+        URL chevronResource = getClass().getResource("/icons/chevron-down.png");
+        if (chevronResource == null) {
+            throw new IllegalStateException("Unable to load sidebar chevron icon.");
         }
+        chevronImg.setImage(new Image(chevronResource.toExternalForm()));
     }
 
     @FXML
@@ -70,6 +71,11 @@ public class SidebarParentElementController extends SidebarChildElementControlle
         }
     }
 
+    /**
+     * Updates the visible title and resets the expanded state.
+     *
+     * @param titleText text shown for this parent row
+     */
     @Override
     public void setTitle(String titleText){
         title.setText(titleText);

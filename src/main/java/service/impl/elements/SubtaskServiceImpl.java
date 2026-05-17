@@ -33,7 +33,7 @@ public class SubtaskServiceImpl
         subtask.setTitle(command.title());
         subtask.setPoints(command.points());
         if(command.parentId() == null){
-            throw new IllegalStateException("Parent id must be null");
+            throw new IllegalStateException("Parent id must not be null");
         }
         subtask.setChapterId(command.parentId());
         subtask.setDifficulty(defaultDifficulty(command.difficulty()));

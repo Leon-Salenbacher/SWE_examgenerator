@@ -126,13 +126,21 @@ public class PdfLayoutDialogController {
 
     private int readAnswerBoxHeightPerPoint() {
         String value = answerBoxHeightPerPointField.getText();
+        if (value == null) {
+            return currentAnswerBoxHeightPerPoint();
+        }
+
         try {
             return PdfLayoutSettings.sanitizeAnswerBoxHeightPerPoint(Integer.parseInt(value.trim()));
-        } catch (NullPointerException | NumberFormatException exception) {
-            return result == null
-                    ? PdfLayoutSettings.DEFAULT_ANSWER_BOX_HEIGHT_PER_POINT
-                    : result.answerBoxHeightPerPoint();
+        } catch (NumberFormatException exception) {
+            return currentAnswerBoxHeightPerPoint();
         }
+    }
+
+    private int currentAnswerBoxHeightPerPoint() {
+        return result == null
+                ? PdfLayoutSettings.DEFAULT_ANSWER_BOX_HEIGHT_PER_POINT
+                : result.answerBoxHeightPerPoint();
     }
 
     private void updateCoverState() {

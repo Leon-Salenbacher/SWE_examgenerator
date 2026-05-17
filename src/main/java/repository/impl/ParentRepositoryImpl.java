@@ -53,13 +53,13 @@ public abstract class ParentRepositoryImpl<
         return element;
     }
 
-    @Override
     /**
      * Rewrites the parent element and replaces all nested children in the XML document.
      *
      * @param object parent aggregate to persist
      * @return updated parent aggregate
      */
+    @Override
     public T update(T object){
         Element element = findElementById(object.getId())
                 .orElseThrow(() -> new XmlStorageException(
@@ -73,13 +73,13 @@ public abstract class ParentRepositoryImpl<
         return object;
     }
 
-    @Override
     /**
      * Loads all children for the parent with the given id.
      *
      * @param id parent id
      * @return nested children or an empty list when the parent does not exist
      */
+    @Override
     public List<C> findAllChildren(int id){
         return findById(id)
                 .map(ParentObject::getChildElements)

@@ -1,6 +1,7 @@
 package controller.editor;
 
 import config.ApplicationContext;
+import exceptions.XmlStorageException;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.ScaleTransition;
@@ -41,6 +42,7 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 /**
@@ -358,7 +360,7 @@ public class ParentEditorController {
             controller.configure(child, selectionHandler);
             return node;
         }catch (IOException e){
-            throw new IllegalStateException("Unabel to load editor child row", e);
+            throw new IllegalStateException("Unable to load editor child row", e);
         }
     }
 
@@ -771,7 +773,7 @@ public class ParentEditorController {
                     showSuccessFeedback(localizationService.get("editor.save.success"));
                 }
             }
-        } catch (Exception exception) {
+        } catch (XmlStorageException | NoSuchElementException | IllegalStateException exception) {
             showErrorFeedback(localizationService.get("editor.save.failed", messageOrFallback(exception)));
         }
     }
@@ -810,7 +812,7 @@ public class ParentEditorController {
                     showSuccessFeedback(localizationService.get("editor.delete.success"));
                 }
             }
-        } catch (Exception exception) {
+        } catch (XmlStorageException | NoSuchElementException | IllegalStateException exception) {
             showErrorFeedback(localizationService.get("editor.delete.failed", messageOrFallback(exception)));
         }
     }
@@ -948,7 +950,7 @@ public class ParentEditorController {
                     displayParent(updatedSubtask);
                 }
             }
-        } catch (Exception exception) {
+        } catch (XmlStorageException | NoSuchElementException | IllegalStateException exception) {
             showErrorFeedback(localizationService.get("editor.create.failed", messageOrFallback(exception)));
         }
     }

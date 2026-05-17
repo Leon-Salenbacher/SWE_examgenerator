@@ -1,6 +1,7 @@
 package controller.editor;
 
 import config.ApplicationContext;
+import exceptions.XmlStorageException;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.ScaleTransition;
@@ -21,6 +22,8 @@ import service.impl.elements.VariantServiceImpl;
 import validation.elements.ValidationResult;
 import validation.elements.VariantValidator;
 import javafx.util.Duration;
+
+import java.util.NoSuchElementException;
 
 /**
  * Controller for editing leaf objects, currently variants.
@@ -237,7 +240,7 @@ public class ChildEditorController {
             } else {
                 showSuccessFeedback(localizationService.get("editor.save.success"));
             }
-        } catch (Exception exception) {
+        } catch (XmlStorageException | NoSuchElementException | IllegalStateException exception) {
             showErrorFeedback(localizationService.get("editor.save.failed", messageOrFallback(exception)));
         }
     }
@@ -277,7 +280,7 @@ public class ChildEditorController {
             } else {
                 showSuccessFeedback(localizationService.get("editor.delete.success"));
             }
-        } catch (Exception exception) {
+        } catch (XmlStorageException | NoSuchElementException | IllegalStateException exception) {
             showErrorFeedback(localizationService.get("editor.delete.failed", messageOrFallback(exception)));
         }
     }
