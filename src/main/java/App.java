@@ -2,6 +2,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import service.impl.LocalizationService;
 
@@ -17,6 +18,7 @@ import java.util.Objects;
 public class App extends Application {
 
     private static final String FXML_PATH = "/fxml/MainView.fxml";
+    private static final String ICON_PATH = "/icons/app-icon.png";
     private static final List<String> CSS_PATHS = Arrays.asList("/style/index.css", "/style/chapterEditorPage.css", "/style/sidebar.css");
 
     private final LocalizationService localizationService = LocalizationService.getInstance();
@@ -35,6 +37,7 @@ public class App extends Application {
         applyCss(scene);
 
         stage.setTitle(localizationService.get("app.title"));
+        stage.getIcons().add(loadIcon());
         localizationService.localeProperty().addListener((obs, oldLocale, newLocale) ->
                 stage.setTitle(localizationService.get("app.title"))
         );
@@ -56,6 +59,15 @@ public class App extends Application {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load FXML: " + FXML_PATH, e);
         }
+    }
+
+    /**
+     * Loads the application icon used by the window title bar and taskbar.
+     */
+    private Image loadIcon() {
+        URL icon = getClass().getResource(ICON_PATH);
+        Objects.requireNonNull(icon, "Icon not found on classpath at " + ICON_PATH);
+        return new Image(icon.toExternalForm());
     }
 
     /**
