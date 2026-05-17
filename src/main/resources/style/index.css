@@ -510,6 +510,46 @@
     -fx-cursor: hand;
 }
 
+.header-icon-button {
+    -fx-background-color: #343844;
+    -fx-text-fill: #F4F6FF;
+    -fx-background-radius: 8;
+    -fx-border-color: #53607A;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-font-size: 17px;
+    -fx-font-weight: 800;
+    -fx-min-width: 38;
+    -fx-pref-width: 38;
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.sidebar-toggle-icon {
+    -fx-background-color: #F4F6FF;
+    -fx-min-width: 18;
+    -fx-pref-width: 18;
+    -fx-max-width: 18;
+    -fx-min-height: 18;
+    -fx-pref-height: 18;
+    -fx-max-height: 18;
+}
+
+.sidebar-toggle-icon-visible {
+    -fx-shape: "M2 3 H16 V15 H2 Z M4 5 V13 H8 V5 Z M12.4 6 L9.4 9 L12.4 12 L13.8 10.6 L12.2 9 L13.8 7.4 Z";
+}
+
+.sidebar-toggle-icon-hidden {
+    -fx-shape: "M2 3 H16 V15 H2 Z M4 5 V13 H8 V5 Z M10.6 6 L13.6 9 L10.6 12 L9.2 10.6 L10.8 9 L9.2 7.4 Z";
+}
+
+.header-icon-button:hover {
+    -fx-background-color: #405075;
+    -fx-border-color: #7B8FD6;
+}
+
 .header-button:hover {
     -fx-background-color: #4A4A4A;
 }

@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSettingsService {
@@ -24,6 +25,9 @@ public class TestSettingsService {
         assertTrue(Files.exists(settingsPath));
         assertEquals(Locale.ENGLISH, settingsService.getLocale());
         assertEquals(SettingsService.DEFAULT_DATA_PATH, settingsService.getDataPath());
+        assertEquals(260.0, settingsService.getSidebarWidth(), 0.001);
+        assertTrue(settingsService.isSidebarVisible());
+        assertTrue(settingsService.isSidebarTagFiltersVisible());
     }
 
     @Test
@@ -50,6 +54,21 @@ public class TestSettingsService {
     }
 
     @Test
+    public void test_setSidebarLayout_goodcase01_persistSelectedLayout() {
+        Path settingsPath = tempDir.resolve("settings.properties");
+        SettingsService settingsService = new SettingsService(settingsPath);
+
+        settingsService.setSidebarWidth(380.0);
+        settingsService.setSidebarVisible(false);
+        settingsService.setSidebarTagFiltersVisible(false);
+
+        SettingsService reloadedSettingsService = new SettingsService(settingsPath);
+        assertEquals(380.0, reloadedSettingsService.getSidebarWidth(), 0.001);
+        assertFalse(reloadedSettingsService.isSidebarVisible());
+        assertFalse(reloadedSettingsService.isSidebarTagFiltersVisible());
+    }
+
+    @Test
     public void test_constructor_goodcase02_fallbackForUnsupportedLocaleAndMissingDataPath() throws Exception {
         Path settingsPath = tempDir.resolve("settings.properties");
         Files.writeString(settingsPath, "locale.language=fr" + System.lineSeparator() + "data.path=");
@@ -58,6 +77,9 @@ public class TestSettingsService {
 
         assertEquals(Locale.ENGLISH, settingsService.getLocale());
         assertEquals(SettingsService.DEFAULT_DATA_PATH, settingsService.getDataPath());
+        assertEquals(260.0, settingsService.getSidebarWidth(), 0.001);
+        assertTrue(settingsService.isSidebarVisible());
+        assertTrue(settingsService.isSidebarTagFiltersVisible());
     }
 
     @Test
@@ -69,5 +91,8 @@ public class TestSettingsService {
 
         assertEquals(Locale.ENGLISH, settingsService.getLocale());
         assertEquals(SettingsService.DEFAULT_DATA_PATH, settingsService.getDataPath());
+        assertEquals(260.0, settingsService.getSidebarWidth(), 0.001);
+        assertTrue(settingsService.isSidebarVisible());
+        assertTrue(settingsService.isSidebarTagFiltersVisible());
     }
 }

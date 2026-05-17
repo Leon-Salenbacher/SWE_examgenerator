@@ -2,6 +2,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -24,6 +25,19 @@
                         onAction="#handleCreateChapter"
                         styleClass="sidebar-add-button" />
             </HBox>
+            <VBox fx:id="tagSection" spacing="8" styleClass="sidebar-tags-section">
+                <HBox alignment="CENTER_LEFT" spacing="6" styleClass="sidebar-filter-header" onMouseClicked="#handleToggleTagFilters">
+                    <Region fx:id="tagToggleIcon" styleClass="sidebar-filter-chevron" />
+                    <Label fx:id="tagsLabel" text="Tags" styleClass="sidebar-section-label" />
+                    <Region HBox.hgrow="ALWAYS" />
+                </HBox>
+                <FlowPane fx:id="tagBox" hgap="6" vgap="6">
+                    <Button fx:id="allTagsButton"
+                            text="All"
+                            onAction="#handleShowAllTags"
+                            styleClass="sidebar-tag-button" />
+                </FlowPane>
+            </VBox>
             <VBox fx:id="chapterBox" spacing="8" />
         </VBox>
     </content>

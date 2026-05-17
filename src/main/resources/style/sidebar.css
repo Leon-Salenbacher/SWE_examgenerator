@@ -1,3 +1,19 @@
+.sidebar-host {
+    -fx-background-color: transparent;
+}
+
+.sidebar-resize-handle {
+    -fx-min-width: 6;
+    -fx-pref-width: 6;
+    -fx-max-width: 6;
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-cursor: h-resize;
+}
+
+.sidebar-resize-handle:hover {
+    -fx-background-color: rgba(124, 77, 255, 0.52);
+}
+
 .sidebar-scroll,
 .sidebar-scroll > .viewport {
     -fx-background-color: linear-gradient(to bottom, #241f36, #1c192a);
@@ -54,6 +70,64 @@
 .sidebar-add-button:hover {
     -fx-background-color: rgba(124, 77, 255, 0.28);
     -fx-border-color: rgba(207, 198, 255, 0.65);
+}
+
+.sidebar-tags-section {
+    -fx-padding: 0 4 4 4;
+}
+
+.sidebar-filter-header {
+    -fx-padding: 3 4 3 4;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.sidebar-filter-header:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.07);
+}
+
+.sidebar-filter-chevron {
+    -fx-background-color: #AFA8CA;
+    -fx-min-width: 9;
+    -fx-pref-width: 9;
+    -fx-max-width: 9;
+    -fx-min-height: 9;
+    -fx-pref-height: 9;
+    -fx-max-height: 9;
+}
+
+.sidebar-filter-chevron-open {
+    -fx-shape: "M2 3 L7 8 L12 3 L10.8 1.8 L7 5.6 L3.2 1.8 Z";
+}
+
+.sidebar-filter-chevron-closed {
+    -fx-shape: "M4 2 L9 7 L4 12 L2.8 10.8 L6.6 7 L2.8 3.2 Z";
+}
+
+.sidebar-section-label {
+    -fx-text-fill: #AFA8CA;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+.sidebar-tag-button {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-text-fill: #EDE8FF;
+    -fx-border-color: rgba(190, 176, 255, 0.26);
+    -fx-border-width: 1;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-padding: 5 9 5 9;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+}
+
+.sidebar-tag-button:hover,
+.sidebar-tag-button.selected {
+    -fx-background-color: rgba(124, 77, 255, 0.34);
+    -fx-border-color: rgba(207, 198, 255, 0.68);
+    -fx-text-fill: #FFFFFF;
 }
 
 

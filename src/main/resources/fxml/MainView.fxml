@@ -13,6 +13,11 @@
             <padding>
                 <Insets top="10" left="20" right="20" bottom="10"/>
             </padding>
+            <Button fx:id="sidebarToggleButton" onAction="#handleToggleSidebar" styleClass="header-icon-button">
+                <graphic>
+                    <Region fx:id="sidebarToggleIcon" styleClass="sidebar-toggle-icon" />
+                </graphic>
+            </Button>
             <Label fx:id="titleLabel" text="Exam Generator" styleClass="header-label" />
             <Region HBox.hgrow="ALWAYS" />
             <Button fx:id="optionsButton" text="Options" onAction="#handleOpenOptions" styleClass="header-button" />
@@ -24,7 +29,12 @@
 
     <!-- Sidebar (links) -->
     <left>
-        <fx:include source="elements/Sidebar.fxml" fx:id="sidebar" />
+        <HBox fx:id="sidebarHost" styleClass="sidebar-host">
+            <StackPane fx:id="sidebarPane">
+                <fx:include source="elements/Sidebar.fxml" fx:id="sidebar" />
+            </StackPane>
+            <Region fx:id="sidebarResizeHandle" styleClass="sidebar-resize-handle" />
+        </HBox>
     </left>
 
     <!-- Content (Mitte) -->

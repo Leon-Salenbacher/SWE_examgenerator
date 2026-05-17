@@ -7,16 +7,25 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import controller.sidebar.SidebarChildElementController;
 import controller.sidebar.SidebarParentElementController;
 import models.Chapter;
 import models.ChildObject;
+import models.Subtask;
 import service.impl.LocalizationService;
+import service.impl.SettingsService;
 import service.impl.elements.ChapterServiceImpl;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -29,13 +38,35 @@ public class SidebarController implements SidebarSelectionCoordinator {
     @FXML
     private Label headingLabel;
     @FXML
+    private Label tagsLabel;
+    @FXML
     private Button addChapterButton;
+    @FXML
+    private Button allTagsButton;
+    @FXML
+    private FlowPane tagBox;
+    @FXML
+    private Region tagToggleIcon;
     private Node selectedNode;
     private Consumer<ChildObject> selectionListener;
     private Runnable createChapterHandler;
     private final LocalizationService localizationService = LocalizationService.getInstance();
+    private final SettingsService settingsService = SettingsService.getInstance();
     private final ChapterServiceImpl chapterService;
     private String selectedKey;
+    private String selectedTag;
+    private boolean tagFiltersVisible;
+
+    private static final class TagFilter {
+        private final String key;
+        private final String label;
+        private int count;
+
+        private TagFilter(String key, String label) {
+            this.key = key;
+            this.label = label;
+        }
+    }
 
     /**
      * Creates a sidebar controller using the shared application context.
@@ -46,6 +77,8 @@ public class SidebarController implements SidebarSelectionCoordinator {
 
     @FXML
     private void initialize(){
+        tagFiltersVisible = settingsService.isSidebarTagFiltersVisible();
+        applyTagFilterVisibility();
         this.loadChapters();
         applyTranslations();
         localizationService.localeProperty().addListener((obs, oldLocale, newLocale) -> applyTranslations());
@@ -54,9 +87,14 @@ public class SidebarController implements SidebarSelectionCoordinator {
     private void loadChapters() {
         List<Chapter> chapters = chapterService.getAll();
         chapterBox.getChildren().clear();
+        updateTagFilters(chapters);
 
         for(Chapter chapter : chapters){
-            Node node = SidebarElementController.createElement(chapter, this);
+            Chapter visibleChapter = filterChapterBySelectedTag(chapter);
+            if (visibleChapter == null) {
+                continue;
+            }
+            Node node = SidebarElementController.createElement(visibleChapter, this);
             chapterBox.getChildren().add(node);
         }
     }
@@ -149,6 +187,19 @@ public class SidebarController implements SidebarSelectionCoordinator {
         if (createChapterHandler != null) {
             createChapterHandler.run();
         }
+    }
+
+    @FXML
+    private void handleShowAllTags() {
+        selectedTag = null;
+        setChapters();
+    }
+
+    @FXML
+    private void handleToggleTagFilters() {
+        tagFiltersVisible = !tagFiltersVisible;
+        settingsService.setSidebarTagFiltersVisible(tagFiltersVisible);
+        applyTagFilterVisibility();
     }
 
     private SidebarChildElementController findController(ChildObject target) {
@@ -267,9 +318,138 @@ public class SidebarController implements SidebarSelectionCoordinator {
         if (headingLabel != null) {
             headingLabel.setText(localizationService.get("sidebar.heading"));
         }
+        if (tagsLabel != null) {
+            tagsLabel.setText(localizationService.get("sidebar.tags"));
+        }
+        if (allTagsButton != null) {
+            allTagsButton.setText(localizationService.get("sidebar.tags.all"));
+        }
         if (addChapterButton != null) {
             addChapterButton.setText(localizationService.get("sidebar.createChapter"));
         }
+        updateTagSelectionStyles();
     }
 
+    private void updateTagFilters(List<Chapter> chapters) {
+        if (tagBox == null || allTagsButton == null) {
+            return;
+        }
+
+        Map<String, TagFilter> tagCounts = collectTagCounts(chapters);
+        if (selectedTag != null && !tagCounts.containsKey(selectedTag)) {
+            selectedTag = null;
+        }
+
+        tagBox.getChildren().setAll(allTagsButton);
+        tagCounts.values().stream()
+                .sorted(Comparator.comparing(filter -> filter.label.toLowerCase(Locale.ROOT)))
+                .forEach(filter -> tagBox.getChildren().add(createTagButton(filter)));
+        updateTagSelectionStyles();
+    }
+
+    private Map<String, TagFilter> collectTagCounts(List<Chapter> chapters) {
+        Map<String, TagFilter> counts = new LinkedHashMap<>();
+        for (Chapter chapter : chapters) {
+            for (Subtask subtask : chapter.getChildElements()) {
+                if (subtask.getLabels() == null) {
+                    continue;
+                }
+                for (String rawLabel : subtask.getLabels()) {
+                    String label = rawLabel == null ? "" : rawLabel.trim();
+                    String key = normalizeTag(label);
+                    if (isDisplayTag(label)) {
+                        TagFilter filter = counts.computeIfAbsent(key, ignored -> new TagFilter(key, label));
+                        filter.count++;
+                    }
+                }
+            }
+        }
+        return counts;
+    }
+
+    private Button createTagButton(TagFilter filter) {
+        Button button = new Button(filter.label + " (" + filter.count + ")");
+        button.setUserData(filter.key);
+        button.getStyleClass().add("sidebar-tag-button");
+        button.setOnAction(event -> {
+            selectedTag = filter.key;
+            setChapters();
+        });
+        return button;
+    }
+
+    private Chapter filterChapterBySelectedTag(Chapter chapter) {
+        if (selectedTag == null) {
+            return chapter;
+        }
+
+        List<Subtask> matchingSubtasks = new ArrayList<>();
+        for (Subtask subtask : chapter.getChildElements()) {
+            if (subtask.getLabels() != null && subtask.getLabels().stream()
+                    .map(this::normalizeTag)
+                    .anyMatch(selectedTag::equals)) {
+                matchingSubtasks.add(subtask);
+            }
+        }
+
+        if (matchingSubtasks.isEmpty()) {
+            return null;
+        }
+
+        Chapter filteredChapter = Chapter.builder()
+                .id(chapter.getId())
+                .title(chapter.getTitle())
+                .childElements(matchingSubtasks)
+                .build();
+        return filteredChapter;
+    }
+
+    private void updateTagSelectionStyles() {
+        if (allTagsButton != null) {
+            setSelectedStyle(allTagsButton, selectedTag == null);
+        }
+        if (tagBox == null) {
+            return;
+        }
+        for (Node node : tagBox.getChildren()) {
+            if (node instanceof Button button && button != allTagsButton) {
+                setSelectedStyle(button, button.getUserData() instanceof String tag && tag.equals(selectedTag));
+            }
+        }
+    }
+
+    private void setSelectedStyle(Node node, boolean selected) {
+        if (selected) {
+            if (!node.getStyleClass().contains("selected")) {
+                node.getStyleClass().add("selected");
+            }
+        } else {
+            node.getStyleClass().remove("selected");
+        }
+    }
+
+    private boolean isDisplayTag(String label) {
+        if (label.isBlank()) {
+            return false;
+        }
+        return !models.ExamType.isExamTypeLabel(label);
+    }
+
+    private String normalizeTag(String tag) {
+        if (tag == null) {
+            return "";
+        }
+        return tag.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private void applyTagFilterVisibility() {
+        if (tagBox != null) {
+            tagBox.setVisible(tagFiltersVisible);
+            tagBox.setManaged(tagFiltersVisible);
+        }
+        if (tagToggleIcon != null) {
+            tagToggleIcon.getStyleClass().removeAll("sidebar-filter-chevron-open", "sidebar-filter-chevron-closed");
+            tagToggleIcon.getStyleClass().add(tagFiltersVisible ? "sidebar-filter-chevron-open" : "sidebar-filter-chevron-closed");
+        }
+    }
 }
